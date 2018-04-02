@@ -27,10 +27,13 @@ public enum SkillType {
     /// A foreman. These guys make other workers more productive.
     case foreman
 
+    /// A fitter. These guys work with finer things like windows and paneling.
+    case fitter
+
     /// A random skill.
     public static var randomSkill: SkillType {
         // FIXME linux
-        return [.electrician, .foreman, .painter, .metalWorker][Int(arc4random_uniform(4))]
+        return [.electrician, .foreman, .painter, .metalWorker, .fitter][Int(arc4random_uniform(5))]
     }
 }
 
@@ -47,6 +50,6 @@ public struct Worker : Laborer {
 
     /// Creates a random worker.
     public static func getInstance() -> Worker {
-        return Worker(skill: SkillType.randomSkill, skillLevel: 1.0)
+        return Worker(skill: .randomSkill, skillLevel: 1.0)
     }
 }

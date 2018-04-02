@@ -24,10 +24,3 @@ public enum PlayType {
     /// An accident playable. These cards affect the status of the game. Such as injuring workers or causing strikes.
     case accident
 }
-
-public extension Playable {
-    /// An array of all known playables.
-    public static var allPlayables: [Playable.Type] {
-        return [Worker.self]
-    }
-}
