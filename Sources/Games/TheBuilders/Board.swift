@@ -7,7 +7,7 @@ import Kit
 
 /// Represents the playing area for a game. This contains the context for the entire game.
 public final class BuildersBoard : GameContext {
-    public typealias RulesType = TheBuildersRules
+    public typealias RulesType = BuildersRules
 
     /// The player who is currently making moves
     public var activePlayer: RulesType.PlayerType
@@ -24,7 +24,7 @@ public final class BuildersBoard : GameContext {
 
         self.players = players
         self.activePlayer = players.first!
-        self.rules = TheBuildersRules(context: self)
+        self.rules = BuildersRules(context: self)
     }
 
     /// Starts this game.

@@ -6,7 +6,7 @@ import Foundation
 import Kit
 
 /// The game of The Builders.
-public struct TheBuildersRules : GameRules {
+public struct BuildersRules: GameRules {
     /// What a turn looks like in this game. A turn consists of a set of phases that are executed in order.
     public let turn = [DrawPhase(), DealPhase()]
 
@@ -43,21 +43,21 @@ public struct TheBuildersRules : GameRules {
     }
 }
 
-public class TheBuilderPhase : Phase {
-    public typealias RulesType = TheBuildersRules
+public class BuilderPhase: Phase {
+    public typealias RulesType = BuildersRules
 
     public func executePhase(withContext context: RulesType.ContextType) {
-        fatalError("TheBuilderPhase must be subclassed")
+        fatalError("BuilderPhase must be subclassed")
     }
 }
 
-public class DrawPhase : TheBuilderPhase {
+public class DrawPhase : BuilderPhase {
     public override func executePhase(withContext context: RulesType.ContextType) {
         print("\(context.activePlayer.id) should draw some cards")
     }
 }
 
-public class DealPhase : TheBuilderPhase {
+public class DealPhase : BuilderPhase {
     public override func executePhase(withContext context: RulesType.ContextType) {
         print("\(context.activePlayer.id) should deal some cards")
     }
