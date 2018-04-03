@@ -4,24 +4,19 @@
 
 import Foundation
 
-/// A namespace enum for various game related items.
-public enum Game {
-    /// An array of all known playables.
-    public static var allPlayables: [Playable.Type] {
-        return [Worker.self, Material.self]
-    }
-}
-
 /// Represents the state of a game.
 public protocol GameContext : AnyObject {
+    /// The type of game this context is playing.
+    associatedtype GameType: GameRules where GameType.ContextType == Self
+
     /// The player who is currently making moves
-    var activePlayer: Player { get set }
+    var activePlayer: GameType.PlayerType { get set }
 
     /// The players in this game.
-    var players: [Player] { get }
+    var players: [GameType.PlayerType] { get }
 
-    /// What a turn looks like in this context.
-    var rules: GameRules { get }
+    /// The rules for the game executing in this context.
+    var rules: GameType! { get }
 
     /// Starts this game.
     func startGame()

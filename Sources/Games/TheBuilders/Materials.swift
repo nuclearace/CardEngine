@@ -5,7 +5,7 @@
 import Foundation
 
 /// Represents a type that can be used to construct the building.
-public protocol BuildingBlock : Playable {
+public protocol BuildingBlock : BuildersPlayable {
     /// The type of this building block.
     var blockType: BuildingBlockType { get }
 }
@@ -48,7 +48,7 @@ public enum BuildingBlockType {
 
 /// A playable material.
 public struct Material : BuildingBlock {
-    public let playType = PlayType.material
+    public let playType = BuildersPlayType.material
 
     /// The type of this building block.
     public let blockType: BuildingBlockType

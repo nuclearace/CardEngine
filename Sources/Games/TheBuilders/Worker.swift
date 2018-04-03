@@ -5,7 +5,7 @@
 import Foundation
 
 /// Represents someone who labors. These guys build stuff.
-public protocol Laborer : Playable {
+public protocol Laborer : BuildersPlayable {
     /// The skill of this laborer.
     var skill: SkillType { get }
 
@@ -40,7 +40,7 @@ public enum SkillType {
 /// Represents a worker. These guys build stuff.
 public struct Worker : Laborer {
     /// The type of this playable.
-    public let playType = PlayType.worker
+    public let playType = BuildersPlayType.worker
 
     /// The skill of this laborer.
     public let skill: SkillType

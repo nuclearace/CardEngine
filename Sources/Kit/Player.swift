@@ -5,22 +5,17 @@
 import Foundation
 
 /// Represents a user.
-public final class Player {
+public protocol Player : AnyObject, Hashable {
     /// The unique identifier for this player.
-    public let id = UUID()
-
-    /// This players hand.
-    public private(set) var cards = [Playable]()
-
-    public init () { }
+    var id: UUID { get }
 }
 
-extension Player : Hashable {
+extension Player {
     public var hashValue: Int {
         return id.hashValue
     }
 
-    public static func ==(lhs: Player, rhs: Player) -> Bool {
+    public static func ==(lhs: Self, rhs: Self) -> Bool {
         return lhs.id == rhs.id
     }
 }
