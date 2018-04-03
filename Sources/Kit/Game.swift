@@ -11,3 +11,18 @@ public enum Game {
         return [Worker.self, Material.self]
     }
 }
+
+/// Represents the state of a game.
+public protocol GameContext : AnyObject {
+    /// The player who is currently making moves
+    var activePlayer: Player { get set }
+
+    /// The players in this game.
+    var players: [Player] { get }
+
+    /// What a turn looks like in this context.
+    var rules: GameRules { get }
+
+    /// Starts this game.
+    func startGame()
+}

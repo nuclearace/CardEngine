@@ -1,6 +1,6 @@
 import Kit
+import Games
 
-print(Worker.getInstance())
-print(Game.allPlayables[0].getInstance())
-print(Game.allPlayables[1].getInstance())
+let theBuilders = Board(players: [Player(), Player()], rules: TheBuildersRules())
 
+theBuilders.startGame()
