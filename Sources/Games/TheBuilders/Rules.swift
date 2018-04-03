@@ -25,7 +25,10 @@ public struct TheBuildersRules : GameRules {
     ///
     /// - parameter forPLayer: The player whose turn it is.
     public mutating func executeTurn(forPlayer player: TheBuilderPlayer) {
-        print("It's \(player.id)'s turn")
+        for phase in turn {
+            phase.executePhase(withContext: context)
+        }
+
         moveCount += 1
     }
 
@@ -57,17 +60,13 @@ public class TheBuilderPhase : Phase {
 }
 
 public class DrawPhase : TheBuilderPhase {
-    public typealias RulesType = TheBuildersRules
-
     public override func executePhase(withContext context: RulesType.ContextType) {
-
+        print("\(context.activePlayer.id) should draw some cards")
     }
 }
 
 public class DealPhase : TheBuilderPhase {
-    public typealias RulesType = TheBuildersRules
-
     public override func executePhase(withContext context: RulesType.ContextType) {
-
+        print("\(context.activePlayer.id) should deal some cards")
     }
 }

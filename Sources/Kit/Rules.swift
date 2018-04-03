@@ -15,7 +15,8 @@ public protocol Phase {
     mutating func executePhase(withContext context: RulesType.ContextType)
 }
 
-/// Represents the rules of a game. This consists of what a turn looks like in the game, as well as
+/// Represents the rules of a game. This consists of what a turn looks like in the game, as well as determining when a
+/// game is over.
 public protocol GameRules {
     associatedtype ContextType: GameContext where ContextType.RulesType == Self
     associatedtype PhaseType: Phase
