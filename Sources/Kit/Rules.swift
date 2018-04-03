@@ -23,7 +23,7 @@ public protocol GameRules {
     associatedtype PlayerType: Player
 
     /// The context these rules apply in.
-    var context: ContextType { get set }
+    var context: ContextType { get }
 
     /// What a turn looks like in this game. A turn consists of a set of phases that are executed in order.
     var turn: [PhaseType] { get }

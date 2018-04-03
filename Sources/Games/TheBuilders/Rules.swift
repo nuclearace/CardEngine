@@ -11,7 +11,7 @@ public struct TheBuildersRules : GameRules {
     public let turn = [DrawPhase(), DealPhase()]
 
     /// The context these rules are applying to
-    public unowned var context: BuildersBoard
+    public unowned let context: BuildersBoard
 
     private var moveCount = 0
 
