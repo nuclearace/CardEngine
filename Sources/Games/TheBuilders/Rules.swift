@@ -8,7 +8,6 @@ import Kit
 /// The game of The Builders.
 public struct TheBuildersRules : GameRules {
     public typealias ContextType = BuildersBoard
-//    public typealias PhaseType = TheBuilderPhase
 
     /// What a turn looks like in this game. A turn consists of a set of phases that are executed in order.
     public let turn = [DrawPhase(), DealPhase()]
