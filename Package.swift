@@ -10,7 +10,7 @@ let package = Package(
         // .package(url: /* package url */, from: "1.0.0"),
     ],
     targets: [
-        .target(name: "TheBuilders", dependencies: ["Kit", "Games"]),
+        .target(name: "Runner", dependencies: ["Kit", "Games"]),
         .target(name: "Kit"),
         .target(name: "Games", dependencies: ["Kit"])
     ]
