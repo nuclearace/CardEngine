@@ -7,16 +7,16 @@ import Foundation
 /// Represents the state of a game.
 public protocol GameContext : AnyObject {
     /// The type of game this context is playing.
-    associatedtype GameType: GameRules where GameType.ContextType == Self
+    associatedtype RulesType : GameRules where RulesType.ContextType == Self
 
     /// The player who is currently making moves
-    var activePlayer: GameType.PlayerType { get set }
+    var activePlayer: RulesType.PlayerType { get set }
 
     /// The players in this game.
-    var players: [GameType.PlayerType] { get }
+    var players: [RulesType.PlayerType] { get }
 
     /// The rules for the game executing in this context.
-    var rules: GameType! { get }
+    var rules: RulesType! { get }
 
     /// Starts this game.
     func startGame()

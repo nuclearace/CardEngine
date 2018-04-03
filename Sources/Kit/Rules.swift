@@ -17,7 +17,7 @@ public protocol Phase {
 
 /// Represents the rules of a game. This consists of what a turn looks like in the game, as well as
 public protocol GameRules {
-    associatedtype ContextType: GameContext where ContextType.GameType == Self
+    associatedtype ContextType: GameContext where ContextType.RulesType == Self
     associatedtype PhaseType: Phase
     associatedtype PlayerType: Player
 
