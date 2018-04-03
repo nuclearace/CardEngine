@@ -7,7 +7,7 @@ import Foundation
 /// Represents the state of a game.
 public protocol GameContext : AnyObject {
     /// The type of game this context is playing.
-    associatedtype RulesType : GameRules where RulesType.ContextType == Self
+    associatedtype RulesType: GameRules where RulesType.ContextType == Self
 
     /// The player who is currently making moves
     var activePlayer: RulesType.PlayerType { get set }

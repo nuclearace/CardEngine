@@ -7,8 +7,6 @@ import Kit
 
 /// The game of The Builders.
 public struct TheBuildersRules : GameRules {
-    public typealias ContextType = BuildersBoard
-
     /// What a turn looks like in this game. A turn consists of a set of phases that are executed in order.
     public let turn = [DrawPhase(), DealPhase()]
 
@@ -24,7 +22,7 @@ public struct TheBuildersRules : GameRules {
     /// Executes player's turn.
     ///
     /// - parameter forPLayer: The player whose turn it is.
-    public mutating func executeTurn(forPlayer player: TheBuilderPlayer) {
+    public mutating func executeTurn(forPlayer player: BuilderPlayer) {
         for phase in turn {
             phase.executePhase(withContext: context)
         }
@@ -43,12 +41,6 @@ public struct TheBuildersRules : GameRules {
     public mutating func startGame() {
 
     }
-}
-
-public final class TheBuilderPlayer : Player {
-    public let id = UUID()
-
-    public init () {}
 }
 
 public class TheBuilderPhase : Phase {
