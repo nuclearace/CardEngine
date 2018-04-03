@@ -26,7 +26,7 @@ public final class Board : GameContext {
 }
 
 /// Represents the state of a game.
-public protocol GameContext {
+public protocol GameContext : AnyObject {
     /// The player who is currently making moves
     var activePlayer: Player { get set }
 
