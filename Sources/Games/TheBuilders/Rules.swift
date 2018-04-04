@@ -6,7 +6,7 @@ import Foundation
 import Kit
 
 /// The game of The Builders.
-public struct BuildersRules: GameRules {
+public struct BuildersRules : GameRules {
     /// What a turn looks like in this game. A turn consists of a set of phases that are executed in order.
     public let turn = [DrawPhase(), DealPhase()]
 
@@ -54,11 +54,16 @@ public class BuilderPhase: Phase {
 public class DrawPhase : BuilderPhase {
     public override func executePhase(withContext context: RulesType.ContextType) {
         print("\(context.activePlayer.id) should draw some cards")
+
+        context.activePlayer.hand.append(Worker.getInstance())
     }
 }
 
 public class DealPhase : BuilderPhase {
     public override func executePhase(withContext context: RulesType.ContextType) {
         print("\(context.activePlayer.id) should deal some cards")
+        print("\(context.activePlayer.id) will play \(context.activePlayer.hand.last!)")
+
+        context.activePlayer.hand.removeLast()
     }
 }
