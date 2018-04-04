@@ -6,6 +6,8 @@ import Foundation
 import Kit
 
 public final class BuilderPlayer : Player {
+    public typealias RulesType = BuildersRules
+
     public let id = UUID()
 
     /// The playable items that this player has. This are items that are not in play.

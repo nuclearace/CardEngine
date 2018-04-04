@@ -4,23 +4,12 @@
 
 import Foundation
 
-/// Phases represent different parts of a turn. During a phase different actions can be taken.
-public protocol Phase {
-    /// The type of rules this phase applies to.
-    associatedtype RulesType: GameRules where RulesType.PhaseType == Self
-
-    /// Run this phase with the given context.
-    ///
-    /// - parameter withContext: The context with which to execute in.
-    mutating func executePhase(withContext context: RulesType.ContextType)
-}
-
 /// Represents the rules of a game. This consists of what a turn looks like in the game, as well as determining when a
 /// game is over.
 public protocol GameRules {
     associatedtype ContextType: GameContext where ContextType.RulesType == Self
     associatedtype PhaseType: Phase where PhaseType.RulesType == Self
-    associatedtype PlayerType: Player
+    associatedtype PlayerType: Player where PlayerType.RulesType == Self
 
     /// The context these rules apply in.
     var context: ContextType { get }
@@ -40,4 +29,15 @@ public protocol GameRules {
 
     /// Setups a game. This is called to deal cards, give money, etc, before the first player goes.
     mutating func setupGame()
+}
+
+/// Phases represent different parts of a turn. During a phase different actions can be taken.
+public protocol Phase {
+    /// The type of rules this phase applies to.
+    associatedtype RulesType: GameRules where RulesType.PhaseType == Self
+
+    /// Run this phase with the given context.
+    ///
+    /// - parameter withContext: The context with which to execute in.
+    mutating func executePhase(withContext context: RulesType.ContextType)
 }

@@ -45,7 +45,7 @@ public struct BuildersRules : GameRules {
     }
 }
 
-public class BuilderPhase: Phase {
+public class BuilderPhase : Phase {
     public typealias RulesType = BuildersRules
 
     public func executePhase(withContext context: RulesType.ContextType) {
@@ -53,7 +53,7 @@ public class BuilderPhase: Phase {
     }
 }
 
-public class DrawPhase : BuilderPhase {
+public final class DrawPhase : BuilderPhase {
     public override func executePhase(withContext context: RulesType.ContextType) {
         let active: BuilderPlayer = context.activePlayer
 
@@ -62,7 +62,7 @@ public class DrawPhase : BuilderPhase {
     }
 }
 
-public class DealPhase : BuilderPhase {
+public final class DealPhase : BuilderPhase {
     public override func executePhase(withContext context: RulesType.ContextType) {
         let active: BuilderPlayer = context.activePlayer
         let cardsToRemove = getCardsToPlay(fromPlayer: active)

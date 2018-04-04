@@ -6,6 +6,8 @@ import Foundation
 
 /// Represents a user.
 public protocol Player : AnyObject, Hashable {
+    associatedtype RulesType: GameRules where RulesType.PlayerType == Self
+
     /// The unique identifier for this player.
     var id: UUID { get }
 }
