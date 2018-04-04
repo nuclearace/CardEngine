@@ -38,6 +38,6 @@ public protocol GameRules {
     /// - returns: `true` if this game is over, false otherwise.
     func isGameOver() -> Bool
 
-    /// Starts a game. This is called to deal cards, give money, etc, before the first player goes.
-    mutating func startGame()
+    /// Setups a game. This is called to deal cards, give money, etc, before the first player goes.
+    mutating func setupGame()
 }

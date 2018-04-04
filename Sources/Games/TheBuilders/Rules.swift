@@ -38,8 +38,10 @@ public struct BuildersRules : GameRules {
     }
 
     /// Starts a game. This is called to deal cards, give money, etc, before the first player goes.
-    public mutating func startGame() {
-
+    public mutating func setupGame() {
+        for player in context.players {
+            player.hand = Array(0..<6).map({_ -> BuildersPlayable in Worker.getInstance() })
+        }
     }
 }
 
@@ -75,17 +77,14 @@ public class DealPhase : BuilderPhase {
     private func getCardsToPlay(fromPlayer player: BuilderPlayer) -> Set<Int> {
         let input = player.getInput(withDialog: "Your hand: \(player.hand)", "Which cards would you like to play? ")
 
-        // If they put a single num
-        if let int = Int(input) {
-            return [int]
-        }
-
         let cards = Set(input.components(separatedBy: ",")
-                         .map({ $0.replacingOccurrences(of: " ", with: "") })
-                         .map(Int.init).compactMap({ $0 }))
+                             .map({ $0.replacingOccurrences(of: " ", with: "") })
+                             .map(Int.init)
+                             .compactMap({ $0 })
+                             .filter({ $0 > 0 && $0 < player.hand.count }))
 
         // FIXME this should probably have a depth counter to avoid someone causing max recursion
-        guard cards.count > 1 else {
+        guard cards.count > 0 else {
             print("You must play something!")
 
             return getCardsToPlay(fromPlayer: player)

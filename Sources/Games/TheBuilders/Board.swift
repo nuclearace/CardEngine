@@ -29,6 +29,8 @@ public final class BuildersBoard : GameContext {
 
     /// Starts this game.
     public func startGame() {
+        rules.setupGame()
+
         while !rules.isGameOver() {
             rules.executeTurn(forPlayer: activePlayer)
 
