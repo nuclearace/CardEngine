@@ -7,11 +7,11 @@ import Kit
 
 /// The game of The Builders.
 public struct BuildersRules : GameRules {
-    /// What a turn looks like in this game. A turn consists of a set of phases that are executed in order.
-    public let turn = [DrawPhase(), DealPhase()]
-
     /// The context these rules are applying to
     public unowned let context: BuildersBoard
+
+    /// What a turn looks like in this game. A turn consists of a set of phases that are executed in order.
+    public let turn = [DrawPhase(), DealPhase()]
 
     private var moveCount = 0
 
