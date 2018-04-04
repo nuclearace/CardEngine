@@ -12,6 +12,10 @@ public protocol BuildingBlock : BuildersPlayable {
 
 /// The kinds of blocks that are available.
 public enum BuildingBlockType {
+    // TODO replace when this is first class in Swift
+    /// All BuildingBlockType cases
+    public static let allSkills: [BuildingBlockType] = [.wiring, .glass, .wood, .metal, .insulation]
+
     /// Windows are a must.
     case glass
 
@@ -41,8 +45,16 @@ public enum BuildingBlockType {
 
     /// A random type.
     public static var randomType: BuildingBlockType {
-        // FIXME linux
-        return [.wiring, .glass, .wood, .metal, .insulation][Int(arc4random_uniform(5))]
+        // FIXME replace with native random in Swift X
+        let rand: Int
+
+        #if os(macOS)
+        rand = Int(arc4random_uniform(UInt32(allSkills.count)))
+        #else
+        rand = Int(random()) % allSkills.count
+        #endif
+
+        return allSkills[rand]
     }
 }
 

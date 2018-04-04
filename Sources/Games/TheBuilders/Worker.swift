@@ -15,6 +15,10 @@ public protocol Laborer : BuildersPlayable {
 
 /// The type of a worker.
 public enum SkillType {
+    // TODO replace when this is first class in Swift
+    /// All BuildingBlockType cases
+    public static let allSkills: [SkillType] = [.electrician, .foreman, .painter, .metalWorker, .fitter]
+
     /// A metal worker. These guys bend metal and stuff.
     case metalWorker
 
@@ -32,8 +36,16 @@ public enum SkillType {
 
     /// A random skill.
     public static var randomSkill: SkillType {
-        // FIXME linux
-        return [.electrician, .foreman, .painter, .metalWorker, .fitter][Int(arc4random_uniform(5))]
+        let rand: Int
+
+        // FIXME replace with native random in Swift X
+        #if os(macOS)
+        rand = Int(arc4random_uniform(UInt32(allSkills.count)))
+        #else
+        rand = Int(random()) % allSkills.count
+        #endif
+
+        return allSkills[rand]
     }
 }
 
