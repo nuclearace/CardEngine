@@ -7,7 +7,7 @@ import Foundation
 /// Phases represent different parts of a turn. During a phase different actions can be taken.
 public protocol Phase {
     /// The type of rules this phase applies to.
-    associatedtype RulesType: GameRules
+    associatedtype RulesType: GameRules where RulesType.PhaseType == Self
 
     /// Run this phase with the given context.
     ///
@@ -19,7 +19,7 @@ public protocol Phase {
 /// game is over.
 public protocol GameRules {
     associatedtype ContextType: GameContext where ContextType.RulesType == Self
-    associatedtype PhaseType: Phase
+    associatedtype PhaseType: Phase where PhaseType.RulesType == Self
     associatedtype PlayerType: Player
 
     /// The context these rules apply in.

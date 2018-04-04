@@ -19,3 +19,26 @@ extension Player {
         return lhs.id == rhs.id
     }
 }
+
+/// Protocol that declares the interface for interacting with users
+// TODO possibly rename this
+public protocol UserInteractive {
+    /// The type returned from interactions
+    associatedtype InteractionType = String
+
+    /// Gets some input from the user.
+    ///
+    /// - parameter withDialog: The text to display to the user.
+    /// - returns: The input from the user.
+    func getInput(withDialog dialog: String...) -> InteractionType
+}
+
+public extension UserInteractive where InteractionType == String {
+    public func getInput(withDialog dialog: String...) -> InteractionType {
+        for str in dialog {
+            print(str)
+        }
+
+        return readLine(strippingNewline: true) ?? ""
+    }
+}

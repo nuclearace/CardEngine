@@ -17,3 +17,5 @@ public final class BuilderPlayer : Player {
 
     public init () {}
 }
+
+extension BuilderPlayer : UserInteractive { }

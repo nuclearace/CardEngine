@@ -53,17 +53,44 @@ public class BuilderPhase: Phase {
 
 public class DrawPhase : BuilderPhase {
     public override func executePhase(withContext context: RulesType.ContextType) {
-        print("\(context.activePlayer.id) should draw some cards")
+        let active: BuilderPlayer = context.activePlayer
 
-        context.activePlayer.hand.append(Worker.getInstance())
+        print("\(context.activePlayer.id) should draw some cards")
+        active.hand.append(Worker.getInstance())
     }
 }
 
 public class DealPhase : BuilderPhase {
     public override func executePhase(withContext context: RulesType.ContextType) {
-        print("\(context.activePlayer.id) should deal some cards")
-        print("\(context.activePlayer.id) will play \(context.activePlayer.hand.last!)")
+        let active: BuilderPlayer = context.activePlayer
+        let cardsToRemove = getCardsToPlay(fromPlayer: active)
 
-        context.activePlayer.hand.removeLast()
+        print("\(active.id) will play \(cardsToRemove)")
+
+        active.hand = active.hand.enumerated().filter({i in
+            return !cardsToRemove.contains(i.0 + 1)
+        }).map({ $0.1 })
+    }
+
+    private func getCardsToPlay(fromPlayer player: BuilderPlayer) -> Set<Int> {
+        let input = player.getInput(withDialog: "Your hand: \(player.hand)", "Which cards would you like to play? ")
+
+        // If they put a single num
+        if let int = Int(input) {
+            return [int]
+        }
+
+        let cards = Set(input.components(separatedBy: ",")
+                         .map({ $0.replacingOccurrences(of: " ", with: "") })
+                         .map(Int.init).compactMap({ $0 }))
+
+        // FIXME this should probably have a depth counter to avoid someone causing max recursion
+        guard cards.count > 1 else {
+            print("You must play something!")
+
+            return getCardsToPlay(fromPlayer: player)
+        }
+
+        return cards
     }
 }
