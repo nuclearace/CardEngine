@@ -5,6 +5,9 @@ import PackageDescription
 
 let package = Package(
     name: "TheBuilders",
+    products: [
+        .executable(name: "Runner", targets: ["Runner"])
+    ],
     dependencies: [
         // Dependencies declare other packages that this package depends on.
         // .package(url: /* package url */, from: "1.0.0"),
