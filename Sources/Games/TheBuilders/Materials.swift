@@ -60,6 +60,7 @@ public enum BuildingBlockType {
 
 /// A playable material.
 public struct Material : BuildingBlock {
+    /// The type of this playable.
     public let playType = BuildersPlayType.material
 
     /// The type of this building block.

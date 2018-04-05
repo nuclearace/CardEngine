@@ -22,8 +22,8 @@ extension Player {
     }
 }
 
-/// Protocol that declares the interface for interacting with users
 // TODO possibly rename this
+/// Protocol that declares the interface for interacting with users
 public protocol UserInteractive {
     /// The type returned from interactions
     associatedtype InteractionType = String

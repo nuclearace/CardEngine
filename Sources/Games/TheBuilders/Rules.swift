@@ -34,7 +34,7 @@ public struct BuildersRules : GameRules {
     ///
     /// - returns: `true` if this game is over, false otherwise.
     public func isGameOver() -> Bool {
-        return moveCount >= 20
+        return context.cardsInPlay.map({ $0.1 }).flatMap({ $0 }).count > 5
     }
 
     /// Starts a game. This is called to deal cards, give money, etc, before the first player goes.
@@ -69,9 +69,21 @@ public final class DealPhase : BuilderPhase {
 
         print("\(active.id) will play \(cardsToRemove)")
 
-        active.hand = active.hand.enumerated().filter({i in
-            return !cardsToRemove.contains(i.0 + 1)
-        }).map({ $0.1 })
+        // TODO make this more functional
+        var workingHand = [BuildersPlayable]()
+        var cardsToPlay = [BuildersPlayable]()
+
+        for (i, playable) in active.hand.enumerated() {
+            switch cardsToRemove.contains(i + 1) {
+            case true:
+                cardsToPlay.append(playable)
+            case false:
+                workingHand.append(playable)
+            }
+        }
+
+        active.hand = workingHand
+        context.cardsInPlay[active, default: []].append(contentsOf: cardsToPlay)
     }
 
     private func getCardsToPlay(fromPlayer player: BuilderPlayer) -> Set<Int> {

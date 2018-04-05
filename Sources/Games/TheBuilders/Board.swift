@@ -12,6 +12,10 @@ public final class BuildersBoard : GameContext {
     /// The player who is currently making moves
     public var activePlayer: RulesType.PlayerType
 
+    // TODO This is a bit crappy. Eventually we'll probably have another object that encapsulates this state
+    /// The cards that are currently in play.
+    public internal(set) var cardsInPlay = [RulesType.PlayerType: [BuildersPlayable]]()
+
     /// The players in this game.
     public private(set) var players: [RulesType.PlayerType]
 
