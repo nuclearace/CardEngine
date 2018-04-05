@@ -16,6 +16,9 @@ public final class BuildersBoard : GameContext {
     /// The cards that are currently in play.
     public internal(set) var cardsInPlay = [RulesType.PlayerType: [BuildersPlayable]]()
 
+    /// Each player's hotel.
+    public internal(set) var hotels = [RulesType.PlayerType: Hotel]()
+
     /// The players in this game.
     public private(set) var players: [RulesType.PlayerType]
 

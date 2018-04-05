@@ -13,7 +13,7 @@ public struct BuildersRules : GameRules {
     public unowned let context: BuildersBoard
 
     /// What a turn looks like in this game. A turn consists of a set of phases that are executed in order.
-    public let turn = [DealPhase(), DrawPhase()]
+    public let turn = [DealPhase(), BuildPhase(), DrawPhase()]
 
     private var moveCount = 0
 
@@ -36,7 +36,7 @@ public struct BuildersRules : GameRules {
     ///
     /// - returns: `true` if this game is over, false otherwise.
     public func isGameOver() -> Bool {
-        return context.cardsInPlay.map({ $0.1 }).flatMap({ $0 }).count > 5
+        return context.hotels.map({ $0.value.floorsBuilt }).reduce(0, +) > 0
     }
 
     /// Starts a game. This is called to deal cards, give money, etc, before the first player goes.
@@ -55,18 +55,10 @@ public class BuilderPhase : Phase {
     }
 }
 
-public final class DrawPhase : BuilderPhase {
-    public override func executePhase(withContext context: RulesType.ContextType) {
-        let active: BuilderPlayer = context.activePlayer
-
-        print("\(context.activePlayer.id) should draw some cards")
-
-        for _ in 0..<BuildersRules.cardsNeededInHand-active.hand.count {
-            active.hand.append(Worker.getInstance())
-        }
-    }
-}
-
+// TODO Allow discard
+/// During the deal phase the player picks what playables they went to put into the game.
+///
+/// The deal phase is followed by the build phase.
 public final class DealPhase : BuilderPhase {
     private typealias HandReducer = (kept: BuilderHand, play: BuilderHand)
 
@@ -108,5 +100,42 @@ public final class DealPhase : BuilderPhase {
         }
 
         return cards
+    }
+}
+
+
+/// During the build the phase, we calculate whether or nothing player built a new floor or not.
+///
+/// The build phase is followed by the draw phase.
+public final class BuildPhase : BuilderPhase {
+    public override func executePhase(withContext context: RulesType.ContextType) {
+        let active: BuilderPlayer = context.activePlayer
+        var hotel = context.hotels[active, default: Hotel()]
+
+        guard var hand = context.cardsInPlay[active] else {
+            return
+        }
+
+        defer {
+            context.cardsInPlay[active] = hand
+            context.hotels[active] = hotel
+        }
+
+        hotel.calculateNewFloors(fromPlayedCards: &hand)
+    }
+}
+
+/// During the draw phase, the player's hand is restocked with playables.
+///
+/// The draw phase concludes a turn.
+public final class DrawPhase : BuilderPhase {
+    public override func executePhase(withContext context: RulesType.ContextType) {
+        let active: BuilderPlayer = context.activePlayer
+
+        print("\(context.activePlayer.id) should draw some cards")
+
+        for _ in 0..<BuildersRules.cardsNeededInHand-active.hand.count {
+            active.hand.append(Worker.getInstance())
+        }
     }
 }
