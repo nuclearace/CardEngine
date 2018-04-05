@@ -62,7 +62,7 @@ public class BuilderPhase : Phase {
 public final class DealPhase : BuilderPhase {
     private typealias HandReducer = (kept: BuilderHand, play: BuilderHand)
 
-    public override func executePhase(withContext context: RulesType.ContextType) {
+    public override func executePhase(withContext context: BuildersBoard) {
         let active: BuilderPlayer = context.activePlayer
         let cardsToRemove = getCardsToPlay(fromPlayer: active)
 
@@ -103,12 +103,11 @@ public final class DealPhase : BuilderPhase {
     }
 }
 
-
 /// During the build the phase, we calculate whether or nothing player built a new floor or not.
 ///
 /// The build phase is followed by the draw phase.
 public final class BuildPhase : BuilderPhase {
-    public override func executePhase(withContext context: RulesType.ContextType) {
+    public override func executePhase(withContext context: BuildersBoard) {
         let active: BuilderPlayer = context.activePlayer
         var hotel = context.hotels[active, default: Hotel()]
 
@@ -129,7 +128,7 @@ public final class BuildPhase : BuilderPhase {
 ///
 /// The draw phase concludes a turn.
 public final class DrawPhase : BuilderPhase {
-    public override func executePhase(withContext context: RulesType.ContextType) {
+    public override func executePhase(withContext context: BuildersBoard) {
         let active: BuilderPlayer = context.activePlayer
 
         print("\(context.activePlayer.id) should draw some cards")
