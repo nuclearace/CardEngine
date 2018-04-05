@@ -5,6 +5,10 @@
 import Foundation
 import Kit
 
+
+/// A hand of BuildersPlayables
+internal typealias BuilderHand = [BuildersPlayable]
+
 /// Represents a playable item in the The Builders.
 public protocol BuildersPlayable : Playable {
     /// The type of this playable.

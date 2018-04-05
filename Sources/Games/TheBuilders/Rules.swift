@@ -68,27 +68,27 @@ public final class DrawPhase : BuilderPhase {
 }
 
 public final class DealPhase : BuilderPhase {
+    private typealias HandReducer = (kept: BuilderHand, play: BuilderHand)
+
     public override func executePhase(withContext context: RulesType.ContextType) {
         let active: BuilderPlayer = context.activePlayer
         let cardsToRemove = getCardsToPlay(fromPlayer: active)
 
-        print("\(active.id) will play \(cardsToRemove)")
-
-        // TODO make this more functional
-        var workingHand = [BuildersPlayable]()
-        var cardsToPlay = [BuildersPlayable]()
-
-        for (i, playable) in active.hand.enumerated() {
-            switch cardsToRemove.contains(i + 1) {
+        // Split into kept and played
+        let enumeratedHand = active.hand.enumerated()
+        let (kept, played) = enumeratedHand.reduce(into: HandReducer([], []), {(reducer: inout HandReducer, playable) in
+            switch cardsToRemove.contains(playable.offset + 1) {
             case true:
-                cardsToPlay.append(playable)
+                reducer.play.append(playable.element)
             case false:
-                workingHand.append(playable)
+                reducer.kept.append(playable.element)
             }
-        }
+        })
 
-        active.hand = workingHand
-        context.cardsInPlay[active, default: []].append(contentsOf: cardsToPlay)
+        print("\(active.id) will play \(played)")
+
+        active.hand = kept
+        context.cardsInPlay[active, default: []].append(contentsOf: played)
     }
 
     private func getCardsToPlay(fromPlayer player: BuilderPlayer) -> Set<Int> {
