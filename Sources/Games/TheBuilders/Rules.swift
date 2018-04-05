@@ -93,7 +93,7 @@ public final class DealPhase : BuilderPhase {
                              .map({ $0.replacingOccurrences(of: " ", with: "") })
                              .map(Int.init)
                              .compactMap({ $0 })
-                             .filter({ $0 > 0 && $0 < player.hand.count }))
+                             .filter({ $0 > 0 && $0 <= player.hand.count }))
 
         // FIXME this should probably have a depth counter to avoid someone causing max recursion
         guard cards.count > 0 else {
