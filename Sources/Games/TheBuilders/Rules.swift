@@ -7,6 +7,8 @@ import Kit
 
 /// The game of The Builders.
 public struct BuildersRules : GameRules {
+    fileprivate static let cardsNeededInHand = 7
+
     /// The context these rules are applying to
     public unowned let context: BuildersBoard
 
@@ -40,7 +42,7 @@ public struct BuildersRules : GameRules {
     /// Starts a game. This is called to deal cards, give money, etc, before the first player goes.
     public mutating func setupGame() {
         for player in context.players {
-            player.hand = Array(0..<6).map({_ -> BuildersPlayable in Worker.getInstance() })
+            player.hand = Array(0..<BuildersRules.cardsNeededInHand).map({_ -> BuildersPlayable in Worker.getInstance() })
         }
     }
 }
@@ -58,7 +60,10 @@ public final class DrawPhase : BuilderPhase {
         let active: BuilderPlayer = context.activePlayer
 
         print("\(context.activePlayer.id) should draw some cards")
-        active.hand.append(Worker.getInstance())
+
+        for _ in 0..<BuildersRules.cardsNeededInHand-active.hand.count {
+            active.hand.append(Worker.getInstance())
+        }
     }
 }
 
