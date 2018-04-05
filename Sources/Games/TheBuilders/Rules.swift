@@ -13,7 +13,7 @@ public struct BuildersRules : GameRules {
     public unowned let context: BuildersBoard
 
     /// What a turn looks like in this game. A turn consists of a set of phases that are executed in order.
-    public let turn = [DrawPhase(), DealPhase()]
+    public let turn = [DealPhase(), DrawPhase()]
 
     private var moveCount = 0
 

@@ -19,7 +19,7 @@ public protocol GameRules {
 
     /// Executes player's turn.
     ///
-    /// - parameter forPLayer: The player whose turn it is.
+    /// - parameter forPlayer: The player whose turn it is.
     mutating func executeTurn(forPlayer player: PlayerType)
 
     /// Calculates whether or not this game is over, based on some criteria.
