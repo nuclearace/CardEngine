@@ -36,9 +36,15 @@ public protocol UserInteractive {
 }
 
 public extension UserInteractive where InteractionType == String {
+    /// Default implementation. Prints to stdout
+    ///
+    /// **NOTE**: Newlines are not added to prints.
+    ///
+    /// - parameter withDialog: The text to display to the user.
+    /// - returns: The input from the user.
     public func getInput(withDialog dialog: String...) -> InteractionType {
         for str in dialog {
-            print(str)
+            print(str, terminator: "")
         }
 
         return readLine(strippingNewline: true) ?? ""

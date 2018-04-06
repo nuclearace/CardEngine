@@ -25,6 +25,8 @@ public struct BuildersRules : GameRules {
     ///
     /// - parameter forPLayer: The player whose turn it is.
     public mutating func executeTurn(forPlayer player: BuilderPlayer) {
+        print("\(player.id)'s turn")
+
         for phase in turn {
             phase.executePhase(withContext: context)
         }
@@ -64,12 +66,28 @@ public final class DealPhase : BuilderPhase {
 
     public override func executePhase(withContext context: BuildersBoard) {
         let active: BuilderPlayer = context.activePlayer
-        let cardsToRemove = getCardsToPlay(fromPlayer: active)
+        let cardsToPlay = getCardsToPlay(fromPlayer: active)
+        let played = playCards(cardsToPlay, forPlayer: active, context: context)
+        let cardsToDiscard = getCardsToDiscard(fromPlayer: active)
 
+        active.hand = active.hand.enumerated().filter({ !cardsToDiscard.contains($0.offset + 1) }).map({ $0.element })
+
+        // TODO Should they have to play something?
+        // FIXME this should probably have a depth counter to avoid someone causing max recursion
+        guard cardsToPlay.count > 0 || cardsToDiscard.count > 0 else {
+            print("You must do something!")
+
+            return executePhase(withContext: context)
+        }
+
+        print("\(active.id) will play \(played)")
+    }
+
+    private func playCards(_ cards: Set<Int>, forPlayer player: BuilderPlayer, context: BuildersBoard) -> BuilderHand {
         // Split into kept and played
-        let enumeratedHand = active.hand.enumerated()
+        let enumeratedHand = player.hand.enumerated()
         let (kept, played) = enumeratedHand.reduce(into: HandReducer([], []), {(reducer: inout HandReducer, playable) in
-            switch cardsToRemove.contains(playable.offset + 1) {
+            switch cards.contains(playable.offset + 1) {
             case true:
                 reducer.play.append(playable.element)
             case false:
@@ -77,29 +95,30 @@ public final class DealPhase : BuilderPhase {
             }
         })
 
-        print("\(active.id) will play \(played)")
+        player.hand = kept
+        context.cardsInPlay[player, default: []].append(contentsOf: played)
 
-        active.hand = kept
-        context.cardsInPlay[active, default: []].append(contentsOf: played)
+        return played
     }
 
     private func getCardsToPlay(fromPlayer player: BuilderPlayer) -> Set<Int> {
-        let input = player.getInput(withDialog: "Your hand: \(player.hand)", "Which cards would you like to play? ")
+        let input = player.getInput(withDialog: "Your hand: \(player.hand)\n", "Which cards would you like to play? ")
 
-        let cards = Set(input.components(separatedBy: ",")
-                             .map({ $0.replacingOccurrences(of: " ", with: "") })
-                             .map(Int.init)
-                             .compactMap({ $0 })
-                             .filter({ $0 > 0 && $0 <= player.hand.count }))
+        return parseInputCards(input: input, player: player)
+    }
 
-        // FIXME this should probably have a depth counter to avoid someone causing max recursion
-        guard cards.count > 0 else {
-            print("You must play something!")
+    private func getCardsToDiscard(fromPlayer player: BuilderPlayer) -> Set<Int> {
+        let input = player.getInput(withDialog: "Your hand \(player.hand)\n", "Would you like discard something?")
 
-            return getCardsToPlay(fromPlayer: player)
-        }
+        return parseInputCards(input: input, player: player)
+    }
 
-        return cards
+    private func parseInputCards(input: String, player: BuilderPlayer) -> Set<Int> {
+        return Set(input.components(separatedBy: ",")
+                        .map({ $0.replacingOccurrences(of: " ", with: "") })
+                        .map(Int.init)
+                        .compactMap({ $0 })
+                        .filter({ $0 > 0 && $0 <= player.hand.count }))
     }
 }
 

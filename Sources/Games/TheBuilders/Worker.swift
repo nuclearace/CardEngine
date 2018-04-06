@@ -65,3 +65,9 @@ public struct Worker : Laborer {
         return Worker(skill: .randomSkill, skillLevel: 1.0)
     }
 }
+
+extension Worker : CustomStringConvertible {
+    public var description: String {
+        return "Worker(skill: \(skill), skillLevel: \(skillLevel)"
+    }
+}
