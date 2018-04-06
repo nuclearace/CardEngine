@@ -86,7 +86,7 @@ public final class DealPhase : BuilderPhase {
     private func playCards(_ cards: Set<Int>, forPlayer player: BuilderPlayer, context: BuildersBoard) -> BuilderHand {
         // Split into kept and played
         let enumeratedHand = player.hand.enumerated()
-        let (kept, played) = enumeratedHand.reduce(into: HandReducer([], []), {(reducer: inout HandReducer, playable) in
+        let (kept, played) = enumeratedHand.reduce(into: ([], []), {(reducer: inout HandReducer, playable) in
             switch cards.contains(playable.offset + 1) {
             case true:
                 reducer.play.append(playable.element)

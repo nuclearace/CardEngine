@@ -68,6 +68,6 @@ public struct Worker : Laborer {
 
 extension Worker : CustomStringConvertible {
     public var description: String {
-        return "Worker(skill: \(skill), skillLevel: \(skillLevel)"
+        return "Worker(skill: \(skill), skillLevel: \(skillLevel))"
     }
 }
