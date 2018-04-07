@@ -66,6 +66,16 @@ public struct Material : BuildingBlock {
     /// The type of this building block.
     public let blockType: BuildingBlockType
 
+    /// Returns whether or not this playable can be played by player.
+    ///
+    /// - parameter inContext: The context this playable is being used in.
+    /// - parameter byPlayer: The player playing.
+    public func canPlay(inContext context: BuildersBoard, byPlayer player: BuilderPlayer) -> Bool {
+        let workers = context.cardsInPlay[player, default: []].workers
+
+        return workers.allSkills.contains(blockType.skillNeeded)
+    }
+
     public static func getInstance() -> Material {
         return Material(blockType: .randomType)
     }

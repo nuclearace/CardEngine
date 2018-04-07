@@ -17,12 +17,12 @@ public struct Hotel {
     // TODO The rules should determine the criteria for a floor being built
     // TODO This is great and all, you can't build a floor without workers, but you also need some material
     /// Calculates whether or not this player has built any new floors.
-    internal mutating func calculateNewFloors(fromPlayedCards cards: inout BuilderHand) {
+    internal mutating func calculateNewFloors(fromPlayedCards cards: inout BuildersHand) {
         let numWorks = cards.map({ $0 is Worker }).reduce(0, { $0 + ($1 ? 1 : 0) })
 
         if numWorks >= 5 {
             floorsBuilt += 1
-            cards = BuilderHand(cards.dropFirst(5))
+            cards = BuildersHand(cards.dropFirst(5))
         }
     }
 }

@@ -60,6 +60,15 @@ public struct Worker : Laborer {
     /// The skill of this laborer. This controls how productive and the quality of their work.
     public var skillLevel = 1.0
 
+    /// Returns whether or not this playable can be played by player.
+    ///
+    /// - parameter inContext: The context this playable is being used in.
+    /// - parameter byPlayer: The player playing.
+    public func canPlay(inContext context: BuildersBoard, byPlayer player: BuilderPlayer) -> Bool {
+        // Workers are always playable
+        return true
+    }
+
     /// Creates a random worker.
     public static func getInstance() -> Worker {
         return Worker(skill: .randomSkill, skillLevel: 1.0)
@@ -69,5 +78,11 @@ public struct Worker : Laborer {
 extension Worker : CustomStringConvertible {
     public var description: String {
         return "Worker(skill: \(skill), skillLevel: \(skillLevel))"
+    }
+}
+
+extension Array where Element == Worker {
+    var allSkills: [SkillType] {
+        return map({ $0.skill })
     }
 }

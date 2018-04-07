@@ -43,8 +43,20 @@ public struct BuildersRules : GameRules {
 
     /// Starts a game. This is called to deal cards, give money, etc, before the first player goes.
     public mutating func setupGame() {
+        // Every player gets 2 workers and 5 material to start a game.
         for player in context.players {
-            player.hand = Array(0..<BuildersRules.cardsNeededInHand).map({_ -> BuildersPlayable in Worker.getInstance() })
+            fillHand(ofPlayer: player)
+        }
+    }
+
+    private func fillHand(ofPlayer player: BuilderPlayer) {
+        for i in 0..<BuildersRules.cardsNeededInHand {
+            switch i {
+            case 0...1:
+                player.hand.append(Worker.getInstance())
+            default:
+                player.hand.append(Material.getInstance())
+            }
         }
     }
 }
@@ -62,14 +74,19 @@ public class BuilderPhase : Phase {
 ///
 /// The deal phase is followed by the build phase.
 public final class DealPhase : BuilderPhase {
-    private typealias HandReducer = (kept: BuilderHand, play: BuilderHand)
+    private typealias HandReducer = (kept: BuildersHand, play: BuildersHand)
 
     public override func executePhase(withContext context: BuildersBoard) {
         let active: BuilderPlayer = context.activePlayer
         let cardsToPlay = getCardsToPlay(fromPlayer: active)
-        let played = playCards(cardsToPlay, forPlayer: active, context: context)
-        let cardsToDiscard = getCardsToDiscard(fromPlayer: active)
 
+        guard let played = playCards(cardsToPlay, forPlayer: active, context: context) else {
+            print("You played a card that you currently are unable to play")
+
+            return executePhase(withContext: context)
+        }
+
+        let cardsToDiscard = getCardsToDiscard(fromPlayer: active)
         active.hand = active.hand.enumerated().filter({ !cardsToDiscard.contains($0.offset + 1) }).map({ $0.element })
 
         // TODO Should they have to play something?
@@ -83,7 +100,7 @@ public final class DealPhase : BuilderPhase {
         print("\(active.id) will play \(played)")
     }
 
-    private func playCards(_ cards: Set<Int>, forPlayer player: BuilderPlayer, context: BuildersBoard) -> BuilderHand {
+    private func playCards(_ cards: Set<Int>, forPlayer player: BuilderPlayer, context: BuildersBoard) -> BuildersHand? {
         // Split into kept and played
         let enumeratedHand = player.hand.enumerated()
         let (kept, played) = enumeratedHand.reduce(into: ([], []), {(reducer: inout HandReducer, playable) in
@@ -95,6 +112,10 @@ public final class DealPhase : BuilderPhase {
             }
         })
 
+        for playedCard in played where !playedCard.canPlay(inContext: context, byPlayer: player) {
+            return nil
+        }
+
         player.hand = kept
         context.cardsInPlay[player, default: []].append(contentsOf: played)
 
@@ -102,13 +123,17 @@ public final class DealPhase : BuilderPhase {
     }
 
     private func getCardsToPlay(fromPlayer player: BuilderPlayer) -> Set<Int> {
-        let input = player.getInput(withDialog: "Your hand: \(player.hand)\n", "Which cards would you like to play? ")
+        let input = player.getInput(withDialog: "Your hand: \n",
+                                    player.hand.prettyPrinted(),
+                                    "Which cards would you like to play? ")
 
         return parseInputCards(input: input, player: player)
     }
 
     private func getCardsToDiscard(fromPlayer player: BuilderPlayer) -> Set<Int> {
-        let input = player.getInput(withDialog: "Your hand \(player.hand)\n", "Would you like discard something?")
+        let input = player.getInput(withDialog: "Your hand: \n",
+                                    player.hand.prettyPrinted(),
+                                    "Would you like discard something?")
 
         return parseInputCards(input: input, player: player)
     }

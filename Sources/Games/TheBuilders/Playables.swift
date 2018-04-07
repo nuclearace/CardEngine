@@ -5,14 +5,17 @@
 import Foundation
 import Kit
 
-
-/// A hand of BuildersPlayables
-internal typealias BuilderHand = [BuildersPlayable]
-
 /// Represents a playable item in the The Builders.
 public protocol BuildersPlayable : Playable {
     /// The type of this playable.
     var playType: BuildersPlayType { get }
+
+    // TODO this should probably be defined on `Playable` but that needs associated types setup
+    /// Returns whether or not this playable can be played by player.
+    ///
+    /// - parameter inContext: The context this playable is being used in.
+    /// - parameter byPlayer: The player playing.
+    func canPlay(inContext context: BuildersBoard, byPlayer player: BuilderPlayer) -> Bool
 }
 
 /// Represents the types of playables.
@@ -25,5 +28,18 @@ public enum BuildersPlayType {
 
     /// An accident playable. These cards affect the status of the game. Such as injuring workers or causing strikes.
     case accident
+}
+
+/// A hand of BuildersPlayables
+internal typealias BuildersHand = [BuildersPlayable]
+
+extension Array where Element == BuildersPlayable {
+    var workers: [Worker] {
+        return map({ $0 as? Worker }).compactMap({ $0 })
+    }
+
+    func prettyPrinted() -> String {
+        return enumerated().map({ "\($0.offset + 1): \($0.element)\n" }).joined()
+    }
 }
 
