@@ -112,6 +112,7 @@ public final class DealPhase : BuilderPhase {
             }
         })
 
+        // Check that all cards played are allowed
         for playedCard in played where !playedCard.canPlay(inContext: context, byPlayer: player) {
             return nil
         }
