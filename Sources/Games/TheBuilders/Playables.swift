@@ -38,6 +38,10 @@ extension Array where Element == BuildersPlayable {
         return map({ $0 as? Worker }).compactMap({ $0 })
     }
 
+    var materials: [Material] {
+        return map({ $0 as? Material }).compactMap({ $0 })
+    }
+
     func prettyPrinted() -> String {
         return enumerated().map({ "\($0.offset + 1): \($0.element)\n" }).joined()
     }

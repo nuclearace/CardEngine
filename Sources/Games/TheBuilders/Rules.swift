@@ -69,7 +69,6 @@ public class BuilderPhase : Phase {
     }
 }
 
-// TODO Allow discard
 /// During the deal phase the player picks what playables they went to put into the game.
 ///
 /// The deal phase is followed by the build phase.
@@ -178,8 +177,26 @@ public final class DrawPhase : BuilderPhase {
 
         print("\(context.activePlayer.id) should draw some cards")
 
-        for _ in 0..<BuildersRules.cardsNeededInHand-active.hand.count {
-            active.hand.append(Worker.getInstance())
+        let needed = BuildersRules.cardsNeededInHand-active.hand.count
+        var drawn = 0
+
+        while drawn < needed {
+            let input = active.getInput(withDialog: "Draw:\n", "1: Worker\n2: Material\n")
+
+            guard let choice = Int(input) else {
+                continue
+            }
+
+            switch choice {
+            case 1:
+                active.hand.append(Worker.getInstance())
+            case 2:
+                active.hand.append(Material.getInstance())
+            default:
+                continue
+            }
+
+            drawn += 1
         }
     }
 }

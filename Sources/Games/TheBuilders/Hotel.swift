@@ -15,16 +15,36 @@ public struct Hotel {
     public private(set) var floorsBuilt = 0
 
     // TODO The rules should determine the criteria for a floor being built
-    // TODO This is great and all, you can't build a floor without workers, but you also need some material
     /// Calculates whether or not this player has built any new floors.
     ///
     /// This removes cards from `fromPlayedCards` that were used to build a floor.
     internal mutating func calculateNewFloors(fromPlayedCards cards: inout BuildersHand) {
-        let numWorks = cards.map({ $0 is Worker }).reduce(0, { $0 + ($1 ? 1 : 0) })
+        // TODO do we need to check for workers? Or is that guarded during play and accident?
+        var metal = false
+        var wiring = false
+        var insulation = false
+        var glass = false
 
-        if numWorks >= 5 {
+        for material in cards.materials {
+            switch material.blockType {
+            case .insulation:
+                insulation = true
+            case .glass:
+                glass = true
+            case .metal:
+                metal = true
+            case .wiring:
+                wiring = true
+            case .wood:
+                // TODO wood and other score boosters
+                continue
+            }
+        }
+
+        // TODO nail down what is required
+        if metal && insulation && glass && wiring {
             floorsBuilt += 1
-            cards = BuildersHand(cards.dropFirst(5))
+            cards.removeAll()
         }
     }
 }
