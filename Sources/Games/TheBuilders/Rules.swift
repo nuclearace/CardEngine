@@ -77,10 +77,13 @@ public final class DealPhase : BuilderPhase {
 
     public override func executePhase(withContext context: BuildersBoard) {
         let active: BuilderPlayer = context.activePlayer
+
+        active.print("Your cards in play:\n", context.cardsInPlay[active, default: []].prettyPrinted())
+
         let cardsToPlay = getCardsToPlay(fromPlayer: active)
 
         guard let played = playCards(cardsToPlay, forPlayer: active, context: context) else {
-            print("You played a card that you currently are unable to play")
+            active.print("You played a card that you currently are unable to play\n")
 
             return executePhase(withContext: context)
         }
@@ -91,7 +94,7 @@ public final class DealPhase : BuilderPhase {
         // TODO Should they have to play something?
         // FIXME this should probably have a depth counter to avoid someone causing max recursion
         guard cardsToPlay.count > 0 || cardsToDiscard.count > 0 else {
-            print("You must do something!")
+            active.print("You must do something!\n")
 
             return executePhase(withContext: context)
         }

@@ -28,11 +28,23 @@ public protocol UserInteractive {
     /// The type returned from interactions
     associatedtype InteractionType = String
 
+    /// Prints some dialog to the player
+    func print(_ out: String...)
+
     /// Gets some input from the user.
     ///
     /// - parameter withDialog: The text to display to the user.
     /// - returns: The input from the user.
     func getInput(withDialog dialog: String...) -> InteractionType
+}
+
+public extension UserInteractive {
+    /// Prints some dialog to the player
+    public func print(_ out: String...) {
+        for o in out {
+            Swift.print(o, terminator: "")
+        }
+    }
 }
 
 public extension UserInteractive where InteractionType == String {
@@ -44,7 +56,7 @@ public extension UserInteractive where InteractionType == String {
     /// - returns: The input from the user.
     public func getInput(withDialog dialog: String...) -> InteractionType {
         for str in dialog {
-            print(str, terminator: "")
+            Swift.print(str, terminator: "")
         }
 
         return readLine(strippingNewline: true) ?? ""
