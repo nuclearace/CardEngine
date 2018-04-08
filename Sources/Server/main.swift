@@ -1,24 +1,31 @@
 import Service
 import Vapor
 import Foundation
+import WebSocket
+
+struct HelloResponder: HTTPResponder {
+    func respond(to request: HTTPRequest, on worker: Worker) -> EventLoopFuture<HTTPResponse> {
+        let res = HTTPResponse(status: .ok, body: HTTPBody(string: "Hello, world!"))
+
+        return Future.map(on: worker) { res }
+    }
+}
 
 // The contents of main are wrapped in a do/catch block because any errors that get raised to the top level will crash Xcode
 do {
-    var config = Config.default()
-    var env = try Environment.detect()
-    var services = Services.default()
+    let group = MultiThreadedEventLoopGroup(numThreads: Int(Environment.get("NUM_THREADS") ?? "1") ?? 1)
 
-    try configure(&config, &env, &services)
+    let server = try HTTPServer.start(
+            hostname: Environment.get("HOST") ?? "127.0.0.1",
+            port: 8080,
+            responder: HelloResponder(),
+            upgraders: [ws],
+            on: group
+    ) {error in
+        return
+    }.wait()
 
-    let app = try Application(
-        config: config,
-        environment: env,
-        services: services
-    )
-
-    try boot(app)
-
-    try app.run()
+    try server.onClose.wait()
 } catch {
     print(error)
     exit(1)
