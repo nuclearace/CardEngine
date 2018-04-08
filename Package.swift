@@ -11,12 +11,12 @@ let package = Package(
     ],
     dependencies: [
         // Dependencies declare other packages that this package depends on.
-        // .package(url: /* package url */, from: "1.0.0"),
+        .package(url: "https://github.com/vapor/vapor.git", from : "3.0.0-rc.2")
     ],
     targets: [
         .target(name: "Runner", dependencies: ["Kit", "Games"]),
         .target(name: "Kit"),
         .target(name: "Games", dependencies: ["Kit"]),
-        .target(name: "Server")
+        .target(name: "Server", dependencies: ["Vapor"])
     ]
 )
