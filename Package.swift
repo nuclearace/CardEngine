@@ -11,12 +11,13 @@ let package = Package(
     ],
     dependencies: [
         // Dependencies declare other packages that this package depends on.
-        .package(url: "https://github.com/vapor/vapor.git", from : "3.0.0-rc.2")
+        .package(url: "https://github.com/vapor/vapor.git", from : "3.0.0-rc.2"),
+        .package(url: "https://github.com/apple/swift-nio.git", from: "1.0.0")
     ],
     targets: [
-        .target(name: "Runner", dependencies: ["Kit", "Games"]),
-        .target(name: "Kit"),
-        .target(name: "Games", dependencies: ["Kit"]),
-        .target(name: "Server", dependencies: ["Vapor"])
+        .target(name: "Runner", dependencies: ["Kit", "Games", "NIO"]),
+        .target(name: "Kit", dependencies: ["NIO"]),
+        .target(name: "Games", dependencies: ["Kit", "NIO"]),
+        .target(name: "Server", dependencies: ["Vapor", "Games"])
     ]
 )

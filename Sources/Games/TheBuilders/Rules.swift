@@ -3,6 +3,7 @@
 //
 
 import Foundation
+import NIO
 import Kit
 
 /// The game of The Builders.
@@ -13,25 +14,25 @@ public struct BuildersRules : GameRules {
     public unowned let context: BuildersBoard
 
     /// What a turn looks like in this game. A turn consists of a set of phases that are executed in order.
-    public let turn = [DealPhase(), BuildPhase(), DrawPhase()]
+    public private(set) var turn: [BuilderPhase]
 
     private var moveCount = 0
 
     public init(context: BuildersBoard) {
         self.context = context
+        self.turn = [DealPhase(context: context), DrawPhase(context: context), BuildPhase(context: context)]
     }
 
     /// Executes player's turn.
     ///
     /// - parameter forPLayer: The player whose turn it is.
-    public mutating func executeTurn(forPlayer player: BuilderPlayer) {
+    public mutating func executeTurn(forPlayer player: BuilderPlayer) -> EventLoopFuture<()> {
         print("\(player.id)'s turn")
 
-        for phase in turn {
-            phase.executePhase(withContext: context)
-        }
-
         moveCount += 1
+
+        // TODO Does it make sense to have a turn when we just do this?
+        return turn[0] >>~ turn[1] >>~ turn[2] >>~ EndPhase(context: context)
     }
 
     /// Calculates whether or not this game is over, based on some criteria.
@@ -61,11 +62,38 @@ public struct BuildersRules : GameRules {
     }
 }
 
+infix operator >>~ : PhasePrecedenceGroup
+
+precedencegroup PhasePrecedenceGroup {
+    associativity: left
+}
+
 public class BuilderPhase : Phase {
     public typealias RulesType = BuildersRules
 
-    public func executePhase(withContext context: RulesType.ContextType) {
+    private unowned let context: BuildersBoard
+
+    fileprivate init(context: BuildersBoard) {
+        self.context = context
+    }
+
+    public func executePhase(withContext context: BuildersBoard) -> EventLoopFuture<()> {
         fatalError("BuilderPhase must be subclassed")
+    }
+
+    fileprivate func doPhase() -> EventLoopFuture<()> {
+        return executePhase(withContext: context)
+    }
+
+    // TODO Maybe make this available on kit?
+    fileprivate static func >>~ (lhs: BuilderPhase, rhs: BuilderPhase) -> EventLoopFuture<BuilderPhase> {
+        return lhs.doPhase().then({_ in rhs.context.runLoop.newSucceededFuture(result: rhs) })
+    }
+
+    fileprivate static func >>~ (lhs: EventLoopFuture<BuilderPhase>, rhs: BuilderPhase) -> EventLoopFuture<BuilderPhase> {
+        return lhs.then {phase in
+            return phase.doPhase().then({_ in rhs.context.runLoop.newSucceededFuture(result: rhs) })
+        }
     }
 }
 
@@ -75,31 +103,71 @@ public class BuilderPhase : Phase {
 public final class DealPhase : BuilderPhase {
     private typealias HandReducer = (kept: BuildersHand, play: BuildersHand)
 
-    public override func executePhase(withContext context: BuildersBoard) {
+    public override func executePhase(withContext context: BuildersBoard) -> EventLoopFuture<()> {
         let active: BuilderPlayer = context.activePlayer
+
+        var playedSomething = false
+        var discardedSomething = false
 
         active.print("Your cards in play:\n", context.cardsInPlay[active, default: []].prettyPrinted())
 
-        let cardsToPlay = getCardsToPlay(fromPlayer: active)
+        return getCardsToPlay(fromPlayer: active).then {cards -> EventLoopFuture<()> in
+            // Get the cards to play
+            guard let played = self.playCards(cards, forPlayer: active, context: context) else {
+                active.print("You played a card that you currently are unable to play\n")
 
-        guard let played = playCards(cardsToPlay, forPlayer: active, context: context) else {
-            active.print("You played a card that you currently are unable to play\n")
+                return self.executePhase(withContext: context)
+            }
 
-            return executePhase(withContext: context)
+            playedSomething = played.count > 0
+
+            return context.runLoop.newSucceededFuture(result: ())
+        }.then {future -> EventLoopFuture<Set<Int>> in
+            // Get cards to discard
+            return self.getCardsToDiscard(fromPlayer: active)
+        }.then {cards -> EventLoopFuture<()> in
+            // Discard those cards
+            discardedSomething = cards.count > 0
+
+            active.hand = active.hand.enumerated().filter({ !cards.contains($0.offset + 1) }).map({ $0.element })
+
+            // TODO Should they have to play something?
+            guard playedSomething || discardedSomething else {
+                active.print("You must do something!\n")
+
+                return self.executePhase(withContext: context)
+            }
+
+            return context.runLoop.newSucceededFuture(result: ())
         }
+    }
 
-        let cardsToDiscard = getCardsToDiscard(fromPlayer: active)
-        active.hand = active.hand.enumerated().filter({ !cardsToDiscard.contains($0.offset + 1) }).map({ $0.element })
+    private func getCardsToPlay(fromPlayer player: BuilderPlayer) -> EventLoopFuture<Set<Int>> {
+        let input = player.getInput(withDialog: "Your hand: \n",
+                                    player.hand.prettyPrinted(),
+                                    "Which cards would you like to play? ")
 
-        // TODO Should they have to play something?
-        // FIXME this should probably have a depth counter to avoid someone causing max recursion
-        guard cardsToPlay.count > 0 || cardsToDiscard.count > 0 else {
-            active.print("You must do something!\n")
+        return input.map({inputString in
+            return self.parseInputCards(input: inputString, player: player)
+        })
+    }
 
-            return executePhase(withContext: context)
-        }
+    private func getCardsToDiscard(fromPlayer player: BuilderPlayer) -> EventLoopFuture<Set<Int>> {
+        let input = player.getInput(withDialog: "Your hand: \n",
+                                    player.hand.prettyPrinted(),
+                                    "Would you like discard something?")
 
-        print("\(active.id) will play \(played)")
+        return input.map({inputString in
+            return self.parseInputCards(input: inputString, player: player)
+        })
+    }
+
+    private func parseInputCards(input: String, player: BuilderPlayer) -> Set<Int> {
+        return Set(input.components(separatedBy: ",")
+                        .map({ $0.replacingOccurrences(of: " ", with: "") })
+                        .map(Int.init)
+                        .compactMap({ $0 })
+                        .filter({ $0 > 0 && $0 <= player.hand.count }))
     }
 
     private func playCards(_ cards: Set<Int>, forPlayer player: BuilderPlayer, context: BuildersBoard) -> BuildersHand? {
@@ -124,42 +192,18 @@ public final class DealPhase : BuilderPhase {
 
         return played
     }
-
-    private func getCardsToPlay(fromPlayer player: BuilderPlayer) -> Set<Int> {
-        let input = player.getInput(withDialog: "Your hand: \n",
-                                    player.hand.prettyPrinted(),
-                                    "Which cards would you like to play? ")
-
-        return parseInputCards(input: input, player: player)
-    }
-
-    private func getCardsToDiscard(fromPlayer player: BuilderPlayer) -> Set<Int> {
-        let input = player.getInput(withDialog: "Your hand: \n",
-                                    player.hand.prettyPrinted(),
-                                    "Would you like discard something?")
-
-        return parseInputCards(input: input, player: player)
-    }
-
-    private func parseInputCards(input: String, player: BuilderPlayer) -> Set<Int> {
-        return Set(input.components(separatedBy: ",")
-                        .map({ $0.replacingOccurrences(of: " ", with: "") })
-                        .map(Int.init)
-                        .compactMap({ $0 })
-                        .filter({ $0 > 0 && $0 <= player.hand.count }))
-    }
 }
 
 /// During the build the phase, we calculate whether or nothing player built a new floor or not.
 ///
 /// The build phase is followed by the draw phase.
 public final class BuildPhase : BuilderPhase {
-    public override func executePhase(withContext context: BuildersBoard) {
+    public override func executePhase(withContext context: BuildersBoard) -> EventLoopFuture<()> {
         let active: BuilderPlayer = context.activePlayer
         var hotel = context.hotels[active, default: Hotel()]
 
         guard var hand = context.cardsInPlay[active] else {
-            return
+            return context.runLoop.newSucceededFuture(result: ())
         }
 
         defer {
@@ -168,6 +212,8 @@ public final class BuildPhase : BuilderPhase {
         }
 
         hotel.calculateNewFloors(fromPlayedCards: &hand)
+
+        return context.runLoop.newSucceededFuture(result: ())
     }
 }
 
@@ -175,19 +221,22 @@ public final class BuildPhase : BuilderPhase {
 ///
 /// The draw phase concludes a turn.
 public final class DrawPhase : BuilderPhase {
-    public override func executePhase(withContext context: BuildersBoard) {
+    public override func executePhase(withContext context: BuildersBoard) -> EventLoopFuture<()> {
         let active: BuilderPlayer = context.activePlayer
 
         print("\(context.activePlayer.id) should draw some cards")
 
-        let needed = BuildersRules.cardsNeededInHand-active.hand.count
-        var drawn = 0
+        return getCards(needed: BuildersRules.cardsNeededInHand-active.hand.count, drawn: 0, context: context)
+    }
 
-        while drawn < needed {
-            let input = active.getInput(withDialog: "Draw:\n", "1: Worker\n2: Material\n")
+    private func getCards(needed: Int, drawn: Int, context: BuildersBoard) -> EventLoopFuture<()> {
+        guard drawn < needed else { return context.runLoop.newSucceededFuture(result: ()) }
 
+        let active: BuilderPlayer = context.activePlayer
+
+        return active.getInput(withDialog: "Draw:\n", "1: Worker\n2: Material\n").then {input -> EventLoopFuture<()> in
             guard let choice = Int(input) else {
-                continue
+                return self.getCards(needed: needed, drawn: drawn, context: context)
             }
 
             switch choice {
@@ -196,10 +245,22 @@ public final class DrawPhase : BuilderPhase {
             case 2:
                 active.hand.append(Material.getInstance())
             default:
-                continue
+                return self.getCards(needed: needed, drawn: drawn, context: context)
             }
 
-            drawn += 1
+            return self.getCards(needed: needed, drawn: drawn + 1, context: context)
+        }
+    }
+}
+
+public final class EndPhase : BuilderPhase {
+    public override func executePhase(withContext context: BuildersBoard) -> EventLoopFuture<()> {
+        return context.runLoop.newSucceededFuture(result: ())
+    }
+
+    fileprivate static func >>~ (lhs: EventLoopFuture<BuilderPhase>, rhs: EndPhase) -> EventLoopFuture<()> {
+        return lhs.then {phase in
+            return phase.doPhase().then({_ in rhs.doPhase() })
         }
     }
 }

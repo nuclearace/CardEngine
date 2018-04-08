@@ -7,6 +7,8 @@ import Foundation
 /// Represents the rules of a game. This consists of what a turn looks like in the game, as well as determining when a
 /// game is over.
 public protocol GameRules {
+    associatedtype TurnReturnType
+
     associatedtype ContextType: GameContext where ContextType.RulesType == Self
     associatedtype PhaseType: Phase where PhaseType.RulesType == Self
     associatedtype PlayerType: Player where PlayerType.RulesType == Self
@@ -20,7 +22,7 @@ public protocol GameRules {
     /// Executes player's turn.
     ///
     /// - parameter forPlayer: The player whose turn it is.
-    mutating func executeTurn(forPlayer player: PlayerType)
+    mutating func executeTurn(forPlayer player: PlayerType) -> TurnReturnType
 
     /// Calculates whether or not this game is over, based on some criteria.
     ///
@@ -33,11 +35,13 @@ public protocol GameRules {
 
 /// Phases represent different parts of a turn. During a phase different actions can be taken.
 public protocol Phase {
+    associatedtype PhaseReturnType
+
     /// The type of rules this phase applies to.
     associatedtype RulesType: GameRules where RulesType.PhaseType == Self
 
     /// Run this phase with the given context.
     ///
     /// - parameter withContext: The context with which to execute in.
-    mutating func executePhase(withContext context: RulesType.ContextType)
+    mutating func executePhase(withContext context: RulesType.ContextType) -> PhaseReturnType
 }

@@ -3,6 +3,7 @@
 //
 
 import Foundation
+import NIO
 
 /// Represents a user.
 public protocol Player : AnyObject, Hashable {
@@ -22,43 +23,33 @@ extension Player {
     }
 }
 
+/// Says that a type will be able to interface with a user.
+public protocol UserInterfacer {
+    /// The promise to the game that some input will be returned. =
+    var responsePromise: EventLoopPromise<String>? { get }
+
+    /// Sends a string to the user.
+    func send(_ str: String)
+
+    /// Gets some input from this user.
+    func getInput(withDialog dialog: String, withPromise promise: EventLoopPromise<String>)
+}
+
 // TODO possibly rename this
 /// Protocol that declares the interface for interacting with users
-public protocol UserInteractive {
+public protocol InteractablePlayer : Player {
     /// The type returned from interactions
     associatedtype InteractionType = String
 
-    /// Prints some dialog to the player
-    func print(_ out: String...)
+    /// How the game interfaces with this player.
+    var interfacer: UserInterfacer { get }
+
+    /// Prints some dialog to the player.
+    func print(_ dialog: String...)
 
     /// Gets some input from the user.
     ///
     /// - parameter withDialog: The text to display to the user.
     /// - returns: The input from the user.
     func getInput(withDialog dialog: String...) -> InteractionType
-}
-
-public extension UserInteractive {
-    /// Prints some dialog to the player
-    public func print(_ out: String...) {
-        for o in out {
-            Swift.print(o, terminator: "")
-        }
-    }
-}
-
-public extension UserInteractive where InteractionType == String {
-    /// Default implementation. Prints to stdout
-    ///
-    /// **NOTE**: Newlines are not added to prints.
-    ///
-    /// - parameter withDialog: The text to display to the user.
-    /// - returns: The input from the user.
-    public func getInput(withDialog dialog: String...) -> InteractionType {
-        for str in dialog {
-            Swift.print(str, terminator: "")
-        }
-
-        return readLine(strippingNewline: true) ?? ""
-    }
 }

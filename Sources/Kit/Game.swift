@@ -9,8 +9,11 @@ public protocol GameContext : AnyObject {
     /// The type of game this context is playing.
     associatedtype RulesType: GameRules where RulesType.ContextType == Self
 
+    /// The name of this game.
+    static var name: String { get }
+
     /// The player who is currently making moves
-    var activePlayer: RulesType.PlayerType { get set }
+    var activePlayer: RulesType.PlayerType { get }
 
     /// The players in this game.
     var players: [RulesType.PlayerType] { get }
