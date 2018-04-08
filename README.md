@@ -1,3 +1,3 @@
-# TheBuilders
+# CardEngine
 
-A super simple card game where you compete with other players to build the best hotel.
+A simple server that lets players play various card and board games.
