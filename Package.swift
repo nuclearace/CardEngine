@@ -6,7 +6,8 @@ import PackageDescription
 let package = Package(
     name: "TheBuilders",
     products: [
-        .executable(name: "Runner", targets: ["Runner"])
+        .executable(name: "Runner", targets: ["Runner"]),
+        .executable(name: "Server", targets: ["Server"])
     ],
     dependencies: [
         // Dependencies declare other packages that this package depends on.
@@ -15,6 +16,7 @@ let package = Package(
     targets: [
         .target(name: "Runner", dependencies: ["Kit", "Games"]),
         .target(name: "Kit"),
-        .target(name: "Games", dependencies: ["Kit"])
+        .target(name: "Games", dependencies: ["Kit"]),
+        .target(name: "Server")
     ]
 )
