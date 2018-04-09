@@ -3,23 +3,31 @@
 //
 
 import Foundation
+import Games
 import NIO
 import Kit
 import WebSocket
 
-class WebSocketInterfacer : UserInterfacer {
+class WebSocketInterfacer<T: GameContext> : UserInterfacer {
     private(set) var responsePromise: EventLoopPromise<String>?
 
+    weak var game: T!
     let ws: WebSocket
 
-    init(ws: WebSocket) {
+    init(ws: WebSocket, game: T) {
         self.ws = ws
+        self.game = game
 
         // Now that they're in a game, all input should be considered as fulfilling a promise.
         self.ws.onText {[weak self] text in
             guard let this = self else { return }
 
             this.responsePromise?.succeed(result: text)
+        }
+
+        self.ws.onClose {
+            game.stopGame()
+            gameStopped(game: game)
         }
     }
 

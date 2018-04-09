@@ -40,6 +40,43 @@ public final class BuildersBoard : GameContext {
         self.rules = BuildersRules(context: self)
     }
 
+    deinit {
+        print("Game is dying")
+    }
+
+    @discardableResult
+    private func nextTurn() -> EventLoopFuture<()> {
+        // FIXME Notify who one the game
+        guard !rules.isGameOver() else {
+            for player in players {
+                player.print("Game over!")
+            }
+
+            return runLoop.newSucceededFuture(result: ())
+        }
+
+        let death: EventLoopFuture<()> = runLoop.newFailedFuture(error: BuildersError.gameDeath)
+
+        return rules.executeTurn(forPlayer: activePlayer).then({[weak self] void -> EventLoopFuture<()> in
+            guard let this = self else { return death }
+
+            this.players = Array(this.players[1...]) + [this.activePlayer]
+
+            return this.nextTurn()
+        }).thenIfError {[weak self] error in
+            guard let this = self else { return death }
+
+            switch error {
+            case let builderError as BuildersError where builderError == .gameDeath:
+                return death
+            case let builderError as BuildersError where builderError == .badPlay:
+                return this.nextTurn()
+            default:
+                fatalError("Unknown error")
+            }
+        }
+    }
+
     /// Sets up this game with players.
     ///
     /// - parameter players: The players.
@@ -52,33 +89,15 @@ public final class BuildersBoard : GameContext {
     /// Starts this game.
     public func startGame() {
         rules.setupGame()
-
-        // FIXME strong capture
         _ = runLoop.scheduleTask(in: .milliseconds(1)) {
-                print("start first turn")
-                self.nextTurn()
+            print("start first turn")
+            self.nextTurn()
         }
     }
 
-    @discardableResult
-    private func nextTurn() -> EventLoopFuture<()> {
-        // FIXME Notify someone this game is done
-        guard !rules.isGameOver() else {
-            for player in players {
-                player.print("Game over!")
-            }
-
-            return runLoop.newSucceededFuture(result: ())
-        }
-
-        // FIXME strong capture
-        return rules.executeTurn(forPlayer: activePlayer).then({void -> EventLoopFuture<()> in
-            self.players = Array(self.players[1...]) + [self.activePlayer]
-
-            return self.nextTurn()
-        }).thenIfError {error in
-            // TODO if we every more errors, handle them here
-            return self.nextTurn()
+    public func stopGame() {
+        for player in players {
+            player.interfacer.responsePromise?.fail(error: BuildersError.gameDeath)
         }
     }
 }

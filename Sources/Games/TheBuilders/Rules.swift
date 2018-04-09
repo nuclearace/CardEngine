@@ -77,6 +77,10 @@ public class BuilderPhase : Phase {
         self.context = context
     }
 
+    deinit {
+        print("\(type(of: self)) is dying")
+    }
+
     public func executePhase(withContext context: BuildersBoard) -> EventLoopFuture<()> {
         fatalError("BuilderPhase must be subclassed")
     }
@@ -111,6 +115,8 @@ public final class DealPhase : BuilderPhase {
 
         active.print("Your cards in play:\n", context.cardsInPlay[active, default: []].prettyPrinted())
 
+        // This is are strong captures, but if something happens, like a user disconnects, the promise will communicate
+        // backthat
         return getCardsToPlay(fromPlayer: active).then {cards -> EventLoopFuture<()> in
             // Get the cards to play
             guard let played = self.playCards(cards, forPlayer: active, context: context) else {
@@ -271,4 +277,7 @@ public final class EndPhase : BuilderPhase {
 enum BuildersError : Error {
     /// A bad hand was played
     case badPlay
+
+    /// The game has gone and died.
+    case gameDeath
 }

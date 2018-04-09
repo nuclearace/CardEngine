@@ -30,7 +30,7 @@ public final class BuilderPlayer : InteractablePlayer {
     }
 
     deinit {
-        print("Player \(id) is dying")
+        Swift.print("Player \(id) is dying")
     }
 
     /// Prints some dialog to the player.

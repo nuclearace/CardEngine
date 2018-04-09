@@ -4,15 +4,16 @@
 
 import Foundation
 import Dispatch
-import HTTP
 import Games
 import NIO
+import Kit
 import Vapor
 import WebSocket
 
 // TODO lobby
 
-private var builderGames = [BuildersBoard]()
+// FIXME this is fugly
+private var builderGames = [AnyObject]()
 private var waitingForBuilders = [WebSocket]()
 
 private let gameLocker = DispatchSemaphore(value: 1)
@@ -59,8 +60,8 @@ private func startBuildersGame() {
 
     let board = BuildersBoard(runLoop: MultiThreadedEventLoopGroup.currentEventLoop!)
     let players = [
-        BuilderPlayer(context: board, interfacer: WebSocketInterfacer(ws: waitingForBuilders[0])),
-        BuilderPlayer(context: board, interfacer: WebSocketInterfacer(ws: waitingForBuilders[1]))
+        BuilderPlayer(context: board, interfacer: WebSocketInterfacer(ws: waitingForBuilders[0], game:  board)),
+        BuilderPlayer(context: board, interfacer: WebSocketInterfacer(ws: waitingForBuilders[1], game: board))
     ]
 
     board.setupPlayers(players)
@@ -68,4 +69,13 @@ private func startBuildersGame() {
 
     builderGames.append(board)
     waitingForBuilders = Array(waitingForBuilders.dropFirst(2))
+}
+
+// FIXME This is fugly
+func gameStopped(game: AnyObject) {
+    defer { gameLocker.signal() }
+
+    gameLocker.wait()
+
+    builderGames = builderGames.filter({ $0 !== game })
 }

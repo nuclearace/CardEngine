@@ -23,4 +23,7 @@ public protocol GameContext : AnyObject {
 
     /// Starts this game.
     func startGame()
+
+    /// Halts this game.
+    func stopGame()
 }
