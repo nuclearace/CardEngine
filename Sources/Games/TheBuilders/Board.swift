@@ -64,13 +64,21 @@ public final class BuildersBoard : GameContext {
     private func nextTurn() -> EventLoopFuture<()> {
         // FIXME Notify someone this game is done
         guard !rules.isGameOver() else {
+            for player in players {
+                player.print("Game over!")
+            }
+
             return runLoop.newSucceededFuture(result: ())
         }
 
         // FIXME strong capture
         return rules.executeTurn(forPlayer: activePlayer).then({void -> EventLoopFuture<()> in
             self.players = Array(self.players[1...]) + [self.activePlayer]
+
             return self.nextTurn()
-        })
+        }).thenIfError {error in
+            // TODO if we every more errors, handle them here
+            return self.nextTurn()
+        }
     }
 }

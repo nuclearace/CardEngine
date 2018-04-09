@@ -116,7 +116,7 @@ public final class DealPhase : BuilderPhase {
             guard let played = self.playCards(cards, forPlayer: active, context: context) else {
                 active.print("You played a card that you currently are unable to play\n")
 
-                return self.executePhase(withContext: context)
+                return context.runLoop.newFailedFuture(error: BuildersError.badPlay)
             }
 
             playedSomething = played.count > 0
@@ -135,7 +135,7 @@ public final class DealPhase : BuilderPhase {
             guard playedSomething || discardedSomething else {
                 active.print("You must do something!\n")
 
-                return self.executePhase(withContext: context)
+                return context.runLoop.newFailedFuture(error: BuildersError.badPlay)
             }
 
             return context.runLoop.newSucceededFuture(result: ())
@@ -263,4 +263,12 @@ public final class EndPhase : BuilderPhase {
             return phase.doPhase().then({_ in rhs.doPhase() })
         }
     }
+}
+
+// MARK: Errors
+
+/// Errors that can occur during a game
+enum BuildersError : Error {
+    /// A bad hand was played
+    case badPlay
 }
