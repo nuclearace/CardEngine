@@ -14,7 +14,7 @@ public struct BuildersRules : GameRules {
     public unowned let context: BuildersBoard
 
     /// What a turn looks like in this game. A turn consists of a set of phases that are executed in order.
-    public private(set) var turn: [BuilderPhase]
+    public let turn: [BuilderPhase]
 
     private var moveCount = 0
 
