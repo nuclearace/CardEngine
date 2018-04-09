@@ -122,7 +122,7 @@ public final class DealPhase : BuilderPhase {
             playedSomething = played.count > 0
 
             return context.runLoop.newSucceededFuture(result: ())
-        }.then {future -> EventLoopFuture<Set<Int>> in
+        }.then {_ -> EventLoopFuture<Set<Int>> in
             // Get cards to discard
             return self.getCardsToDiscard(fromPlayer: active)
         }.then {cards -> EventLoopFuture<()> in

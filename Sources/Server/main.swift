@@ -14,11 +14,9 @@ struct HelloResponder : HTTPResponder {
 }
 
 let server: HTTPServer
-let group: MultiThreadedEventLoopGroup
+let group = MultiThreadedEventLoopGroup(numThreads: System.coreCount)
 
 do {
-    group = MultiThreadedEventLoopGroup(numThreads: Int(Environment.get("NUM_THREADS") ?? "1") ?? 1)
-
     server = try HTTPServer.start(
             hostname: Environment.get("HOST") ?? "127.0.0.1",
             port: 8080,
