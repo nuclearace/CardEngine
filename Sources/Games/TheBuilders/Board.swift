@@ -89,7 +89,8 @@ public final class BuildersBoard : GameContext {
     /// Starts this game.
     public func startGame() {
         rules.setupGame()
-        _ = runLoop.scheduleTask(in: .milliseconds(1)) {
+
+        runLoop.execute {
             print("start first turn")
             self.nextTurn()
         }
