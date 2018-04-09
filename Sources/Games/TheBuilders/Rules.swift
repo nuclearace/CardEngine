@@ -115,8 +115,8 @@ public final class DealPhase : BuilderPhase {
 
         active.print("Your cards in play:\n", context.cardsInPlay[active, default: []].prettyPrinted())
 
-        // This is are strong captures, but if something happens, like a user disconnects, the promise will communicate
-        // backthat
+        // These are strong captures, but if something happens, like a user disconnects, the promise will communicate
+        // communicate a gameDeath error
         return getCardsToPlay(fromPlayer: active).then {cards -> EventLoopFuture<()> in
             // Get the cards to play
             guard let played = self.playCards(cards, forPlayer: active, context: context) else {
