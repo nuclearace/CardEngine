@@ -1,11 +1,8 @@
+import CoreFoundation
 import Foundation
 import Kit
 import NIO
 import Games
-
-#if os(Linux)
-fatalError("Runner not written for linux yet")
-#endif
 
 let group = MultiThreadedEventLoopGroup(numThreads: 1)
 let loop = group.next()
