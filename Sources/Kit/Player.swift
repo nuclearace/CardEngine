@@ -45,7 +45,7 @@ public protocol InteractablePlayer : Player {
     var interfacer: UserInterfacer { get }
 
     /// Prints some dialog to the player.
-    func print(_ dialog: String...)
+    func show(_ dialog: String...)
 
     /// Gets some input from the user.
     ///

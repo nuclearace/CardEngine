@@ -49,7 +49,7 @@ public final class BuildersBoard : GameContext {
         // FIXME Notify who one the game
         guard !rules.isGameOver() else {
             for player in players {
-                player.print("Game over!")
+                player.show("Game over!")
             }
 
             return runLoop.newSucceededFuture(result: ())

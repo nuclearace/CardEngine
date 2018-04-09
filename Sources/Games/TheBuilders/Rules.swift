@@ -113,14 +113,14 @@ public final class DealPhase : BuilderPhase {
         var playedSomething = false
         var discardedSomething = false
 
-        active.print("Your cards in play:\n", context.cardsInPlay[active, default: []].prettyPrinted())
+        active.show("Your cards in play:\n", context.cardsInPlay[active, default: []].prettyPrinted())
 
         // These are strong captures, but if something happens, like a user disconnects, the promise will communicate
         // communicate a gameDeath error
         return getCardsToPlay(fromPlayer: active).then {cards -> EventLoopFuture<()> in
             // Get the cards to play
             guard let played = self.playCards(cards, forPlayer: active, context: context) else {
-                active.print("You played a card that you currently are unable to play\n")
+                active.show("You played a card that you currently are unable to play\n")
 
                 return context.runLoop.newFailedFuture(error: BuildersError.badPlay)
             }
@@ -139,7 +139,7 @@ public final class DealPhase : BuilderPhase {
 
             // TODO Should they have to play something?
             guard playedSomething || discardedSomething else {
-                active.print("You must do something!\n")
+                active.show("You must do something!\n")
 
                 return context.runLoop.newFailedFuture(error: BuildersError.badPlay)
             }
