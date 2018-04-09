@@ -96,8 +96,10 @@ public final class BuildersBoard : GameContext {
     }
 
     public func stopGame() {
-        for player in players {
-            player.interfacer.responsePromise?.fail(error: BuildersError.gameDeath)
+        runLoop.execute {
+            for player in self.players {
+                player.interfacer.responsePromise?.fail(error: BuildersError.gameDeath)
+            }
         }
     }
 }
