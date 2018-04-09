@@ -60,16 +60,17 @@ public final class BuildersBoard : GameContext {
         }
     }
 
-    private func nextTurn() {
+    @discardableResult
+    private func nextTurn() -> EventLoopFuture<()> {
         // FIXME Notify someone this game is done
-        guard !rules.isGameOver() else { return }
+        guard !rules.isGameOver() else {
+            return runLoop.newSucceededFuture(result: ())
+        }
 
         // FIXME strong capture
-        _ = rules.executeTurn(forPlayer: activePlayer).then({(v) -> EventLoopFuture<()> in
-                self.players = Array(self.players[1...]) + [self.activePlayer]
-                self.nextTurn()
-
-                return self.runLoop.newSucceededFuture(result: ())
+        return rules.executeTurn(forPlayer: activePlayer).then({void -> EventLoopFuture<()> in
+            self.players = Array(self.players[1...]) + [self.activePlayer]
+            return self.nextTurn()
         })
     }
 }
