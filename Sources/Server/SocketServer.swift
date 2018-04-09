@@ -37,7 +37,11 @@ let ws = WebSocket.httpProtocolUpgrader(shouldUpgrade: {req in
             defer { gameLocker.signal() }
 
             gameLocker.wait()
-            if waitingForBuilders.count >= 1 && !waitingForBuilders.contains(where: { websocket === $0 }) {
+
+            // Make sure they aren't already waiting for a game
+            guard !waitingForBuilders.contains(where: { websocket === $0 }) else { return }
+
+            if waitingForBuilders.count >= 1 {
                 print("Should start a game")
                 waitingForBuilders.append(websocket)
                 _ = group.next().scheduleTask(in: .milliseconds(1), startBuildersGame)
