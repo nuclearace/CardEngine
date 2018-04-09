@@ -32,7 +32,7 @@ public struct BuildersRules : GameRules {
         moveCount += 1
 
         // TODO Does it make sense to have a turn when we just do this?
-        return turn[0] >>~ turn[1] >>~ turn[2] >>~ EndPhase(context: context)
+        return turn[0] ~~> turn[1] ~~> turn[2] ~~> EndPhase(context: context)
     }
 
     /// Calculates whether or not this game is over, based on some criteria.
@@ -62,12 +62,6 @@ public struct BuildersRules : GameRules {
     }
 }
 
-infix operator >>~ : PhasePrecedenceGroup
-
-precedencegroup PhasePrecedenceGroup {
-    associativity: left
-}
-
 public class BuilderPhase : Phase {
     public typealias RulesType = BuildersRules
 
@@ -90,11 +84,11 @@ public class BuilderPhase : Phase {
     }
 
     // TODO Maybe make this available on kit?
-    fileprivate static func >>~ (lhs: BuilderPhase, rhs: BuilderPhase) -> EventLoopFuture<BuilderPhase> {
+    fileprivate static func ~~> (lhs: BuilderPhase, rhs: BuilderPhase) -> EventLoopFuture<BuilderPhase> {
         return lhs.doPhase().then({_ in rhs.context.runLoop.newSucceededFuture(result: rhs) })
     }
 
-    fileprivate static func >>~ (lhs: EventLoopFuture<BuilderPhase>, rhs: BuilderPhase) -> EventLoopFuture<BuilderPhase> {
+    fileprivate static func ~~> (lhs: EventLoopFuture<BuilderPhase>, rhs: BuilderPhase) -> EventLoopFuture<BuilderPhase> {
         return lhs.then {phase in
             return phase.doPhase().then({_ in rhs.context.runLoop.newSucceededFuture(result: rhs) })
         }
@@ -264,7 +258,7 @@ public final class EndPhase : BuilderPhase {
         return context.runLoop.newSucceededFuture(result: ())
     }
 
-    fileprivate static func >>~ (lhs: EventLoopFuture<BuilderPhase>, rhs: EndPhase) -> EventLoopFuture<()> {
+    fileprivate static func ~~> (lhs: EventLoopFuture<BuilderPhase>, rhs: EndPhase) -> EventLoopFuture<()> {
         return lhs.then {phase in
             return phase.doPhase().then({_ in rhs.doPhase() })
         }
