@@ -62,6 +62,10 @@ public struct Accident : BuildersPlayable {
         return true
     }
 
+    /// Whether or not this accident effects the given `BuildersPlayable`.
+    ///
+    /// - parameter playable: The `BuildersPlayable` that is being tested.
+    /// - returns: Whether or not this accident is affecting the playable.
     public func effectsPlayable(_ playable: BuildersPlayable) -> Bool {
         switch (type, playable) {
         case let (.strike(skillType), worker as Worker):
