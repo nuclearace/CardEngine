@@ -71,9 +71,10 @@ public struct Material : BuildingBlock {
     /// - parameter inContext: The context this playable is being used in.
     /// - parameter byPlayer: The player playing.
     public func canPlay(inContext context: BuildersBoard, byPlayer player: BuilderPlayer) -> Bool {
-        let workers = context.cardsInPlay[player, default: []].workers
+        let accidents = context.accidents[player, default: []]
+        let activeWorkers = context.cardsInPlay[player, default: []].workers.active(accountingFor: accidents)
 
-        return workers.allSkills.contains(blockType.skillNeeded)
+        return activeWorkers.allSkills.contains(blockType.skillNeeded)
     }
 
     public static func getInstance() -> Material {

@@ -19,6 +19,9 @@ public enum SkillType {
     /// All BuildingBlockType cases
     public static let allSkills: [SkillType] = [.electrician, .foreman, .painter, .metalWorker, .fitter]
 
+    /// A special skill that is a placeholder for all skills.
+    case any
+
     /// A metal worker. These guys bend metal and stuff.
     case metalWorker
 
@@ -84,5 +87,14 @@ extension Worker : CustomStringConvertible {
 extension Array where Element == Worker {
     var allSkills: [SkillType] {
         return map({ $0.skill })
+    }
+
+    /// Only those workers that are active on the job.
+    func active(accountingFor accidents: [Accident]) -> [Worker] {
+        return filter({worker in
+            return accidents.reduce(true, {cur, accident in
+                return cur && !accident.effectsPlayable(worker)
+            })
+        })
     }
 }

@@ -20,7 +20,12 @@ public struct BuildersRules : GameRules {
 
     public init(context: BuildersBoard) {
         self.context = context
-        self.turn = [DealPhase(context: context), DrawPhase(context: context), BuildPhase(context: context)]
+        self.turn = [
+            CountPhase(context: context),
+            DealPhase(context: context),
+            DrawPhase(context: context),
+            BuildPhase(context: context)
+        ]
     }
 
     /// Executes player's turn.
@@ -32,7 +37,7 @@ public struct BuildersRules : GameRules {
         moveCount += 1
 
         // TODO Does it make sense to have a turn when we just do this?
-        return turn[0] ~~> turn[1] ~~> turn[2] ~~> EndPhase(context: context)
+        return turn[0] ~~> turn[1] ~~> turn[2] ~~> turn [3] ~~> EndPhase(context: context)
     }
 
     /// Calculates whether or not this game is over, based on some criteria.
@@ -92,6 +97,22 @@ public class BuilderPhase : Phase {
         return lhs.then {phase in
             return phase.doPhase().then({_ in rhs.context.runLoop.newSucceededFuture(result: rhs) })
         }
+    }
+}
+
+/// A phase that goes through all cards in play and increments any counters.
+///
+/// The count phase is followed by the deal phase.
+public final class CountPhase : BuilderPhase {
+    public override func executePhase(withContext context: BuildersBoard) -> EventLoopFuture<()> {
+        // Go through all active accidents increment the turn
+        for (player, accidents) in context.accidents {
+            context.accidents[player] = accidents.map({accident in
+                Accident(type: accident.type, turns: accident.turns + 1)
+            })
+        }
+
+        return context.runLoop.newSucceededFuture(result: ())
     }
 }
 
@@ -188,7 +209,8 @@ public final class DealPhase : BuilderPhase {
         }
 
         player.hand = kept
-        context.cardsInPlay[player, default: []].append(contentsOf: played)
+        context.accidents[context.players[1]] = played.accidents
+        context.cardsInPlay[player, default: []].append(contentsOf: played.filter({ $0.playType != .accident }))
 
         return played
     }
@@ -234,7 +256,7 @@ public final class DrawPhase : BuilderPhase {
 
         let active: BuilderPlayer = context.activePlayer
 
-        return active.getInput(withDialog: "Draw:\n", "1: Worker\n2: Material\n").then {input -> EventLoopFuture<()> in
+        return active.getInput(withDialog: "Draw:\n", "1: Worker\n2: Material\n3: Accident\n").then {input -> EventLoopFuture<()> in
             guard let choice = Int(input) else {
                 return self.getCards(needed: needed, drawn: drawn, context: context)
             }
@@ -244,6 +266,8 @@ public final class DrawPhase : BuilderPhase {
                 active.hand.append(Worker.getInstance())
             case 2:
                 active.hand.append(Material.getInstance())
+            case 3:
+                active.hand.append(Accident.getInstance())
             default:
                 return self.getCards(needed: needed, drawn: drawn, context: context)
             }
@@ -255,6 +279,13 @@ public final class DrawPhase : BuilderPhase {
 
 public final class EndPhase : BuilderPhase {
     public override func executePhase(withContext context: BuildersBoard) -> EventLoopFuture<()> {
+        // Filter out accidents that aren't valid anymore
+        for (player, accidents) in context.accidents {
+            context.accidents[player] = accidents.filter({accident in
+                return accident.turns <= accident.type.turnsActive
+            })
+        }
+
         return context.runLoop.newSucceededFuture(result: ())
     }
 

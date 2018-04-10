@@ -14,7 +14,7 @@ public struct Hotel {
     /// The number of floors that have been constructed.
     public private(set) var floorsBuilt = 0
 
-    // TODO The rules should determine the criteria for a floor being built
+    // TODO The rules should determine the criteria for a floor being built. So this should receive a context.
     /// Calculates whether or not this player has built any new floors.
     ///
     /// This removes cards from `fromPlayedCards` that were used to build a floor.

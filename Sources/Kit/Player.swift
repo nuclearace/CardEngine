@@ -35,7 +35,6 @@ public protocol UserInterfacer {
     func getInput(withDialog dialog: String, withPromise promise: EventLoopPromise<String>)
 }
 
-// TODO possibly rename this
 /// Protocol that declares the interface for interacting with users
 public protocol InteractablePlayer : Player {
     /// The type returned from interactions

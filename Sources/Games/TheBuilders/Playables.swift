@@ -34,6 +34,10 @@ public enum BuildersPlayType {
 internal typealias BuildersHand = [BuildersPlayable]
 
 extension Array where Element == BuildersPlayable {
+    var accidents: [Accident] {
+        return map({ $0 as? Accident }).compactMap({ $0 })
+    }
+
     var workers: [Worker] {
         return map({ $0 as? Worker }).compactMap({ $0 })
     }

@@ -18,6 +18,9 @@ public final class BuildersBoard : GameContext {
         return players[0]
     }
 
+    /// The accidents that are afflicting a user.
+    public internal(set) var accidents = [RulesType.PlayerType: [Accident]]()
+
     // TODO This is a bit crappy. Eventually we'll probably have another object that encapsulates this state
     /// The cards that are currently in play.
     public internal(set) var cardsInPlay = [RulesType.PlayerType: [BuildersPlayable]]()
@@ -70,6 +73,13 @@ public final class BuildersBoard : GameContext {
             case let builderError as BuildersError where builderError == .gameDeath:
                 return death
             case let builderError as BuildersError where builderError == .badPlay:
+                // This wasn't a valid turn, decrement the accident turns
+                for (player, accidents) in this.accidents {
+                    this.accidents[player] = accidents.map({accident in
+                        Accident(type: accident.type, turns: accident.turns - 1)
+                    })
+                }
+
                 return this.nextTurn()
             default:
                 fatalError("Unknown error")
