@@ -70,7 +70,7 @@ public struct BuildersRules : GameRules {
 public class BuilderPhase : Phase {
     public typealias RulesType = BuildersRules
 
-    fileprivate unowned let context: BuildersBoard
+    private unowned let context: BuildersBoard
 
     fileprivate init(context: BuildersBoard) {
         self.context = context
@@ -134,7 +134,7 @@ public final class DealPhase : BuilderPhase {
         // communicate a gameDeath error
         return getCardsToPlay(fromPlayer: active).then {cards -> EventLoopFuture<()> in
             // Get the cards to play
-            guard let played = self.playCards(cards, forPlayer: active) else {
+            guard let played = self.playCards(cards, forPlayer: active, context: context) else {
                 active.show("You played a card that you currently are unable to play\n")
 
                 return context.runLoop.newFailedFuture(error: BuildersError.badPlay)
@@ -191,7 +191,7 @@ public final class DealPhase : BuilderPhase {
                         .filter({ $0 > 0 && $0 <= player.hand.count }))
     }
 
-    private func playCards(_ cards: Set<Int>, forPlayer player: BuilderPlayer) -> BuildersHand? {
+    private func playCards(_ cards: Set<Int>, forPlayer player: BuilderPlayer, context: BuildersBoard) -> BuildersHand? {
         // Split into kept and played
         let enumeratedHand = player.hand.enumerated()
         let (kept, played) = enumeratedHand.reduce(into: ([], []), {(reducer: inout HandReducer, playable) in
