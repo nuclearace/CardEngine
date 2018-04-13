@@ -49,6 +49,14 @@ let ws = WebSocket.httpProtocolUpgrader(shouldUpgrade: {req in
             }
         }
     }
+
+    websocket.onClose {
+        defer { gameLocker.signal() }
+
+        gameLocker.wait()
+
+        waitingForBuilders = waitingForBuilders.filter({ $0.0 !== websocket })
+    }
 })
 
 private func startBuildersGame(loop: EventLoop) {

@@ -9,7 +9,7 @@ import Kit
 import WebSocket
 
 /// A type for interacting with a user over a WebSocket.
-class WebSocketInterfacer<T: GameContext> : UserInterfacer {
+final class WebSocketInterfacer<T: GameContext> : UserInterfacer {
     private(set) var responsePromise: EventLoopPromise<String>?
 
     weak var game: T!
