@@ -9,15 +9,14 @@ import Foundation
 public protocol GameRules {
     associatedtype TurnReturnType
 
+    /// The type of the context for these rules. Constrained to prevent mixing and matching Rules/Players/etc
     associatedtype ContextType: GameContext where ContextType.RulesType == Self
-    associatedtype PhaseType: Phase where PhaseType.RulesType == Self
+
+    /// The type of the player for these rules. Constrained to prevent mixing and matching Rules/Players/etc
     associatedtype PlayerType: Player where PlayerType.RulesType == Self
 
     /// The context these rules apply in.
     var context: ContextType { get }
-
-    /// What a turn looks like in this game. A turn consists of a set of phases that are executed in order.
-    var turn: [PhaseType] { get }
 
     /// Executes player's turn.
     ///
@@ -33,15 +32,3 @@ public protocol GameRules {
     mutating func setupGame()
 }
 
-/// Phases represent different parts of a turn. During a phase different actions can be taken.
-public protocol Phase {
-    associatedtype PhaseReturnType
-
-    /// The type of rules this phase applies to.
-    associatedtype RulesType: GameRules where RulesType.PhaseType == Self
-
-    /// Run this phase with the given context.
-    ///
-    /// - parameter withContext: The context with which to execute in.
-    mutating func executePhase(withContext context: RulesType.ContextType) -> PhaseReturnType
-}
