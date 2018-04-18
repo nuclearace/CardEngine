@@ -12,26 +12,11 @@ protocol BuilderPhase {
 
     // FIXME passing context when context is stored is silly
     /// Executes this phase with context.
-    func executePhase(withContext context: BuildersBoard) -> EventLoopFuture<()>
-
-    // FIXME Get rid of this when `executePhase(withContext:)` is fixed
     func doPhase() -> EventLoopFuture<()>
-}
-
-extension BuilderPhase {
-    func doPhase() -> EventLoopFuture<()> {
-        guard let context = self.context else {
-            return currentEventLoop.newFailedFuture(error: BuildersError.gameDeath)
-        }
-
-        return executePhase(withContext: context)
-    }
 }
 
 private func newFuturePhase(to phase: BuilderPhase) -> EventLoopFuture<BuilderPhase> {
     guard let context = phase.context else {
-        // Context is gone, we have a problem.
-
         return currentEventLoop.newFailedFuture(error: BuildersError.gameDeath)
     }
 
@@ -59,7 +44,9 @@ func ~~> (lhs: EventLoopFuture<BuilderPhase>, rhs: BuilderPhase) -> EventLoopFut
 struct CountPhase : BuilderPhase {
     private(set) weak var context: BuildersBoard?
 
-    func executePhase(withContext context: BuildersBoard) -> EventLoopFuture<()> {
+    func doPhase() -> EventLoopFuture<()> {
+        guard let context = context else { return deadGame }
+
         // Go through all active accidents increment the turn
         for (player, accidents) in context.accidents {
             context.accidents[player] = accidents.map({accident in
@@ -79,7 +66,9 @@ struct DealPhase : BuilderPhase {
 
     private(set) weak var context: BuildersBoard?
 
-    func executePhase(withContext context: BuildersBoard) -> EventLoopFuture<()> {
+    func doPhase() -> EventLoopFuture<()> {
+        guard let context = context else { return deadGame }
+
         let active: BuilderPlayer = context.activePlayer
 
         var playedSomething = false
@@ -89,7 +78,9 @@ struct DealPhase : BuilderPhase {
 
         // These are strong captures, but if something happens, like a user disconnects, the promise will communicate
         // communicate a gameDeath error
-        return getCardsToPlay(fromPlayer: active).then {cards -> EventLoopFuture<()> in
+        return getCardsToPlay(fromPlayer: active).then {[weak context] cards -> EventLoopFuture<()> in
+            guard let context = context else { return deadGame }
+
             // Get the cards to play
             guard let played = self.playCards(cards, forPlayer: active, context: context) else {
                 active.show("You played a card that you currently are unable to play\n")
@@ -103,7 +94,9 @@ struct DealPhase : BuilderPhase {
         }.then {_ -> EventLoopFuture<Set<Int>> in
             // Get cards to discard
             return self.getCardsToDiscard(fromPlayer: active)
-        }.then {cards -> EventLoopFuture<()> in
+        }.then {[weak context] cards -> EventLoopFuture<()> in
+            guard let context = context else { return deadGame }
+
             // Discard those cards
             discardedSomething = cards.count > 0
 
@@ -179,7 +172,9 @@ struct DealPhase : BuilderPhase {
 struct BuildPhase : BuilderPhase {
     private(set) weak var context: BuildersBoard?
 
-    func executePhase(withContext context: BuildersBoard) -> EventLoopFuture<()> {
+    func doPhase() -> EventLoopFuture<()> {
+        guard let context = context else { return deadGame }
+
         let active: BuilderPlayer = context.activePlayer
         var hotel = context.hotels[active, default: Hotel()]
 
@@ -204,7 +199,9 @@ struct BuildPhase : BuilderPhase {
 struct DrawPhase : BuilderPhase {
     private(set) weak var context: BuildersBoard?
 
-    func executePhase(withContext context: BuildersBoard) -> EventLoopFuture<()> {
+    func doPhase() -> EventLoopFuture<()> {
+        guard let context = context else { return deadGame }
+
         let active: BuilderPlayer = context.activePlayer
 
         print("\(context.activePlayer.id) should draw some cards")
@@ -242,7 +239,9 @@ struct DrawPhase : BuilderPhase {
 struct EndPhase : BuilderPhase {
     private(set) weak var context: BuildersBoard?
 
-    func executePhase(withContext context: BuildersBoard) -> EventLoopFuture<()> {
+    func doPhase() -> EventLoopFuture<()> {
+        guard let context = context else { return deadGame }
+
         // Filter out accidents that aren't valid anymore
         for (player, accidents) in context.accidents {
             context.accidents[player] = accidents.filter({accident in

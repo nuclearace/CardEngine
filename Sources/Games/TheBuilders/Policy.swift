@@ -17,3 +17,8 @@ precedencegroup PhasePrecedenceGroup {
 var currentEventLoop: EventLoop {
     return MultiThreadedEventLoopGroup.currentEventLoop!
 }
+
+/// Returns a new failed future for the current event loop. Return when a game has died.
+var deadGame: EventLoopFuture<()> {
+    return currentEventLoop.newFailedFuture(error: BuildersError.gameDeath)
+}
