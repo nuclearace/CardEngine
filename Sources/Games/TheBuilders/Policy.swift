@@ -22,3 +22,15 @@ var currentEventLoop: EventLoop {
 var deadGame: EventLoopFuture<()> {
     return currentEventLoop.newFailedFuture(error: BuildersError.gameDeath)
 }
+
+// MARK: Errors
+
+/// Errors that can occur during a game
+enum BuildersError : Error {
+    /// A bad hand was played
+    case badPlay
+
+    /// The game has gone and died.
+    case gameDeath
+}
+
