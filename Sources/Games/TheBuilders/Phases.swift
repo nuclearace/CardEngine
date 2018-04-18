@@ -10,7 +10,6 @@ protocol BuilderPhase {
     /// The context that everything is working in.
     var context: BuildersBoard? { get }
 
-    // FIXME passing context when context is stored is silly
     /// Executes this phase with context.
     func doPhase() -> EventLoopFuture<()>
 }
