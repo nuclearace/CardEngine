@@ -61,6 +61,10 @@ struct CountPhase : BuilderPhase {
 ///
 /// The deal phase is followed by the build phase.
 struct DealPhase : BuilderPhase {
+    private enum DealType : String {
+        case play, discard
+    }
+
     private typealias HandReducer = (kept: BuildersHand, play: BuildersHand)
 
     private(set) weak var context: BuildersBoard?
@@ -118,13 +122,7 @@ struct DealPhase : BuilderPhase {
                                     "Which cards would you like to play? ")
 
         return input.map({inputString in
-            guard let playJson = parseGameMove(fromInput: inputString),
-                  let played = playJson["play"] as? String else {
-                // TODO Should signal some error? How to do that?
-                return []
-            }
-
-            return self.parseInputCards(input: played, player: player)
+            return self.parseInputCards(input: inputString, player: player, dealType: .play)
         })
     }
 
@@ -134,22 +132,22 @@ struct DealPhase : BuilderPhase {
                                     "Would you like discard something?")
 
         return input.map({inputString in
-            guard let playJson = parseGameMove(fromInput: inputString),
-                  let played = playJson["discard"] as? String else {
-                // TODO Should signal some error? How to do that?
-                return []
-            }
-
-            return self.parseInputCards(input: played, player: player)
+            return self.parseInputCards(input: inputString, player: player, dealType: .discard)
         })
     }
 
-    private func parseInputCards(input: String, player: BuilderPlayer) -> Set<Int> {
-        return Set(input.components(separatedBy: ",")
-                           .map({ $0.replacingOccurrences(of: " ", with: "") })
-                           .map(Int.init)
-                           .compactMap({ $0 })
-                           .filter({ $0 > 0 && $0 <= player.hand.count }))
+    private func parseInputCards(input: String, player: BuilderPlayer, dealType: DealType) -> Set<Int> {
+        guard let playJson = parseGameMove(fromInput: input),
+              let dealt = playJson[dealType.rawValue] as? String else {
+            // TODO Should signal some error? How to do that?
+            return []
+        }
+
+        return Set(dealt.components(separatedBy: ",")
+                        .map({ $0.replacingOccurrences(of: " ", with: "") })
+                        .map(Int.init)
+                        .compactMap({ $0 })
+                        .filter({ $0 > 0 && $0 <= player.hand.count }))
     }
 
     private func playCards(_ cards: Set<Int>, forPlayer player: BuilderPlayer, context: BuildersBoard) -> BuildersHand? {
