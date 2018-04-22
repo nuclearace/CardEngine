@@ -165,7 +165,7 @@ struct DealPhase : BuilderPhase {
     }
 }
 
-/// During the build the phase, we calculate whether or nothing player built a new floor or not.
+/// During the build the phase, we calculate whether or not player built a new floor or not.
 ///
 /// The build phase is followed by the draw phase.
 struct BuildPhase : BuilderPhase {

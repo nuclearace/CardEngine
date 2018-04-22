@@ -49,7 +49,7 @@ public final class BuildersBoard : GameContext {
 
     @discardableResult
     private func nextTurn() -> EventLoopFuture<()> {
-        // FIXME Notify who one the game
+        // FIXME Notify who won the game
         guard !rules.isGameOver() else {
             for player in players {
                 player.show("Game over!")
