@@ -58,20 +58,18 @@ public final class BuildersBoard : GameContext {
             return runLoop.newSucceededFuture(result: ())
         }
 
-        let death: EventLoopFuture<()> = runLoop.newFailedFuture(error: BuildersError.gameDeath)
-
         return rules.executeTurn(forPlayer: activePlayer).then({[weak self] void -> EventLoopFuture<()> in
-            guard let this = self else { return death }
+            guard let this = self else { return deadGame }
 
             this.players = Array(this.players[1...]) + [this.activePlayer]
 
             return this.nextTurn()
         }).thenIfError {[weak self] error in
-            guard let this = self else { return death }
+            guard let this = self else { return deadGame }
 
             switch error {
             case let builderError as BuildersError where builderError == .gameDeath:
-                return death
+                return deadGame
             case let builderError as BuildersError where builderError == .badPlay:
                 // This wasn't a valid turn, decrement the accident turns
                 for (player, accidents) in this.accidents {

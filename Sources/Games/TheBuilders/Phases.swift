@@ -118,7 +118,13 @@ struct DealPhase : BuilderPhase {
                                     "Which cards would you like to play? ")
 
         return input.map({inputString in
-            return self.parseInputCards(input: inputString, player: player)
+            guard let playJson = parseGameMove(fromInput: inputString),
+                  let played = playJson["play"] as? String else {
+                // TODO Should signal some error? How to do that?
+                return []
+            }
+
+            return self.parseInputCards(input: played, player: player)
         })
     }
 
@@ -128,7 +134,13 @@ struct DealPhase : BuilderPhase {
                                     "Would you like discard something?")
 
         return input.map({inputString in
-            return self.parseInputCards(input: inputString, player: player)
+            guard let playJson = parseGameMove(fromInput: inputString),
+                  let played = playJson["discard"] as? String else {
+                // TODO Should signal some error? How to do that?
+                return []
+            }
+
+            return self.parseInputCards(input: played, player: player)
         })
     }
 
@@ -214,11 +226,13 @@ struct DrawPhase : BuilderPhase {
         let active: BuilderPlayer = context.activePlayer
 
         return active.getInput(withDialog: "Draw:\n", "1: Worker\n2: Material\n3: Accident\n").then {input -> EventLoopFuture<()> in
-            guard let choice = Int(input) else {
+            guard let playJson = parseGameMove(fromInput: input),
+                  let drawType = playJson["draw"] as? Int else {
+                // TODO Should signal some error? How to do that?
                 return self.getCards(needed: needed, drawn: drawn, context: context)
             }
 
-            switch choice {
+            switch drawType {
             case 1:
                 active.hand.append(Worker.getInstance())
             case 2:
