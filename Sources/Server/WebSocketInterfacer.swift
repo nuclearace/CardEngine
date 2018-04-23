@@ -30,7 +30,7 @@ final class WebSocketInterfacer<T: GameContext> : UserInterfacer {
 
         self.ws.onClose {
             game.stopGame()
-            gameStopped(game: game)
+            gameStopped(game)
         }
     }
 

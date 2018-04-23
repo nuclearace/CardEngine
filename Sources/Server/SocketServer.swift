@@ -84,7 +84,7 @@ private func startBuildersGame(loop: EventLoop) {
 }
 
 // FIXME This is fugly
-func gameStopped(game: AnyObject) {
+func gameStopped(_ game: AnyObject) {
     defer { gameLocker.signal() }
 
     gameLocker.wait()
