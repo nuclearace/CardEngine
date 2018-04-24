@@ -28,25 +28,23 @@ let ws = WebSocket.httpProtocolUpgrader(shouldUpgrade: {req in
 
             return
         }
+        
+        guard let game = json["game"] as? String else { return }
 
-        // TODO maybe use a third party json lib? Sounds kinda gross
-        // TODO This is amazingly gross
-        if let game = json["game"] as? String {
-            defer { gameLocker.signal() }
+        defer { gameLocker.signal() }
 
-            gameLocker.wait()
+        gameLocker.wait()
 
-            // Make sure they aren't already waiting for a game
-            guard !waitingForBuilders.contains(where: { websocket === $0.0 }) else { return }
+        // Make sure they aren't already waiting for a game
+        guard !waitingForBuilders.contains(where: { websocket === $0.0 }) else { return }
 
-            if waitingForBuilders.count >= 1 {
-                print("Should start a game")
-                waitingForBuilders.append((websocket, MultiThreadedEventLoopGroup.currentEventLoop!))
-                startBuildersGame(loop: group.next())
-            } else {
-                print("add to wait queue")
-                waitingForBuilders.append((websocket, MultiThreadedEventLoopGroup.currentEventLoop!))
-            }
+        if waitingForBuilders.count >= 1 {
+            print("Should start a game")
+            waitingForBuilders.append((websocket, MultiThreadedEventLoopGroup.currentEventLoop!))
+            startBuildersGame(loop: group.next())
+        } else {
+            print("add to wait queue")
+            waitingForBuilders.append((websocket, MultiThreadedEventLoopGroup.currentEventLoop!))
         }
     }
 
