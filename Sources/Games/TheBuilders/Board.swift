@@ -58,13 +58,13 @@ public final class BuildersBoard : GameContext {
             return runLoop.newSucceededFuture(result: ())
         }
 
-        return rules.executeTurn(forPlayer: activePlayer).then({[weak self] void -> EventLoopFuture<()> in
+        return rules.executeTurn(forPlayer: activePlayer).then {[weak self] void -> EventLoopFuture<()> in
             guard let this = self else { return deadGame }
 
             this.players = Array(this.players[1...]) + [this.activePlayer]
 
             return this.nextTurn()
-        }).thenIfError {[weak self] error in
+        }.thenIfError {[weak self] error in
             guard let this = self else { return deadGame }
 
             switch error {

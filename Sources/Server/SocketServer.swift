@@ -28,7 +28,7 @@ let ws = WebSocket.httpProtocolUpgrader(shouldUpgrade: {req in
 
             return
         }
-        
+
         guard let game = json["game"] as? String else { return }
 
         defer { gameLocker.signal() }

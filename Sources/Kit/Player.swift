@@ -25,7 +25,7 @@ extension Player {
 
 /// Says that a type will be able to interface with a user.
 public protocol UserInterfacer {
-    /// The promise to the game that some input will be returned. =
+    /// The promise to the game that some input will be returned.
     var responsePromise: EventLoopPromise<String>? { get }
 
     /// Sends a string to the user.

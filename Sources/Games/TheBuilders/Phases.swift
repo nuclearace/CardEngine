@@ -30,11 +30,11 @@ func ~~> (lhs: BuilderPhase, rhs: BuilderPhase) -> EventLoopFuture<BuilderPhase>
 }
 
 func ~~> (lhs: EventLoopFuture<BuilderPhase>, rhs: BuilderPhase) -> EventLoopFuture<BuilderPhase> {
-    return lhs.then {phase in
+    return lhs.then({phase in
         return phase.doPhase().then({_ in
             return newFuturePhase(to: rhs)
         })
-    }
+    })
 }
 
 /// A phase that goes through all cards in play and increments any counters.
