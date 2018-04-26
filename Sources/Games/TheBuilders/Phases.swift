@@ -37,7 +37,7 @@ func ~~> (lhs: EventLoopFuture<BuilderPhase>, rhs: BuilderPhase) -> EventLoopFut
     })
 }
 
-/// A phase that goes through all cards in play and increments any counters.
+/// A phase that goes through all cards in play and removes any accidents that have expired.
 ///
 /// The count phase is followed by the deal phase.
 struct CountPhase : BuilderPhase {
@@ -48,9 +48,9 @@ struct CountPhase : BuilderPhase {
 
         let active = context.activePlayer
 
-        // Go through all active accidents increment the turn
-        context.accidents[active] = context.accidents[active, default: []].map({accident in
-            return Accident(type: accident.type, turns: accident.turns + 1)
+        // Filter out accidents that aren't valid anymore
+        context.accidents[active] = context.accidents[active, default: []].filter({accident in
+            return accident.turns < accident.type.turnsActive
         })
 
         return context.runLoop.newSucceededFuture(result: ())
@@ -255,9 +255,9 @@ struct EndPhase : BuilderPhase {
 
         let active = context.activePlayer
 
-        // Filter out accidents that aren't valid anymore
-        context.accidents[active] = context.accidents[active, default: []].filter({accident in
-            return accident.turns <= accident.type.turnsActive
+        // Go through all active accidents increment the turn
+        context.accidents[active] = context.accidents[active, default: []].map({accident in
+            return Accident(type: accident.type, turns: accident.turns + 1)
         })
 
         return context.runLoop.newSucceededFuture(result: ())
