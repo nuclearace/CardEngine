@@ -71,12 +71,12 @@ public final class BuildersBoard : GameContext {
             case let builderError as BuildersError where builderError == .gameDeath:
                 return deadGame
             case let builderError as BuildersError where builderError == .badPlay:
+                let active = this.activePlayer
+
                 // This wasn't a valid turn, decrement the accident turns
-                for (player, accidents) in this.accidents {
-                    this.accidents[player] = accidents.map({accident in
-                        Accident(type: accident.type, turns: accident.turns - 1)
-                    })
-                }
+                this.accidents[active] = this.accidents[active, default: []].map({accident in
+                    return Accident(type: accident.type, turns: accident.turns - 1)
+                })
 
                 return this.nextTurn()
             default:

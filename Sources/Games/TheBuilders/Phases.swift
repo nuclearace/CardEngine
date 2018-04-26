@@ -46,12 +46,12 @@ struct CountPhase : BuilderPhase {
     func doPhase() -> EventLoopFuture<()> {
         guard let context = context else { return deadGame }
 
+        let active = context.activePlayer
+
         // Go through all active accidents increment the turn
-        for (player, accidents) in context.accidents {
-            context.accidents[player] = accidents.map({accident in
-                Accident(type: accident.type, turns: accident.turns + 1)
-            })
-        }
+        context.accidents[active] = context.accidents[active, default: []].map({accident in
+            return Accident(type: accident.type, turns: accident.turns + 1)
+        })
 
         return context.runLoop.newSucceededFuture(result: ())
     }
@@ -253,12 +253,12 @@ struct EndPhase : BuilderPhase {
     func doPhase() -> EventLoopFuture<()> {
         guard let context = context else { return deadGame }
 
+        let active = context.activePlayer
+
         // Filter out accidents that aren't valid anymore
-        for (player, accidents) in context.accidents {
-            context.accidents[player] = accidents.filter({accident in
-                return accident.turns <= accident.type.turnsActive
-            })
-        }
+        context.accidents[active] = context.accidents[active, default: []].filter({accident in
+            return accident.turns <= accident.type.turnsActive
+        })
 
         return context.runLoop.newSucceededFuture(result: ())
     }
