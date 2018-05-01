@@ -22,16 +22,16 @@ final class WebSocketInterfacer<T: GameContext> : UserInterfacer {
         self.wsEventLoop = onLoop
 
         // Now that they're in a game, all input should be considered as fulfilling a promise.
-        self.ws.onText {[weak self] text in
+        self.ws.onText {[weak self] websocket, text in
             guard let this = self else { return }
 
             this.responsePromise?.succeed(result: text)
         }
 
-        self.ws.onClose {
+        self.ws.onClose.do {_ in
             game.stopGame()
             gameStopped(game)
-        }
+        }.catch {_ in }
     }
 
     deinit {

@@ -11,12 +11,15 @@ public final class BuildersBoard : GameContext {
     public typealias RulesType = BuildersRules
 
     /// The name of this game.
-    public static let name = "The Builders"
+    public static let name = "TheBuilders"
 
     /// The player who is currently making moves
     public var activePlayer: RulesType.PlayerType {
         return players[0]
     }
+
+    /// The id for this game.
+    public let id = UUID()
 
     /// The accidents that are afflicting a user.
     public internal(set) var accidents = [RulesType.PlayerType: [Accident]]()

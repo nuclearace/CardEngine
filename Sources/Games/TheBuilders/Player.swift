@@ -24,7 +24,7 @@ public final class BuilderPlayer : InteractablePlayer {
         }
     }
 
-    public init (context: BuildersBoard, interfacer: UserInterfacer) {
+    public init(context: BuildersBoard, interfacer: UserInterfacer) {
         self.context = context
         self.interfacer = interfacer
     }

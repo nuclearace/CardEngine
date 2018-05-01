@@ -43,6 +43,9 @@ public protocol InteractablePlayer : Player {
     /// How the game interfaces with this player.
     var interfacer: UserInterfacer { get }
 
+    /// Creates a new `InteractablePlayer`.
+    init(context: RulesType.ContextType, interfacer: UserInterfacer)
+
     /// Prints some dialog to the player.
     func show(_ dialog: String...)
 

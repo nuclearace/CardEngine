@@ -5,7 +5,7 @@ import Vapor
 import Foundation
 import WebSocket
 
-struct HelloResponder : HTTPResponder {
+struct HelloResponder : HTTPServerResponder {
     func respond(to request: HTTPRequest, on worker: Worker) -> EventLoopFuture<HTTPResponse> {
         let res = HTTPResponse(status: .ok, body: HTTPBody(string: "Hello, world!"))
 
