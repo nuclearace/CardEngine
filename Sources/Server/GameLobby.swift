@@ -77,9 +77,7 @@ final class DefaultLobby<Game: GameContext> : GameLobby where Game.RulesType.Pla
     }
 
     func startGame() {
-        guard waitingPlayers.count >= 2 else {
-            fatalError("Something went wrong, we should have two players waiting to start a game")
-        }
+        precondition(waitingPlayers.count >= 2, "Should have two players waiting to start a game")
 
         let board = GameType(runLoop: group.next())
         let players = [
