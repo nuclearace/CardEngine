@@ -28,9 +28,6 @@ protocol GameLobby {
 
     /// Removes `game` from `games`.
     func removeGame(_ game: GameType)
-
-    /// Call when there is enough players in the wait queue to start a new game.
-    func startGame()
 }
 
 final class DefaultLobby<Game: GameContext> : GameLobby where Game.RulesType.PlayerType: InteractablePlayer {
@@ -42,6 +39,7 @@ final class DefaultLobby<Game: GameContext> : GameLobby where Game.RulesType.Pla
 
     private let lock = DispatchSemaphore(value: 1)
 
+    /// Adds a player to this lobby.
     func addPlayerToWait(_ player: WebSocket) {
         defer { lock.signal() }
 
@@ -63,27 +61,29 @@ final class DefaultLobby<Game: GameContext> : GameLobby where Game.RulesType.Pla
         if waitingPlayers.count >= 1 {
             print("Should start a game")
             waitingPlayers.append((player, loop))
-            startGame()
+            startNewGame()
         } else {
             print("add to wait queue")
             waitingPlayers.append((player, loop))
         }
     }
 
+    /// Removes `game` from `games`.
     func removeGame(_ game: GameType) {
         lock.wait()
         games[game.id] = nil
         lock.signal()
     }
 
-    func startGame() {
+    /// Call when there is enough players in the wait queue to start a new game.
+    private func startNewGame() {
         precondition(waitingPlayers.count >= 2, "Should have two players waiting to start a game")
 
         let board = GameType(runLoop: group.next())
         let players = [
             GameType.RulesType.PlayerType(context: board,
                                           interfacer: WebSocketInterfacer(ws: waitingPlayers[0].ws,
-                                                                          game:  board,
+                                                                          game: board,
                                                                           onLoop: waitingPlayers[0].loop)),
             GameType.RulesType.PlayerType(context: board,
                                           interfacer: WebSocketInterfacer(ws: waitingPlayers[1].ws,
