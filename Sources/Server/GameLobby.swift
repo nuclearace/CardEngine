@@ -37,42 +37,46 @@ final class DefaultLobby<Game: GameContext> : GameLobby where Game.RulesType.Pla
 
     var waitingPlayers = [WsPlayer]()
 
-    private let lock = DispatchSemaphore(value: 1)
+    private let runLoop = MultiThreadedEventLoopGroup.currentEventLoop!
 
     /// Adds a player to this lobby.
     func addPlayerToWait(_ player: WebSocket) {
-        defer { lock.signal() }
-
-        lock.wait()
-
-        guard !waitingPlayers.contains(where: { player === $0.0 }) else { return }
-
         let loop = MultiThreadedEventLoopGroup.currentEventLoop!
 
-        // unowned(unsafe) is safe here since lobbies should be global to the program, but we don't want ARC overhead
-        player.onClose.do {[weak player, unowned(unsafe) self] in
-            guard let player = player else { return }
+        runLoop.execute {
+            self.addPlayerToWait((player, loop))
+        }
+    }
 
-            self.lock.wait()
-            self.waitingPlayers = self.waitingPlayers.filter({ $0.ws !== player })
-            self.lock.signal()
+    private func addPlayerToWait(_ player: WsPlayer) {
+        guard !waitingPlayers.contains(where: { player.ws === $0.0 }) else { return }
+
+        // unowned(unsafe) is safe here since lobbies should be global to the program, but we don't want ARC overhead
+        player.ws.onClose.do {[unowned(unsafe) self] in
+            self.runLoop.execute {
+                self.waitingPlayers = self.waitingPlayers.filter({ $0.ws !== player.ws })
+            }
         }.catch {_ in }
 
         if waitingPlayers.count >= 1 {
             print("Should start a game")
-            waitingPlayers.append((player, loop))
+            waitingPlayers.append(player)
             startNewGame()
         } else {
             print("add to wait queue")
-            waitingPlayers.append((player, loop))
+            waitingPlayers.append(player)
         }
     }
 
     /// Removes `game` from `games`.
     func removeGame(_ game: GameType) {
-        lock.wait()
+        runLoop.execute {
+            self._removeGame(game)
+        }
+    }
+
+    private func _removeGame(_ game: GameType) {
         games[game.id] = nil
-        lock.signal()
     }
 
     /// Call when there is enough players in the wait queue to start a new game.
