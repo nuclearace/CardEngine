@@ -71,12 +71,8 @@ final class DefaultLobby<Game: GameContext> : GameLobby where Game.RulesType.Pla
     /// Removes `game` from `games`.
     func removeGame(_ game: GameType) {
         runLoop.execute {
-            self._removeGame(game)
+            self.games[game.id] = nil
         }
-    }
-
-    private func _removeGame(_ game: GameType) {
-        games[game.id] = nil
     }
 
     /// Call when there is enough players in the wait queue to start a new game.
