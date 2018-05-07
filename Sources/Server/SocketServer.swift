@@ -13,8 +13,6 @@ import WebSocket
 
 // TODO lobby
 
-// Lobbies doesn't require a lock, since all lobbies should be implemented as thread-safe
-let lobbies = [BuildersBoard.name: DefaultLobby<BuildersBoard>()]
 let ws = HTTPServer.webSocketUpgrader(shouldUpgrade: {_ in [:] }, onUpgrade: handleUpgrade)
 
 private func handleUpgrade(_ websocket: WebSocket, _ request: HTTPRequest) {
@@ -32,7 +30,7 @@ private func handleUpgrade(_ websocket: WebSocket, _ request: HTTPRequest) {
 
         switch game {
         case BuildersBoard.name:
-            lobbies[BuildersBoard.name]!.addPlayerToWait(websocket)
+            Lobbies.buildersLobby.addPlayerToWait(websocket)
         case _:
             return
         }
@@ -42,7 +40,7 @@ private func handleUpgrade(_ websocket: WebSocket, _ request: HTTPRequest) {
 func gameStopped<T: GameContext>(_ game: T) {
     switch game {
     case let game as BuildersBoard:
-        lobbies[BuildersBoard.name]!.removeGame(game)
+        Lobbies.buildersLobby.removeGame(game)
     case _:
         return
     }

@@ -4,6 +4,7 @@
 
 import Dispatch
 import Foundation
+import Games
 import Kit
 import NIO
 import WebSocket
@@ -97,4 +98,9 @@ final class DefaultLobby<Game: GameContext> : GameLobby where Game.RulesType.Pla
         games[board.id] = board
         waitingPlayers = Array(waitingPlayers.dropFirst(2))
     }
+}
+
+/// A namespace to wrap various lobbies.
+struct Lobbies {
+   static var buildersLobby = DefaultLobby<BuildersBoard>()
 }
