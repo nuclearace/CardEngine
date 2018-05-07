@@ -9,6 +9,11 @@ import Kit
 import NIO
 import WebSocket
 
+/// A namespace to wrap various lobbies.
+struct Lobbies {
+    static let buildersLobby = DefaultLobby<BuildersBoard>()
+}
+
 typealias WsPlayer = (ws: WebSocket, loop: EventLoop)
 
 /// Marks a type will hold a set of games.
@@ -100,7 +105,3 @@ final class DefaultLobby<Game: GameContext> : GameLobby where Game.RulesType.Pla
     }
 }
 
-/// A namespace to wrap various lobbies.
-struct Lobbies {
-   static var buildersLobby = DefaultLobby<BuildersBoard>()
-}
