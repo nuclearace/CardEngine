@@ -25,6 +25,8 @@ private func handleUpgrade(_ websocket: WebSocket, _ request: HTTPRequest) {
         }
 
         guard let game = json["game"] as? String else {
+            websocket.close()
+
             return
         }
 
