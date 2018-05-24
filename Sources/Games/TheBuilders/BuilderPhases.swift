@@ -127,7 +127,7 @@ struct DealPhase : BuilderPhase {
             // TODO Should they have to play something?
             guard playedSomething || discardedSomething else {
                 active.send([
-                    "event": BuilderEvent.dialog.rawValue,
+                    "event": BuilderEvent.playError.rawValue,
                     "data": [
                         "dialog": ["You must do something!"]
                     ]
@@ -183,16 +183,12 @@ struct DealPhase : BuilderPhase {
 
     private func parseInputCards(input: String, player: BuilderPlayer, dealType: DealType) -> Set<Int> {
         guard let playJson = parseGameMove(fromInput: input),
-              let dealt = playJson[dealType.rawValue] as? String else {
+              let dealt = playJson[dealType.rawValue] as? [Int] else {
             // TODO Should signal some error? How to do that?
             return []
         }
 
-        return Set(dealt.components(separatedBy: ",")
-                        .map({ $0.replacingOccurrences(of: " ", with: "") })
-                        .map(Int.init)
-                        .compactMap({ $0 })
-                        .filter({ $0 > 0 && $0 <= player.hand.count }))
+        return Set(dealt.filter({ $0 > 0 && $0 <= player.hand.count }))
     }
 
     private func playCards(_ cards: Set<Int>, forPlayer player: BuilderPlayer, context: BuildersBoard) -> BuildersHand? {
