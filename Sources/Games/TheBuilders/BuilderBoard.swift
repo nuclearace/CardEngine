@@ -52,10 +52,11 @@ public final class BuildersBoard : GameContext {
 
     private func announceWinners(_ winners: [BuilderPlayer]) {
         // TODO Use some kind of name for the players
-        let winnerString = "\(winners.map({ $0.id.uuidString }).joined(separator: ", ")) have won the game!\n"
-
         for player in players {
-            player.show(winnerString)
+            player.send([
+                "event": BuilderEvent.gameOver.rawValue,
+                "data": winners.map({ $0.id.uuidString })
+            ])
         }
     }
 

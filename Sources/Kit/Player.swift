@@ -37,8 +37,11 @@ public protocol UserInterfacer {
 
 /// Protocol that declares the interface for interacting with users
 public protocol InteractablePlayer : Player {
-    /// The type returned from interactions
-    associatedtype InteractionType = String
+    /// The input type.
+    associatedtype InteractionInputType = String
+
+    /// The type returned from interactions.
+    associatedtype InteractionReturnType = String
 
     /// How the game interfaces with this player.
     var interfacer: UserInterfacer { get }
@@ -46,12 +49,12 @@ public protocol InteractablePlayer : Player {
     /// Creates a new `InteractablePlayer`.
     init(context: RulesType.ContextType, interfacer: UserInterfacer)
 
-    /// Prints some dialog to the player.
-    func show(_ dialog: String...)
+    /// Sends some data to the player.
+    func send(_ dialog: InteractionInputType)
 
     /// Gets some input from the user.
     ///
-    /// - parameter withDialog: The text to display to the user.
+    /// - parameter object: The object to send to the player.
     /// - returns: The input from the user.
-    func getInput(withDialog dialog: String...) -> InteractionType
+    func getInput(_ object: InteractionInputType) -> InteractionReturnType
 }

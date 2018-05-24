@@ -34,18 +34,26 @@ public final class BuilderPlayer : InteractablePlayer {
     }
 
     /// Prints some dialog to the player.
-    public func show(_ dialog: String...) {
-        interfacer.send(dialog.joined())
+    public func send(_ dialog: [String: Any]) {
+        guard let encoded = try? JSONSerialization.data(withJSONObject: dialog) else {
+            fatalError("Error creating JSON for builders")
+        }
+
+        interfacer.send(String(data: encoded, encoding: .utf8)!)
     }
 
     /// Gets some input from the user.
     ///
-    /// - parameter withDialog: The text to display to the user.
+    /// - parameter object: The object to send to the user.
     /// - returns: The input from the user.
-    public func getInput(withDialog dialog: String...) -> EventLoopFuture<String> {
+    public func getInput(_ dialog: [String: Any]) -> EventLoopFuture<String> {
+        guard let encoded = try? JSONSerialization.data(withJSONObject: dialog) else {
+            fatalError("Error creating JSON for builders")
+        }
+
         let p: EventLoopPromise<String> = context.runLoop.newPromise()
 
-        interfacer.getInput(withDialog: dialog.joined(), withPromise: p)
+        interfacer.getInput(withDialog: String(data: encoded, encoding: .utf8)!, withPromise: p)
 
         return p.futureResult
     }

@@ -27,7 +27,8 @@ public struct BuildersRules : GameRules {
 
         moveCount += 1
 
-        return CountPhase(context: context)
+        return StartPhase(context: context)
+                ~~> CountPhase(context: context)
                 ~~> DealPhase(context: context)
                 ~~> DrawPhase(context: context)
                 ~~> BuildPhase(context: context)

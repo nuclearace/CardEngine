@@ -37,6 +37,22 @@ func ~~> (lhs: EventLoopFuture<BuilderPhase>, rhs: BuilderPhase) -> EventLoopFut
     })
 }
 
+/// The start of a turn.
+struct StartPhase : BuilderPhase {
+    private(set) weak var context: BuildersBoard?
+
+    func doPhase() -> EventLoopFuture<()> {
+        guard let context = context else { return deadGame }
+
+        context.activePlayer.send([
+            "event": BuilderEvent.turnStart.rawValue,
+            "data": []
+        ])
+
+        return context.runLoop.newSucceededFuture(result: ())
+    }
+}
+
 /// A phase that goes through all cards in play and removes any accidents that have expired.
 ///
 /// The count phase is followed by the deal phase.
@@ -77,8 +93,6 @@ struct DealPhase : BuilderPhase {
         var playedSomething = false
         var discardedSomething = false
 
-        active.show("Your cards in play:\n", context.cardsInPlay[active, default: []].prettyPrinted())
-
         // These are strong captures, but if something happens, like a user disconnects, the promise will communicate
         // communicate a gameDeath error
         return getCardsToPlay(fromPlayer: active).then {[weak context] cards -> EventLoopFuture<()> in
@@ -86,7 +100,12 @@ struct DealPhase : BuilderPhase {
 
             // Get the cards to play
             guard let played = self.playCards(cards, forPlayer: active, context: context) else {
-                active.show("You played a card that you currently are unable to play\n")
+                active.send([
+                    "event": BuilderEvent.dialog.rawValue,
+                    "data": [
+                        "dialog": ["You played a card that you currently are unable to play"]
+                    ]
+                ])
 
                 return context.runLoop.newFailedFuture(error: BuildersError.badPlay)
             }
@@ -107,8 +126,12 @@ struct DealPhase : BuilderPhase {
 
             // TODO Should they have to play something?
             guard playedSomething || discardedSomething else {
-                active.show("You must do something!\n")
-
+                active.send([
+                    "event": BuilderEvent.dialog.rawValue,
+                    "data": [
+                        "dialog": ["You must do something!"]
+                    ]
+                ])
                 return context.runLoop.newFailedFuture(error: BuildersError.badPlay)
             }
 
@@ -117,9 +140,26 @@ struct DealPhase : BuilderPhase {
     }
 
     private func getCardsToPlay(fromPlayer player: BuilderPlayer) -> EventLoopFuture<Set<Int>> {
-        let input = player.getInput(withDialog: "Your hand: \n",
-                                    player.hand.prettyPrinted(),
-                                    "Which cards would you like to play? ")
+        assert(context != nil)
+
+        // FIXME get rid of this send and let the front end handle showing the hand
+        player.send([
+            "event": BuilderEvent.dialog.rawValue,
+            "data": [
+                "dialog": [
+                    "Your cards in play:",
+                    context!.cardsInPlay[player, default: []].prettyPrinted()
+                ]
+            ]
+        ])
+
+        let input = player.getInput([
+            "event": BuilderEvent.turn.rawValue,
+            "data": [
+                "phase": DealType.play.rawValue,
+                "hand": player.hand.prettyPrinted() // TODO send proper object
+            ]
+        ])
 
         return input.map({inputString in
             return self.parseInputCards(input: inputString, player: player, dealType: .play)
@@ -127,9 +167,14 @@ struct DealPhase : BuilderPhase {
     }
 
     private func getCardsToDiscard(fromPlayer player: BuilderPlayer) -> EventLoopFuture<Set<Int>> {
-        let input = player.getInput(withDialog: "Your hand: \n",
-                                    player.hand.prettyPrinted(),
-                                    "Would you like discard something?")
+        let input = player.getInput([
+            "event": BuilderEvent.turn.rawValue,
+            "data": [
+                "phase": DealType.discard.rawValue,
+                "hand": player.hand.prettyPrinted(), // TODO send proper object
+                "dialog": ["Would you like discard something?"]
+            ]
+        ])
 
         return input.map({inputString in
             return self.parseInputCards(input: inputString, player: player, dealType: .discard)
@@ -223,7 +268,18 @@ struct DrawPhase : BuilderPhase {
 
         let active: BuilderPlayer = context.activePlayer
 
-        return active.getInput(withDialog: "Draw:\n", "1: Worker\n2: Material\n3: Accident\n").then {input -> EventLoopFuture<()> in
+        return active.getInput([
+            "event": BuilderEvent.turn.rawValue,
+            "data": [
+                "phase": "draw",
+                "dialog": [
+                    "Draw:",
+                    "1: Worker",
+                    "2: Material",
+                    "3: Accident"
+                ]
+            ]
+       ]).then {input -> EventLoopFuture<()> in
             guard let playJson = parseGameMove(fromInput: input),
                   let drawType = playJson["draw"] as? Int else {
                 // TODO Should signal some error? How to do that?
@@ -254,6 +310,8 @@ struct EndPhase : BuilderPhase {
         guard let context = context else { return deadGame }
 
         let active = context.activePlayer
+
+        active.send(["event": BuilderEvent.turnEnd.rawValue, "data": []])
 
         // Go through all active accidents increment the turn
         context.accidents[active] = context.accidents[active, default: []].map({accident in
