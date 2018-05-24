@@ -34,11 +34,11 @@ public struct BuildersRules : GameRules {
                 ~~> EndPhase(context: context)
     }
 
-    /// Calculates whether or not this game is over, based on some criteria.
+    /// Calculates whether or not this game is over, returning the winning players.
     ///
-    /// - returns: `true` if this game is over, false otherwise.
-    public func isGameOver() -> Bool {
-        return context.hotels.map({ $0.value.floorsBuilt }).reduce(0, +) > 0
+    /// - returns: An array of `BuilderPlayer` who've won, or an empty array if no one has one.
+    public func getWinners() -> [BuilderPlayer] {
+        return context.hotels.filter({ $0.value.floorsBuilt > 0 }).map({ $0.key })
     }
 
     /// Starts a game. This is called to deal cards, give money, etc, before the first player goes.

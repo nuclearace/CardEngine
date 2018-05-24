@@ -50,18 +50,26 @@ public final class BuildersBoard : GameContext {
         print("Game is dying")
     }
 
+    private func announceWinners(_ winners: [BuilderPlayer]) {
+        // TODO Use some kind of name for the players
+        let winnerString = "\(winners.map({ $0.id.uuidString }).joined(separator: ", ")) have won the game!\n"
+
+        for player in players {
+            player.show(winnerString)
+        }
+    }
+
     @discardableResult
     private func nextTurn() -> EventLoopFuture<()> {
-        // FIXME Notify who won the game
-        guard !rules.isGameOver() else {
-            for player in players {
-                player.show("Game over!")
-            }
+        let winners = rules.getWinners()
+
+        guard winners.isEmpty else {
+            announceWinners(winners)
 
             return runLoop.newSucceededFuture(result: ())
         }
 
-        return rules.executeTurn(forPlayer: activePlayer).then {[weak self] void -> EventLoopFuture<()> in
+        return rules.executeTurn(forPlayer: activePlayer).then {[weak self] _ -> EventLoopFuture<()> in
             guard let this = self else { return deadGame }
 
             this.players = Array(this.players[1...]) + [this.activePlayer]
@@ -99,9 +107,8 @@ public final class BuildersBoard : GameContext {
 
     /// Starts this game.
     public func startGame() {
-        rules.setupGame()
-
         runLoop.execute {
+            self.rules.setupGame()
             print("start first turn")
             self.nextTurn()
         }

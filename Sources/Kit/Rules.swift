@@ -23,10 +23,10 @@ public protocol GameRules {
     /// - parameter forPlayer: The player whose turn it is.
     mutating func executeTurn(forPlayer player: PlayerType) -> TurnReturnType
 
-    /// Calculates whether or not this game is over, based on some criteria.
+    /// Calculates whether or not this game is over, returning the winning players.
     ///
-    /// - returns: `true` if this game is over, false otherwise.
-    func isGameOver() -> Bool
+    /// - returns: An array of `PlayerType` who've won, or an empty array if no one has one.
+    func getWinners() -> [PlayerType]
 
     /// Setups a game. This is called to deal cards, give money, etc, before the first player goes.
     mutating func setupGame()
