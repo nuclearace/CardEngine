@@ -24,20 +24,11 @@ public enum AccidentType : Encodable {
         }
     }
 
-    public func encode(to encoder: Encoder) throws {
-        var containter = encoder.container(keyedBy: CodingKeys.self)
-
-        switch self {
-        case let .strike(type):
-            try containter.encode(type, forKey: .strike)
-        }
-    }
-
     /// A random skill.
     public static var randomAccident: AccidentType {
         let rand: Int
 
-        // FIXME replace with native random in Swift X
+        // FIXME replace with native random in Swift 4.2
         #if os(macOS)
         rand = Int(arc4random_uniform(UInt32(allAccidents.count)))
         #else
@@ -47,6 +38,15 @@ public enum AccidentType : Encodable {
         switch allAccidents[rand] {
         case .strike:
             return .strike(.randomSkill)
+        }
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var containter = encoder.container(keyedBy: CodingKeys.self)
+
+        switch self {
+        case let .strike(type):
+            try containter.encode(type, forKey: .strike)
         }
     }
 }

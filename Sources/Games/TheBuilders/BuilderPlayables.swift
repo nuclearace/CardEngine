@@ -40,8 +40,7 @@ struct EncodableHand : Encodable {
         var container = encoder.unkeyedContainer()
 
         for playable in hand {
-            let superEncoder = container.superEncoder()
-            try playable.encode(to: superEncoder)
+            try playable.encode(to: container.superEncoder())
         }
     }
 }
