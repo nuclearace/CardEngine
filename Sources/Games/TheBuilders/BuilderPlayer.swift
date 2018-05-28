@@ -32,9 +32,11 @@ public final class BuilderPlayer : InteractablePlayer {
         self.interfacer = interfacer
     }
 
+    #if DEBUG
     deinit {
         print("Player \(id) is dying")
     }
+    #endif
 
     /// Prints some dialog to the player.
     public func send(_ dialog: UserInteraction<BuildersInteraction>) {

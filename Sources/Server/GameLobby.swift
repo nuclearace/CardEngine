@@ -65,11 +65,15 @@ final class DefaultLobby<Game: GameContext> : GameLobby where Game.RulesType.Pla
         }.catch {_ in }
 
         if waitingPlayers.count >= 1 {
+            #if DEBUG
             print("Should start a game")
+            #endif
             waitingPlayers.append(player)
             startNewGame()
         } else {
+            #if DEBUG
             print("add to wait queue")
+            #endif
             waitingPlayers.append(player)
         }
     }

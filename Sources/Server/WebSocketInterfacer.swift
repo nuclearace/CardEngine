@@ -34,9 +34,11 @@ final class WebSocketInterfacer<T: GameContext> : UserInterfacer {
         }.catch {_ in }
     }
 
+    #if DEBUG
     deinit {
         print("Some WebSocketInterfacer is dying")
     }
+    #endif
 
     func send(_ str: String) {
         wsEventLoop.execute {

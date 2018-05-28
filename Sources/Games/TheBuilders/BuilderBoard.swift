@@ -46,9 +46,11 @@ public final class BuildersBoard : GameContext {
         self.rules = BuildersRules(context: self)
     }
 
+    #if DEBUG
     deinit {
         print("Game is dying")
     }
+    #endif
 
     private func announceWinners(_ winners: [BuilderPlayer]) {
         // TODO Use some kind of name for the players
@@ -121,7 +123,9 @@ public final class BuildersBoard : GameContext {
     public func startGame() {
         runLoop.execute {
             self.rules.setupGame()
+            #if DEBUG
             print("start first turn")
+            #endif
             self.nextTurn()
         }
     }

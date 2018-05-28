@@ -23,7 +23,9 @@ public struct BuildersRules : GameRules {
     ///
     /// - parameter forPLayer: The player whose turn it is.
     public mutating func executeTurn(forPlayer player: BuilderPlayer) -> EventLoopFuture<()> {
+        #if DEBUG
         print("\(player.id)'s turn")
+        #endif
 
         moveCount += 1
 

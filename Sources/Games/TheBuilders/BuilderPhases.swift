@@ -252,7 +252,9 @@ struct DrawPhase : BuilderPhase {
 
         let active: BuilderPlayer = context.activePlayer
 
+        #if DEBUG
         print("\(context.activePlayer.id) should draw some cards")
+        #endif
 
         return getCards(needed: BuildersRules.cardsNeededInHand-active.hand.count, drawn: 0, context: context)
     }
