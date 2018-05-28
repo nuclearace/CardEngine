@@ -47,15 +47,15 @@ struct EncodableHand : Encodable {
 
 extension Array where Element == BuildersPlayable {
     var accidents: [Accident] {
-        return map({ $0 as? Accident }).compactMap({ $0 })
+        return compactMap({ $0 as? Accident })
     }
 
     var workers: [Worker] {
-        return map({ $0 as? Worker }).compactMap({ $0 })
+        return compactMap({ $0 as? Worker })
     }
 
     var materials: [Material] {
-        return map({ $0 as? Material }).compactMap({ $0 })
+        return compactMap({ $0 as? Material })
     }
 
     func prettyPrinted() -> String {
