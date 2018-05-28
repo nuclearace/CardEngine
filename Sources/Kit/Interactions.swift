@@ -7,22 +7,22 @@ import Foundation
 /// Represents the top level message structure that goes from the server to a player.
 public struct UserInteraction<InteractionType: Encodable> : Encodable {
 
-    // FIXME find a better name for the inner InteractionType
+    // FIXME find a better name for the inner UserInteractionType
     /// The type of interaction this is.
-    public var type: Kit.InteractionType
+    public var type: UserInteractionType
 
     /// Represents the interaction for this message. This can be anything that is `Encodable`.
     public var interaction: InteractionType
 
     // TODO docstring
-    public init(type: Kit.InteractionType, interaction: InteractionType) {
+    public init(type: UserInteractionType, interaction: InteractionType) {
         self.type = type
         self.interaction = interaction
     }
 }
 
 /// The set of events that can happen during a game.
-public enum InteractionType : String, Encodable {
+public enum UserInteractionType : String, Encodable {
     /// Sent when the server has a message that should be shown.
     case dialog
 
