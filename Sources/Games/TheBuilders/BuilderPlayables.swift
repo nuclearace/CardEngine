@@ -38,9 +38,9 @@ struct EncodableHand : Encodable {
 
     func encode(to encoder: Encoder) throws {
         var container = encoder.unkeyedContainer()
-        let superEncoder = container.superEncoder()
 
         for playable in hand {
+            let superEncoder = container.superEncoder()
             try playable.encode(to: superEncoder)
         }
     }
