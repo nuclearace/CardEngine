@@ -90,10 +90,6 @@ struct CountPhase : BuilderPhase {
 ///
 /// The deal phase is followed by the build phase.
 struct DealPhase : BuilderPhase {
-    private enum DealType : String {
-        case play, discard
-    }
-
     private typealias HandReducer = (kept: BuildersHand, play: BuildersHand)
 
     private(set) weak var context: BuildersBoard?
