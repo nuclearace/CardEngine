@@ -165,7 +165,6 @@ struct DealPhase : BuilderPhase {
     }
 
     private func getCardsToDiscard(fromPlayer player: BuilderPlayer) -> EventLoopFuture<Set<Int>> {
-        // TODO finish the rest of this, need to change this to the new signature, change dicts to actual types etc
         let input = player.getInput(
                 UserInteraction(type: .turn,
                                 interaction: BuildersInteraction(phase: .discard,
