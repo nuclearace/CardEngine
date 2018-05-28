@@ -11,7 +11,7 @@ public protocol BuildingBlock : BuildersPlayable {
 }
 
 /// The kinds of blocks that are available.
-public enum BuildingBlockType {
+public enum BuildingBlockType : String, Encodable {
     // TODO replace when this is first class in Swift
     /// All BuildingBlockType cases
     public static let allSkills: [BuildingBlockType] = [.wiring, .glass, .wood, .metal, .insulation]
@@ -59,7 +59,7 @@ public enum BuildingBlockType {
 }
 
 /// A playable material.
-public struct Material : BuildingBlock {
+public struct Material : BuildingBlock, Encodable {
     /// The type of this playable.
     public let playType = BuildersPlayType.material
 

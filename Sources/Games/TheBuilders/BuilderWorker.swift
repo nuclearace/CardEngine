@@ -14,7 +14,7 @@ public protocol Laborer : BuildersPlayable {
 }
 
 /// The type of a worker.
-public enum SkillType {
+public enum SkillType : String,  Encodable {
     // TODO replace when this is first class in Swift
     /// All BuildingBlockType cases
     public static let allSkills: [SkillType] = [.electrician, .foreman, .painter, .metalWorker, .fitter]

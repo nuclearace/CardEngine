@@ -5,7 +5,7 @@
 import Foundation
 
 /// An accident type. These are the different effects that can happen.
-public enum AccidentType {
+public enum AccidentType : Encodable {
     /// All accidents.
     public static let allAccidents: [AccidentType] = [.strike(.any)]
 
@@ -17,6 +17,15 @@ public enum AccidentType {
         switch self {
         case .strike:
             return 3
+        }
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var containter = encoder.singleValueContainer()
+
+        switch self {
+        case let .strike(type):
+            try containter.encode(type)
         }
     }
 
@@ -39,7 +48,7 @@ public enum AccidentType {
 }
 
 /// An accident playable. These cards affect the status of the game. Such as injuring workers or causing strikes.
-public struct Accident : BuildersPlayable {
+public struct Accident : BuildersPlayable, Encodable {
     /// The type of this playable.
     public let playType = BuildersPlayType.accident
 

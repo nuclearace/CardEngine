@@ -38,9 +38,8 @@ public protocol UserInterfacer {
 /// Protocol that declares the interface for interacting with users
 public protocol InteractablePlayer : Player {
     /// The input type.
-    associatedtype InteractionInputType = String
+    associatedtype InteractionType: Encodable
 
-    /// The type returned from interactions.
     associatedtype InteractionReturnType = String
 
     /// How the game interfaces with this player.
@@ -50,11 +49,11 @@ public protocol InteractablePlayer : Player {
     init(context: RulesType.ContextType, interfacer: UserInterfacer)
 
     /// Sends some data to the player.
-    func send(_ dialog: InteractionInputType)
+    func send(_ dialog: UserInteraction<InteractionType>)
 
     /// Gets some input from the user.
     ///
     /// - parameter object: The object to send to the player.
     /// - returns: The input from the user.
-    func getInput(_ object: InteractionInputType) -> InteractionReturnType
+    func getInput(_ object: UserInteraction<InteractionType>) -> InteractionReturnType
 }

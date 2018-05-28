@@ -3,6 +3,7 @@
 //
 
 import Foundation
+import Kit
 import NIO
 
 /// Represents a phase of a turn.
@@ -12,6 +13,21 @@ protocol BuilderPhase {
 
     /// Executes this phase with context.
     func doPhase() -> EventLoopFuture<()>
+}
+
+/// The names of player facing phases of a turn. These do not have to match the number of internal `BuilderPhase`s.
+public enum BuildersPlayerPhaseName : String, Encodable {
+    /// The player is going to place some cards on the board.
+    case play
+
+    /// The player is going to throw away some cards.
+    case discard
+
+    /// The player is going to draw some new cards.
+    case draw
+
+    /// This turn has progressed into the absolute phase of the game, the end.
+    case gameOver
 }
 
 private func newFuturePhase(to phase: BuilderPhase) -> EventLoopFuture<BuilderPhase> {
@@ -44,10 +60,7 @@ struct StartPhase : BuilderPhase {
     func doPhase() -> EventLoopFuture<()> {
         guard let context = context else { return deadGame }
 
-        context.activePlayer.send([
-            "event": BuilderEvent.turnStart.rawValue,
-            "data": []
-        ])
+        context.activePlayer.send(UserInteraction(type: .turnStart, interaction: BuildersInteraction()))
 
         return context.runLoop.newSucceededFuture(result: ())
     }
@@ -100,12 +113,11 @@ struct DealPhase : BuilderPhase {
 
             // Get the cards to play
             guard let played = self.playCards(cards, forPlayer: active, context: context) else {
-                active.send([
-                    "event": BuilderEvent.dialog.rawValue,
-                    "data": [
-                        "dialog": ["You played a card that you currently are unable to play"]
-                    ]
-                ])
+                active.send(
+                        UserInteraction(type: .playError,
+                                        interaction: BuildersInteraction(dialog: ["You played a card that you " +
+                                                "currently are unable to play"]))
+                )
 
                 return context.runLoop.newFailedFuture(error: BuildersError.badPlay)
             }
@@ -126,12 +138,11 @@ struct DealPhase : BuilderPhase {
 
             // TODO Should they have to play something?
             guard playedSomething || discardedSomething else {
-                active.send([
-                    "event": BuilderEvent.playError.rawValue,
-                    "data": [
-                        "dialog": ["You must do something!"]
-                    ]
-                ])
+                active.send(
+                        UserInteraction(type: .playError,
+                                        interaction: BuildersInteraction(dialog: ["You must do something!"]))
+                )
+
                 return context.runLoop.newFailedFuture(error: BuildersError.badPlay)
             }
 
@@ -142,24 +153,11 @@ struct DealPhase : BuilderPhase {
     private func getCardsToPlay(fromPlayer player: BuilderPlayer) -> EventLoopFuture<Set<Int>> {
         assert(context != nil)
 
-        // FIXME get rid of this send and let the front end handle showing the hand
-        player.send([
-            "event": BuilderEvent.dialog.rawValue,
-            "data": [
-                "dialog": [
-                    "Your cards in play:",
-                    context!.cardsInPlay[player, default: []].prettyPrinted()
-                ]
-            ]
-        ])
-
-        let input = player.getInput([
-            "event": BuilderEvent.turn.rawValue,
-            "data": [
-                "phase": DealType.play.rawValue,
-                "hand": player.hand.prettyPrinted() // TODO send proper object
-            ]
-        ])
+        let input = player.getInput(
+                UserInteraction(type: .turn,
+                                interaction: BuildersInteraction(phase: .play, hand: player.hand)
+                )
+        )
 
         return input.map({inputString in
             return self.parseInputCards(input: inputString, player: player, dealType: .play)
@@ -167,14 +165,12 @@ struct DealPhase : BuilderPhase {
     }
 
     private func getCardsToDiscard(fromPlayer player: BuilderPlayer) -> EventLoopFuture<Set<Int>> {
-        let input = player.getInput([
-            "event": BuilderEvent.turn.rawValue,
-            "data": [
-                "phase": DealType.discard.rawValue,
-                "hand": player.hand.prettyPrinted(), // TODO send proper object
-                "dialog": ["Would you like discard something?"]
-            ]
-        ])
+        // TODO finish the rest of this, need to change this to the new signature, change dicts to actual types etc
+        let input = player.getInput(
+                UserInteraction(type: .turn,
+                                interaction: BuildersInteraction(phase: .discard,
+                                                                 dialog: ["Would you like discard something?"],
+                                                                 hand: player.hand)))
 
         return input.map({inputString in
             return self.parseInputCards(input: inputString, player: player, dealType: .discard)
@@ -264,18 +260,14 @@ struct DrawPhase : BuilderPhase {
 
         let active: BuilderPlayer = context.activePlayer
 
-        return active.getInput([
-            "event": BuilderEvent.turn.rawValue,
-            "data": [
-                "phase": "draw",
-                "dialog": [
-                    "Draw:",
-                    "1: Worker",
-                    "2: Material",
-                    "3: Accident"
-                ]
-            ]
-       ]).then {input -> EventLoopFuture<()> in
+        return active.getInput(
+                UserInteraction(type: .turn,
+                                interaction: BuildersInteraction(phase: .draw, dialog: [
+                                    "Draw:",
+                                    "1: Worker",
+                                    "2: Material",
+                                    "3: Accident"
+                                ]))).then {input -> EventLoopFuture<()> in
             guard let playJson = parseGameMove(fromInput: input),
                   let drawType = playJson["draw"] as? Int else {
                 // TODO Should signal some error? How to do that?
@@ -307,7 +299,7 @@ struct EndPhase : BuilderPhase {
 
         let active = context.activePlayer
 
-        active.send(["event": BuilderEvent.turnEnd.rawValue, "data": []])
+        active.send(UserInteraction(type: .turnEnd, interaction: BuildersInteraction()))
 
         // Go through all active accidents increment the turn
         context.accidents[active] = context.accidents[active, default: []].map({accident in

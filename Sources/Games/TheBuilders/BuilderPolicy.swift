@@ -42,4 +42,3 @@ func parseGameMove(fromInput input: String) -> [String: Any]? {
 
     return json
 }
-

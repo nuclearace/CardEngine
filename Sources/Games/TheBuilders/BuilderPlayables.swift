@@ -6,7 +6,7 @@ import Foundation
 import Kit
 
 /// Represents a playable item in the The Builders.
-public protocol BuildersPlayable : Playable {
+public protocol BuildersPlayable : Playable, Encodable {
     /// The type of this playable.
     var playType: BuildersPlayType { get }
 
@@ -19,7 +19,7 @@ public protocol BuildersPlayable : Playable {
 }
 
 /// Represents the types of playables.
-public enum BuildersPlayType {
+public enum BuildersPlayType : String, Encodable {
     /// A material playable. These are used to construct parts of the structure.
     case material
 
@@ -32,6 +32,19 @@ public enum BuildersPlayType {
 
 /// A hand of BuildersPlayables
 internal typealias BuildersHand = [BuildersPlayable]
+
+struct EncodableHand : Encodable {
+    var hand: [BuildersPlayable]
+
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.unkeyedContainer()
+        let superEncoder = container.superEncoder()
+
+        for playable in hand {
+            try playable.encode(to: superEncoder)
+        }
+    }
+}
 
 extension Array where Element == BuildersPlayable {
     var accidents: [Accident] {

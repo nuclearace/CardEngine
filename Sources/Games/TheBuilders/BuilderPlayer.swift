@@ -17,6 +17,8 @@ public final class BuilderPlayer : InteractablePlayer {
 
     private unowned let context: BuildersBoard
 
+    private let encoder = JSONEncoder()
+
     /// The playable items that this player has. This are items that are not in play.
     public internal(set) var hand = [BuildersPlayable]() {
         didSet {
@@ -34,8 +36,8 @@ public final class BuilderPlayer : InteractablePlayer {
     }
 
     /// Prints some dialog to the player.
-    public func send(_ dialog: [String: Any]) {
-        guard let encoded = try? JSONSerialization.data(withJSONObject: dialog) else {
+    public func send(_ dialog: UserInteraction<BuildersInteraction>) {
+        guard let encoded = try? encoder.encode(dialog) else {
             fatalError("Error creating JSON for builders")
         }
 
@@ -46,8 +48,8 @@ public final class BuilderPlayer : InteractablePlayer {
     ///
     /// - parameter object: The object to send to the user.
     /// - returns: The input from the user.
-    public func getInput(_ dialog: [String: Any]) -> EventLoopFuture<String> {
-        guard let encoded = try? JSONSerialization.data(withJSONObject: dialog) else {
+    public func getInput(_ dialog: UserInteraction<BuildersInteraction>) -> EventLoopFuture<String> {
+        guard let encoded = try? encoder.encode(dialog) else {
             fatalError("Error creating JSON for builders")
         }
 
