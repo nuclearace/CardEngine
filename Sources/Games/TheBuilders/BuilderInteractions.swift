@@ -55,4 +55,36 @@ public struct BuildersInteraction : Encodable {
     }
 }
 
+/// Represents a response from a player.
+public enum BuildersPlayerResponse : Decodable {
+    /// The player is discarding some cards. The payload is an array of Int that represents the +1 index of the card.
+    case discard([Int])
 
+    /// The player is drawing some cards. The payload is a `BuildersPlayType` that is to be drawn.
+    case draw(BuildersPlayType)
+
+    /// The player is playing some cards. The payload is an array of Int that represents the +1 index of the card.
+    case play([Int])
+
+    public init(from decoder: Decoder) throws {
+        let con = try decoder.container(keyedBy: CodingKeys.self)
+
+        if let discard = try? con.decode([Int].self, forKey: .discard) {
+            self = .discard(discard)
+        } else if let drawType = try? con.decode(BuildersPlayType.self, forKey: .draw) {
+            self = .draw(drawType)
+        } else if let played = try? con.decode([Int].self, forKey: .play) {
+            self = .play(played)
+        } else {
+            throw BuildersPlayerResponseError.badInput
+        }
+    }
+
+    private enum CodingKeys : CodingKey {
+        case discard, draw, play
+    }
+
+    enum BuildersPlayerResponseError : Error {
+        case badInput
+    }
+}

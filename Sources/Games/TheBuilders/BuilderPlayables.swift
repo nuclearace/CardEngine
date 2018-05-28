@@ -19,7 +19,7 @@ public protocol BuildersPlayable : Playable, Encodable {
 }
 
 /// Represents the types of playables.
-public enum BuildersPlayType : String, Encodable {
+public enum BuildersPlayType : String, Codable {
     /// A material playable. These are used to construct parts of the structure.
     case material
 

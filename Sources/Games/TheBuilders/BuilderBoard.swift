@@ -70,6 +70,9 @@ public final class BuildersBoard : GameContext {
             return runLoop.newSucceededFuture(result: ())
         }
 
+        // TODO better rollback
+        let oldHand = activePlayer.hand
+
         return rules.executeTurn(forPlayer: activePlayer).then {[weak self] _ -> EventLoopFuture<()> in
             guard let this = self else { return deadGame }
 
@@ -79,16 +82,24 @@ public final class BuildersBoard : GameContext {
         }.thenIfError {[weak self] error in
             guard let this = self else { return deadGame }
 
-            switch error {
-            case let builderError as BuildersError where builderError == .gameDeath:
-                return deadGame
-            case let builderError as BuildersError where builderError == .badPlay:
+            func rollbackTurn() {
                 let active = this.activePlayer
 
                 // This wasn't a valid turn, decrement the accident turns
                 this.accidents[active] = this.accidents[active, default: []].map({accident in
                     return Accident(type: accident.type, turns: accident.turns - 1)
                 })
+
+                active.hand = oldHand
+            }
+
+            switch error {
+            case let builderError as BuildersError where builderError == .gameDeath:
+                return deadGame
+            case let builderError as BuildersError where builderError == .badPlay:
+                fallthrough
+            case is BuildersPlayerResponse.BuildersPlayerResponseError:
+                rollbackTurn()
 
                 return this.nextTurn()
             default:

@@ -159,8 +159,12 @@ struct DealPhase : BuilderPhase {
                 )
         )
 
-        return input.map({inputString in
-            return self.parseInputCards(input: inputString, player: player, dealType: .play)
+        return input.map({[handCount = player.hand.count] response in
+            guard case let .play(played) = response else {
+                return []
+            }
+
+            return DealPhase.filterInvalidCards(indexes: played, handCount: handCount)
         })
     }
 
@@ -172,19 +176,17 @@ struct DealPhase : BuilderPhase {
                                                                  dialog: ["Would you like discard something?"],
                                                                  hand: player.hand)))
 
-        return input.map({inputString in
-            return self.parseInputCards(input: inputString, player: player, dealType: .discard)
+        return input.map({[handCount = player.hand.count] response in
+            guard case let .discard(discarded) = response else {
+                return []
+            }
+
+            return DealPhase.filterInvalidCards(indexes: discarded, handCount: handCount)
         })
     }
 
-    private func parseInputCards(input: String, player: BuilderPlayer, dealType: DealType) -> Set<Int> {
-        guard let playJson = parseGameMove(fromInput: input),
-              let dealt = playJson[dealType.rawValue] as? [Int] else {
-            // TODO Should signal some error? How to do that?
-            return []
-        }
-
-        return Set(dealt.filter({ $0 > 0 && $0 <= player.hand.count }))
+    private static func filterInvalidCards(indexes: [Int], handCount: Int) -> Set<Int> {
+        return Set(indexes.filter({ $0 > 0 && $0 <= handCount }))
     }
 
     private func playCards(_ cards: Set<Int>, forPlayer player: BuilderPlayer, context: BuildersBoard) -> BuildersHand? {
@@ -267,22 +269,18 @@ struct DrawPhase : BuilderPhase {
                                     "1: Worker",
                                     "2: Material",
                                     "3: Accident"
-                                ]))).then {input -> EventLoopFuture<()> in
-            guard let playJson = parseGameMove(fromInput: input),
-                  let drawType = playJson["draw"] as? Int else {
-                // TODO Should signal some error? How to do that?
+                                ]))).then {response -> EventLoopFuture<()> in
+            guard case let .draw(drawType) = response else {
                 return self.getCards(needed: needed, drawn: drawn, context: context)
             }
 
             switch drawType {
-            case 1:
+            case .worker:
                 active.hand.append(Worker.getInstance())
-            case 2:
+            case .material:
                 active.hand.append(Material.getInstance())
-            case 3:
+            case .accident:
                 active.hand.append(Accident.getInstance())
-            default:
-                return self.getCards(needed: needed, drawn: drawn, context: context)
             }
 
             return self.getCards(needed: needed, drawn: drawn + 1, context: context)

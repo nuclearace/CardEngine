@@ -33,12 +33,3 @@ enum BuildersError : Error {
     /// The game has gone and died.
     case gameDeath
 }
-
-// TODO find a better place for this.
-func parseGameMove(fromInput input: String) -> [String: Any]? {
-    guard let json = try? JSONSerialization.jsonObject(with: input.data(using: .utf8)!) as? [String: Any] else {
-        return nil
-    }
-
-    return json
-}

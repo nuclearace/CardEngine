@@ -18,6 +18,7 @@ public final class BuilderPlayer : InteractablePlayer {
     private unowned let context: BuildersBoard
 
     private let encoder = JSONEncoder()
+    private let decoder = JSONDecoder()
 
     /// The playable items that this player has. This are items that are not in play.
     public internal(set) var hand = [BuildersPlayable]() {
@@ -48,7 +49,7 @@ public final class BuilderPlayer : InteractablePlayer {
     ///
     /// - parameter object: The object to send to the user.
     /// - returns: The input from the user.
-    public func getInput(_ dialog: UserInteraction<BuildersInteraction>) -> EventLoopFuture<String> {
+    public func getInput(_ dialog: UserInteraction<BuildersInteraction>) -> EventLoopFuture<BuildersPlayerResponse> {
         guard let encoded = try? encoder.encode(dialog) else {
             fatalError("Error creating JSON for builders")
         }
@@ -57,6 +58,8 @@ public final class BuilderPlayer : InteractablePlayer {
 
         interfacer.getInput(withDialog: String(data: encoded, encoding: .utf8)!, withPromise: p)
 
-        return p.futureResult
+        return p.futureResult.thenThrowing({[decoder = self.decoder] str in
+            return try decoder.decode(BuildersPlayerResponse.self, from: str.data(using: .utf8)!)
+        })
     }
 }
