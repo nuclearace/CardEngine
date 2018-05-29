@@ -7,14 +7,15 @@ import NIO
 
 /// Represents the state of a game.
 public protocol GameContext : AnyObject {
+    // MARK: Typealiases
+
     /// The type of game this context is playing.
     associatedtype RulesType: GameRules where RulesType.ContextType == Self
 
+    // MARK: Properties
+
     /// The name of this game.
     static var name: String { get }
-
-    /// Creates a new game controlled on `runLoop`.
-    init(runLoop: EventLoop)
 
     /// The player who is currently making moves
     var activePlayer: RulesType.PlayerType { get }
@@ -27,6 +28,11 @@ public protocol GameContext : AnyObject {
 
     /// The rules for the game executing in this context.
     var rules: RulesType! { get }
+
+    // MARK: Initializers
+
+    /// Creates a new game controlled on `runLoop`.
+    init(runLoop: EventLoop)
 
     /// Sets up this game with some players.
     func setupPlayers(_ players: [RulesType.PlayerType])
