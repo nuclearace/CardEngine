@@ -79,7 +79,7 @@ public struct Accident : BuildersPlayable, Encodable {
     ///
     /// - parameter playable: The `BuildersPlayable` that is being tested.
     /// - returns: Whether or not this accident is affecting the playable.
-    public func effectsPlayable(_ playable: BuildersPlayable) -> Bool {
+    public func affectsPlayable(_ playable: BuildersPlayable) -> Bool {
         switch (type, playable) {
         case let (.strike(skillType), worker as Worker):
             return worker.skill == skillType

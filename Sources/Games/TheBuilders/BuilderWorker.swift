@@ -93,7 +93,7 @@ extension Array where Element == Worker {
     func active(accountingFor accidents: [Accident]) -> [Worker] {
         return filter({worker in
             return accidents.reduce(true, {cur, accident in
-                return cur && !accident.effectsPlayable(worker)
+                return cur && !accident.affectsPlayable(worker)
             })
         })
     }
