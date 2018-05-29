@@ -34,6 +34,8 @@ public protocol GameContext : AnyObject {
     /// Creates a new game controlled on `runLoop`.
     init(runLoop: EventLoop)
 
+    // MARK: Methods
+
     /// Sets up this game with some players.
     func setupPlayers(_ players: [RulesType.PlayerType])
 

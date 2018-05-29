@@ -7,7 +7,11 @@ import NIO
 
 /// Represents a user.
 public protocol Player : AnyObject, Hashable {
+    // MARK: Typealiases
+
     associatedtype RulesType: GameRules where RulesType.PlayerType == Self
+
+    // MARK: Properties
 
     /// The unique identifier for this player.
     var id: UUID { get }
@@ -25,8 +29,12 @@ extension Player {
 
 /// Says that a type will be able to interface with a user.
 public protocol UserInterfacer {
+    // MARK: Properties
+
     /// The promise to the game that some input will be returned.
     var responsePromise: EventLoopPromise<String>? { get }
+
+    // MARK: Methods
 
     /// Sends a string to the user.
     func send(_ str: String)
@@ -37,16 +45,24 @@ public protocol UserInterfacer {
 
 /// Protocol that declares the interface for interacting with users
 public protocol InteractablePlayer : Player {
+    // MARK: Typealiases
+
     /// The input type.
     associatedtype InteractionType: Encodable
 
     associatedtype InteractionReturnType = String
 
+    // MARK: Properties
+
     /// How the game interfaces with this player.
     var interfacer: UserInterfacer { get }
 
+    // MARK: Initializers
+
     /// Creates a new `InteractablePlayer`.
     init(context: RulesType.ContextType, interfacer: UserInterfacer)
+
+    // MARK: Methods
 
     /// Sends some data to the player.
     func send(_ dialog: UserInteraction<InteractionType>)

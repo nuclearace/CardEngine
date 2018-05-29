@@ -6,6 +6,7 @@ import Foundation
 
 /// Represents the top level message structure that goes from the server to a player.
 public struct UserInteraction<InteractionType: Encodable> : Encodable {
+    // MARK: Properties
 
     // FIXME find a better name for the inner UserInteractionType
     /// The type of interaction this is.
@@ -13,6 +14,8 @@ public struct UserInteraction<InteractionType: Encodable> : Encodable {
 
     /// Represents the interaction for this message. This can be anything that is `Encodable`.
     public var interaction: InteractionType
+
+    // MARK: Initializers
 
     // TODO docstring
     public init(type: UserInteractionType, interaction: InteractionType) {

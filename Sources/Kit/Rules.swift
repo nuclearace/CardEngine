@@ -7,6 +7,8 @@ import Foundation
 /// Represents the rules of a game. This consists of what a turn looks like in the game, as well as determining when a
 /// game is over.
 public protocol GameRules {
+    // MARK: Typealiases
+
     associatedtype TurnReturnType
 
     /// The type of the context for these rules. Constrained to prevent mixing and matching Rules/Players/etc
@@ -15,8 +17,12 @@ public protocol GameRules {
     /// The type of the player for these rules. Constrained to prevent mixing and matching Rules/Players/etc
     associatedtype PlayerType: Player where PlayerType.RulesType == Self
 
+    // MARK: Properties
+
     /// The context these rules apply in.
     var context: ContextType { get }
+
+    // MARK: Methods
 
     /// Executes player's turn.
     ///
