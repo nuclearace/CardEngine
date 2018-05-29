@@ -57,7 +57,7 @@ public struct BuildersRules : GameRules {
             switch i {
             case 0...1:
                 player.hand.append(Worker.getInstance())
-            default:
+            case _:
                 player.hand.append(Material.getInstance())
             }
         }

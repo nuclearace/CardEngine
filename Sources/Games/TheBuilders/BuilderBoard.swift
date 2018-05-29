@@ -104,7 +104,7 @@ public final class BuildersBoard : GameContext {
                 rollbackTurn()
 
                 return this.nextTurn()
-            default:
+            case _:
                 fatalError("Unknown error")
             }
         }

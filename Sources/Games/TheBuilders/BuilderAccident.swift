@@ -75,7 +75,7 @@ public struct Accident : BuildersPlayable, Encodable {
         return true
     }
 
-    /// Whether or not this accident effects the given `BuildersPlayable`.
+    /// Whether or not this accident affects the given `BuildersPlayable`.
     ///
     /// - parameter playable: The `BuildersPlayable` that is being tested.
     /// - returns: Whether or not this accident is affecting the playable.
@@ -83,7 +83,7 @@ public struct Accident : BuildersPlayable, Encodable {
         switch (type, playable) {
         case let (.strike(skillType), worker as Worker):
             return worker.skill == skillType
-        default:
+        case _:
             return false
         }
     }
