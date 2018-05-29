@@ -4,10 +4,12 @@
 
 import Dispatch
 import Foundation
-import Games
 import Kit
 import NIO
 import WebSocket
+
+// Import the games
+import TheBuilders
 
 /// A namespace to wrap various lobbies.
 struct Lobbies {

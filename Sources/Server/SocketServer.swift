@@ -4,12 +4,14 @@
 
 import Foundation
 import Dispatch
-import Games
 import HTTP
 import NIO
 import Kit
 import Vapor
 import WebSocket
+
+// Import the games
+import TheBuilders
 
 let ws = HTTPServer.webSocketUpgrader(shouldUpgrade: {_ in [:] }, onUpgrade: handleUpgrade)
 
