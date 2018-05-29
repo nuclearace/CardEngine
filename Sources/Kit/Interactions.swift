@@ -5,10 +5,12 @@
 import Foundation
 
 /// Represents the top level message structure that goes from the server to a player.
+///
+/// Besides the `type`, the `interaction` is a generic type; the only thing it most conform to is `Encodable`.
+/// This allows games to customize the API that they wish to have.
 public struct UserInteraction<InteractionType: Encodable> : Encodable {
     // MARK: Properties
 
-    // FIXME find a better name for the inner UserInteractionType
     /// The type of interaction this is.
     public var type: UserInteractionType
 
