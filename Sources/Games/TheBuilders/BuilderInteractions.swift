@@ -7,10 +7,6 @@ import Kit
 
 /// An interaction with a Builders player.
 public struct BuildersInteraction : Encodable {
-    private enum CodingKeys : CodingKey {
-        case phase, dialog, winners, hand
-    }
-
     /// The name of this phase of a turn.
     public var phase: BuildersPlayerPhaseName?
 
@@ -52,6 +48,10 @@ public struct BuildersInteraction : Encodable {
         if let hand = self.hand {
             try container.encode(EncodableHand(hand: hand), forKey: .hand)
         }
+    }
+
+    private enum CodingKeys : CodingKey {
+        case phase, dialog, winners, hand
     }
 }
 

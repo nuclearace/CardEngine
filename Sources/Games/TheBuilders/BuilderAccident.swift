@@ -6,10 +6,6 @@ import Foundation
 
 /// An accident type. These are the different effects that can happen.
 public enum AccidentType : Encodable {
-    private enum CodingKeys : CodingKey {
-        case strike
-    }
-
     /// All accidents.
     public static let allAccidents: [AccidentType] = [.strike(.any)]
 
@@ -48,6 +44,10 @@ public enum AccidentType : Encodable {
         case let .strike(type):
             try containter.encode(type, forKey: .strike)
         }
+    }
+
+    private enum CodingKeys : CodingKey {
+        case strike
     }
 }
 
