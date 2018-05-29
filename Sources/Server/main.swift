@@ -16,18 +16,27 @@ struct HelloResponder : HTTPServerResponder {
 let server: HTTPServer
 let group = MultiThreadedEventLoopGroup(numThreads: System.coreCount)
 
+defer { try! group.syncShutdownGracefully() }
+
 do {
-    server = try HTTPServer.start(
+    print("Starting server with \(System.coreCount) threads")
+
+    let futureServer = HTTPServer.start(
             hostname: Environment.get("HOST") ?? "127.0.0.1",
             port: 8080,
             responder: HelloResponder(),
             upgraders: [ws],
             on: group
     ) {error in
-        return
-    }.wait()
+        fatalError("Error starting server \(error)")
+    }
 
-    print("Starting server")
+    print("Waiting for server")
+
+    server = try futureServer.wait()
+
+    print("Server started")
+
     try server.onClose.wait()
 } catch {
     print(error)

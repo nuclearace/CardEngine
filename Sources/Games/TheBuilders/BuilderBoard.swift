@@ -105,7 +105,7 @@ public final class BuildersBoard : GameContext {
 
                 return this.nextTurn()
             case _:
-                fatalError("Unknown error")
+                fatalError("Unknown error \(error)")
             }
         }
     }

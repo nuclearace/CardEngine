@@ -41,7 +41,7 @@ public enum SkillType : String,  Encodable {
     public static var randomSkill: SkillType {
         let rand: Int
 
-        // FIXME replace with native random in Swift X
+        // FIXME replace with native random in Swift 4.2
         #if os(macOS)
         rand = Int(arc4random_uniform(UInt32(allSkills.count)))
         #else

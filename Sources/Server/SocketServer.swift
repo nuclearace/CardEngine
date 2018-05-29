@@ -11,8 +11,6 @@ import Kit
 import Vapor
 import WebSocket
 
-// TODO lobby
-
 let ws = HTTPServer.webSocketUpgrader(shouldUpgrade: {_ in [:] }, onUpgrade: handleUpgrade)
 
 private func handleUpgrade(_ websocket: WebSocket, _ request: HTTPRequest) {

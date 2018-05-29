@@ -28,7 +28,7 @@ public enum AccidentType : Encodable {
         #if os(macOS)
         rand = Int(arc4random_uniform(UInt32(allAccidents.count)))
         #else
-        rand = Int(random()) % allSkills.count
+        rand = Int(random()) % allAccidents.count
         #endif
 
         switch allAccidents[rand] {
