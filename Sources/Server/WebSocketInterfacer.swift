@@ -7,9 +7,6 @@ import NIO
 import Kit
 import WebSocket
 
-// Import the games
-import TheBuilders
-
 /// A type for interacting with a user over a WebSocket.
 final class WebSocketInterfacer<T: GameContext> : UserInterfacer {
     private(set) var responsePromise: EventLoopPromise<String>?
