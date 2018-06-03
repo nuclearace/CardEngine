@@ -162,12 +162,12 @@ public extension DefaultPlayingCard {
                 let rand: Int
 
                 #if os(macOS)
-                    rand = Int(arc4random_uniform(UInt32(range.upperBound + 1)))
+                    rand = range.lowerBound + Int(arc4random_uniform(UInt32(range.upperBound - range.lowerBound + 1)))
                 #else
-                    rand = Int(random()) % range.upperBound + 1
+                    rand = (Int(random()) % range.upperBound - range.lowerBound + 1) + range.lowerBound
                 #endif
 
-                return .pip(rand >= range.lowerBound ? rand : range.lowerBound)
+                return .pip(rand)
             case .jack:
                 return .jack
             case .queen:
