@@ -3,6 +3,7 @@
 //
 
 import Foundation
+import Kit
 
 /// Represents a type that can be used to construct the building.
 public protocol BuildingBlock : BuildersPlayable {
@@ -11,10 +12,10 @@ public protocol BuildingBlock : BuildersPlayable {
 }
 
 /// The kinds of blocks that are available.
-public enum BuildingBlockType : String, Encodable {
+public enum BuildingBlockType : String, Encodable, RandomCasable {
     // TODO replace when this is first class in Swift
     /// All BuildingBlockType cases
-    public static let allSkills: [BuildingBlockType] = [.wiring, .glass, .wood, .metal, .insulation]
+    public static let allCases: [BuildingBlockType] = [.wiring, .glass, .wood, .metal, .insulation]
 
     /// Windows are a must.
     case glass
@@ -42,20 +43,6 @@ public enum BuildingBlockType : String, Encodable {
             return .metalWorker
         }
     }
-
-    /// A random type.
-    public static var randomType: BuildingBlockType {
-        // FIXME replace with native random in Swift X
-        let rand: Int
-
-        #if os(macOS)
-        rand = Int(arc4random_uniform(UInt32(allSkills.count)))
-        #else
-        rand = Int(random()) % allSkills.count
-        #endif
-
-        return allSkills[rand]
-    }
 }
 
 /// A playable material.
@@ -78,6 +65,6 @@ public struct Material : BuildingBlock, Encodable {
     }
 
     public static func getInstance() -> Material {
-        return Material(blockType: .randomType)
+        return Material(blockType: .randomCase)
     }
 }

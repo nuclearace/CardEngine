@@ -3,11 +3,12 @@
 //
 
 import Foundation
+import Kit
 
 /// An accident type. These are the different effects that can happen.
-public enum AccidentType : Encodable {
+public enum AccidentType : Encodable, RandomCasable {
     /// All accidents.
-    public static let allAccidents: [AccidentType] = [.strike(.any)]
+    public static let allCases: [AccidentType] = [.strike(.any)]
 
     /// A strike. This causes all workers of a certain `SkillType` to be taken out of play for 3 turns.
     case strike(SkillType)
@@ -17,23 +18,6 @@ public enum AccidentType : Encodable {
         switch self {
         case .strike:
             return 3
-        }
-    }
-
-    /// A random skill.
-    public static var randomAccident: AccidentType {
-        let rand: Int
-
-        // FIXME replace with native random in Swift 4.2
-        #if os(macOS)
-        rand = Int(arc4random_uniform(UInt32(allAccidents.count)))
-        #else
-        rand = Int(random()) % allAccidents.count
-        #endif
-
-        switch allAccidents[rand] {
-        case .strike:
-            return .strike(.randomSkill)
         }
     }
 
@@ -90,7 +74,7 @@ public struct Accident : BuildersPlayable, Encodable {
 
     /// Creates a random instance of this playable.
     public static func getInstance() -> Accident {
-        return Accident(type: .randomAccident)
+        return Accident(type: .randomCase)
     }
 }
 

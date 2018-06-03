@@ -3,6 +3,7 @@
 //
 
 import Foundation
+import Kit
 
 /// Represents someone who labors. These guys build stuff.
 public protocol Laborer : BuildersPlayable {
@@ -14,10 +15,10 @@ public protocol Laborer : BuildersPlayable {
 }
 
 /// The type of a worker.
-public enum SkillType : String,  Encodable {
+public enum SkillType : String, Encodable, RandomCasable {
     // TODO replace when this is first class in Swift
     /// All BuildingBlockType cases
-    public static let allSkills: [SkillType] = [.electrician, .foreman, .painter, .metalWorker, .fitter]
+    public static let allCases: [SkillType] = [.electrician, .foreman, .painter, .metalWorker, .fitter]
 
     /// A special skill that is a placeholder for all skills.
     case any
@@ -36,20 +37,6 @@ public enum SkillType : String,  Encodable {
 
     /// A fitter. These guys work with finer things like windows and paneling.
     case fitter
-
-    /// A random skill.
-    public static var randomSkill: SkillType {
-        let rand: Int
-
-        // FIXME replace with native random in Swift 4.2
-        #if os(macOS)
-        rand = Int(arc4random_uniform(UInt32(allSkills.count)))
-        #else
-        rand = Int(random()) % allSkills.count
-        #endif
-
-        return allSkills[rand]
-    }
 }
 
 /// Represents a worker. These guys build stuff.
@@ -74,7 +61,7 @@ public struct Worker : Laborer {
 
     /// Creates a random worker.
     public static func getInstance() -> Worker {
-        return Worker(skill: .randomSkill, skillLevel: 1.0)
+        return Worker(skill: .randomCase, skillLevel: 1.0)
     }
 }
 

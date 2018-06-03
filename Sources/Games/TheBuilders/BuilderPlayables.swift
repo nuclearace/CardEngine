@@ -33,6 +33,7 @@ public enum BuildersPlayType : String, Codable {
 /// A hand of BuildersPlayables
 internal typealias BuildersHand = [BuildersPlayable]
 
+/// A type that allows an array of arbitrary `BuildersPlayable`'s to to encoded.
 struct EncodableHand : Encodable {
     var hand: [BuildersPlayable]
 
