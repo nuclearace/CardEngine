@@ -116,7 +116,7 @@ public extension DefaultPlayingCard {
                 return
             }
 
-            switch (try? con.decode(String.self)) {
+            switch try? con.decode(String.self) {
             case "jack"?:
                 self = .jack
             case "queen"?:
