@@ -38,7 +38,6 @@ private func newFuturePhase(to phase: BuilderPhase) -> EventLoopFuture<BuilderPh
     return context.runLoop.newSucceededFuture(result: phase)
 }
 
-
 func ~~> (lhs: BuilderPhase, rhs: BuilderPhase) -> EventLoopFuture<BuilderPhase> {
     return lhs.doPhase().then({_ in
         return newFuturePhase(to: rhs)

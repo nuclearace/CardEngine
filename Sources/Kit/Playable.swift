@@ -12,11 +12,12 @@ public protocol Playable {
     static func getInstance() -> Self
 }
 
-// TODO Remove this protocol when this is properly added to Swift
+// TODO Make this protocol a refinement of `CaseIterable` in Swift 4.2
 /// A mixin-protocol that lets you get a random instance of an enum case
 public protocol RandomCasable {
     // MARK: Properties
 
+    // TODO Remove when this protocol is a refinement of `CaseIterable`
     /// The set of cases for this enum
     static var allCases: [Self] { get }
 
