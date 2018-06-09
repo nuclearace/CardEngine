@@ -280,6 +280,8 @@ struct DrawPhase : BuilderPhase {
             }
 
             return self.getCards(needed: needed, drawn: drawn + 1, context: context)
+        }.thenIfError {_ in
+            return self.getCards(needed: needed, drawn: drawn, context: context)
         }
     }
 }
