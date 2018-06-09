@@ -4,7 +4,7 @@ import Kit
 import NIO
 import TheBuilders
 
-let group = MultiThreadedEventLoopGroup(numThreads: 1)
+let group = MultiThreadedEventLoopGroup(numberOfThreads: 1)
 let loop = group.next()
 let theBuilders = BuildersBoard(runLoop: loop)
 
