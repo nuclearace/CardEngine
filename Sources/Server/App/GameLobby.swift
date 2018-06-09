@@ -91,7 +91,7 @@ final class DefaultLobby<Game: GameContext> : GameLobby where Game.RulesType.Pla
     private func startNewGame() {
         precondition(waitingPlayers.count >= 2, "Should have two players waiting to start a game")
 
-        let board = GameType(runLoop: group.next())
+        let board = GameType(runLoop: MultiThreadedEventLoopGroup.currentEventLoop!)
         let players = [
             GameType.RulesType.PlayerType(context: board,
                                           interfacer: WebSocketInterfacer(ws: waitingPlayers[0].ws,
@@ -111,3 +111,11 @@ final class DefaultLobby<Game: GameContext> : GameLobby where Game.RulesType.Pla
     }
 }
 
+func gameStopped<T: GameContext>(_ game: T) {
+    switch game {
+    case let game as BuildersBoard:
+        Lobbies.buildersLobby.removeGame(game)
+    case _:
+        return
+    }
+}

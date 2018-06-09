@@ -17,7 +17,10 @@ let package = Package(
     targets: [
         .target(name: "Runner", dependencies: ["Kit", "TheBuilders", "NIO"]),
         .target(name: "Kit", dependencies: ["NIO"]),
-        .target(name: "Server", dependencies: ["Vapor", "TheBuilders"]),
+
+        // Server targets
+        .target(name: "ServerApp", dependencies: ["Vapor", "TheBuilders"], path: "Sources/Server/App"),
+        .target(name: "Server", dependencies: ["ServerApp", "Vapor"], path: "Sources/Server/Run"),
 
         // Game modules go here
         .target(name: "TheBuilders", dependencies: ["Kit", "NIO"], path: "Sources/Games/TheBuilders"),
