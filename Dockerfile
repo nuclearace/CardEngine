@@ -13,4 +13,4 @@ ENV PATH ./.build/x86_64-unknown-linux/debug:$PATH
 
 EXPOSE 8080
 
-CMD ./.build/x86_64-unknown-linux/debug/Server
+CMD ./.build/x86_64-unknown-linux/debug/Server --hostname 0.0.0.0

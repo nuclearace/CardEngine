@@ -3,6 +3,7 @@
 //
 
 import HTTP
+import Service
 import Vapor
 import WebSocket
 
@@ -24,25 +25,9 @@ public func configure(_ config: inout Config, _ env: inout Environment, _ servic
     services.register(middlewares)
 
     // Setup WS
-    // Create a new NIO websocket server
     let wss = NIOWebSocketServer.default()
-
     wss.get("join", use: handleUpgrade)
-
     services.register(wss, as: WebSocketServer.self)
-
-    // Configure a SQLite database
-//    let sqlite = try SQLiteDatabase(storage: .memory)
-//
-//    /// Register the configured SQLite database to the database config.
-//    var databases = DatabasesConfig()
-//    databases.add(database: sqlite, as: .sqlite)
-//    services.register(databases)
-//
-//    /// Configure migrations
-//    var migrations = MigrationConfig()
-//    services.register(migrations)
-
 }
 
 
