@@ -129,7 +129,7 @@ struct DealPhase : BuilderPhase {
             // Discard those cards
             discardedSomething = cards.count > 0
 
-            active.hand = active.hand.enumerated().filter({ !cards.contains($0.offset + 1) }).map({ $0.element })
+            active.hand = active.hand.enumerated().filter({ !cards.contains($0.offset) }).map({ $0.element })
 
             // TODO Should they have to play something?
             guard playedSomething || discardedSomething else {
@@ -180,14 +180,14 @@ struct DealPhase : BuilderPhase {
     }
 
     private static func filterInvalidCards(indexes: [Int], handCount: Int) -> Set<Int> {
-        return Set(indexes.filter({ $0 > 0 && $0 <= handCount }))
+        return Set(indexes.filter({ $0 >= 0 && $0 <= handCount }))
     }
 
     private func playCards(_ cards: Set<Int>, forPlayer player: BuilderPlayer, context: BuildersBoard) -> BuildersHand? {
         // Split into kept and played
         let enumeratedHand = player.hand.enumerated()
         let (kept, played) = enumeratedHand.reduce(into: ([], []), {(reducer: inout HandReducer, playable) in
-            switch cards.contains(playable.offset + 1) {
+            switch cards.contains(playable.offset) {
             case true:
                 reducer.play.append(playable.element)
             case false:

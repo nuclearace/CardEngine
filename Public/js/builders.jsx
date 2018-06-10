@@ -19,15 +19,34 @@ export class BuildersGame extends Component {
         // Bind this
         this.playCards = this.playCards.bind(this);
         this.playCard = this.playCard.bind(this);
+        this.discardCards = this.discardCards.bind(this);
+    }
+
+    discardCard(cardNum) {
+        this.setState(prevState => {
+            const newPlay = prevState.cardsToDiscard.slice();
+
+            newPlay.push(cardNum);
+
+            return {
+                turn: 'play',
+                hand: prevState.hand,
+                cardsToDiscard: newPlay
+            }
+        });
+    }
+
+    discardCards() {
+        this.ws.send(JSON.stringify({
+            'discard': this.state.cardsToDiscard
+        }))
     }
 
     parseMessage(messageObject) {
         switch (messageObject['type']) {
         case 'playError':
-            this.setState(BuildersGame.cleanState);
-            break;
         case 'turnStart':
-            console.log('start turn');
+            this.setState(BuildersGame.cleanState());
             break;
         case 'turn':
             this.parseTurn(messageObject['interaction']);
@@ -42,6 +61,16 @@ export class BuildersGame extends Component {
         switch (turnObject['phase']) {
         case 'play':
             this.setState({turn: 'play', hand: turnObject['hand']});
+            break;
+        case 'discard':
+            this.setState(() => {
+                const state = BuildersGame.cleanState();
+
+                state.turn = 'discard';
+                state.hand = turnObject['hand'];
+
+                return state;
+            });
             break;
         default:
             console.error(`unhandled turn ${JSON.stringify(turnObject)}`);
@@ -59,13 +88,13 @@ export class BuildersGame extends Component {
                 hand: prevState.hand,
                 cardsToPlay: newPlay
             }
-        })
+        });
     }
 
     playCards() {
         this.ws.send(JSON.stringify({
-            "play": this.state.cardsToPlay
-        }))
+            'play': this.state.cardsToPlay
+        }));
     }
 
     static cleanState() {
@@ -74,6 +103,7 @@ export class BuildersGame extends Component {
         state.turn = null;
         state.hand = [];
         state.cardsToPlay = [];
+        state.cardsToDiscard = [];
 
         return state;
     }
@@ -87,6 +117,15 @@ export class BuildersGame extends Component {
                                 onPlay={this.playCard}
                                 hide={this.state.cardsToPlay}/>
                     <button onClick={this.playCards}>Play selected cards</button>
+                </div>
+            );
+        case 'discard':
+            return (
+                <div>
+                    <PlayerHand hand={this.state.hand}
+                                onPlay={this.discardCard}
+                                hide={this.state.cardsToDiscard}/>
+                    <button onClick={this.playCards}>Discard selected cards</button>
                 </div>
             );
         default:
@@ -123,7 +162,7 @@ class PlayerCard extends Component {
         return (
             <li>
                 <span>
-                    <button onClick={this.props.onPlay} disabled={this.props.hide}>Play</button>
+                    <button onClick={this.props.onPlay} disabled={this.props.hide}>Select</button>
                     Type {type}
                 </span>
             </li>
