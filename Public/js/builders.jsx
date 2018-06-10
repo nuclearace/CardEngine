@@ -19,6 +19,7 @@ export class BuildersGame extends Component {
         // Bind this
         this.playCards = this.playCards.bind(this);
         this.playCard = this.playCard.bind(this);
+        this.discardCard = this.discardCard.bind(this);
         this.discardCards = this.discardCards.bind(this);
     }
 
@@ -29,7 +30,6 @@ export class BuildersGame extends Component {
             newPlay.push(cardNum);
 
             return {
-                turn: 'play',
                 hand: prevState.hand,
                 cardsToDiscard: newPlay
             }
@@ -84,7 +84,6 @@ export class BuildersGame extends Component {
             newPlay.push(cardNum);
 
             return {
-                turn: 'play',
                 hand: prevState.hand,
                 cardsToPlay: newPlay
             }
@@ -125,7 +124,7 @@ export class BuildersGame extends Component {
                     <PlayerHand hand={this.state.hand}
                                 onPlay={this.discardCard}
                                 hide={this.state.cardsToDiscard}/>
-                    <button onClick={this.playCards}>Discard selected cards</button>
+                    <button onClick={this.discardCards}>Discard selected cards</button>
                 </div>
             );
         default:
