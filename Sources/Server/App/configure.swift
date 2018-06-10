@@ -19,9 +19,14 @@ func configure(_ config: inout Config, _ env: inout Environment, _ services: ino
     services.register(router, as: Router.self)
 
     // Register middleware
-    var middlewares = MiddlewareConfig() // Create _empty_ middleware config
-    // middlewares.use(FileMiddleware.self) // Serves files from `Public/` directory
-    middlewares.use(ErrorMiddleware.self) // Catches errors and converts to HTTP response
+    var middlewares = MiddlewareConfig()
+
+    // Serve static files in debug builds
+    if !env.isRelease {
+        middlewares.use(FileMiddleware.self)
+    }
+
+    middlewares.use(ErrorMiddleware.self)
     services.register(middlewares)
 
     // Setup WS
@@ -49,6 +54,7 @@ private func handleUpgrade(_ websocket: WebSocket, _ request: Request) {
         case BuildersBoard.name:
             Lobbies.buildersLobby.addPlayerToWait(websocket)
         case _:
+            websocket.close()
             return
         }
     }
