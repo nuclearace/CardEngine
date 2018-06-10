@@ -189,15 +189,31 @@ class PlayerHand extends Component {
 
 class PlayerCard extends Component {
     render() {
+        const card = this.props.card;
         const type = this.props.card.playType;
 
         return (
             <li>
                 <span>
                     <button onClick={this.props.onPlay} disabled={this.props.hide}>Select</button>
-                    Type {type}
+                    Type {PlayerCard.getInner(type, card)}
                 </span>
             </li>
         )
+    }
+
+    static getInner(type, card) {
+        switch (type) {
+        case 'worker':
+            return `Worker => Skill: ${card['skill']}, Skill level: ${card['skillLevel']}`;
+        case 'material':
+            return `Material => Block type ${card['blockType']}`;
+        case 'accident':
+            const accident = card['type'];
+
+            if ('strike' in accident) {
+                return `Accident => Effects: ${card['type']['strike']}`;
+            }
+        }
     }
 }

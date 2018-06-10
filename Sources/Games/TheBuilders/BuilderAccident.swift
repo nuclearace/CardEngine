@@ -13,6 +13,10 @@ public enum AccidentType : Encodable, RandomCasable {
     /// A strike. This causes all workers of a certain `SkillType` to be taken out of play for 3 turns.
     case strike(SkillType)
 
+    public static var randomCase: AccidentType {
+        return .strike(.randomCase)
+    }
+
     /// The number of turns this accident is active.
     var turnsActive: Int {
         switch self {
