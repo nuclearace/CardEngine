@@ -14,11 +14,7 @@ export class BuildersGame extends Component {
             this.parseMessage(JSON.parse(event.data));
         });
 
-        this.state = {};
-        this.state.turn = null;
-        this.state.messages = [];
-        this.state.hand = [];
-        this.state.cardsToPlay = [];
+        this.state = BuildersGame.cleanState();
 
         // Bind this
         this.playCards = this.playCards.bind(this);
@@ -27,6 +23,9 @@ export class BuildersGame extends Component {
 
     parseMessage(messageObject) {
         switch (messageObject['type']) {
+        case 'playError':
+            this.setState(BuildersGame.cleanState);
+            break;
         case 'turnStart':
             console.log('start turn');
             break;
@@ -69,6 +68,16 @@ export class BuildersGame extends Component {
         }))
     }
 
+    static cleanState() {
+        const state = {};
+
+        state.turn = null;
+        state.hand = [];
+        state.cardsToPlay = [];
+
+        return state;
+    }
+
     render() {
         switch (this.state.turn) {
         case 'play':
@@ -81,7 +90,7 @@ export class BuildersGame extends Component {
                 </div>
             );
         default:
-            return <h2>'Waiting!'</h2>;
+            return <h2>Waiting!</h2>;
         }
     }
 }
