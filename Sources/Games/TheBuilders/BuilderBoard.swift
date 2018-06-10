@@ -123,6 +123,11 @@ public final class BuildersBoard : GameContext {
     public func startGame() {
         runLoop.execute {
             self.rules.setupGame()
+
+            for player in self.players {
+                player.send(UserInteraction(type: .gameStart, interaction: BuildersInteraction()))
+            }
+
             #if DEBUG
             print("start first turn")
             #endif

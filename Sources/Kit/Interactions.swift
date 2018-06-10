@@ -31,6 +31,9 @@ public enum UserInteractionType : String, Encodable {
     /// Sent when the server has a message that should be shown.
     case dialog
 
+    /// Sent when the game starts.
+    case gameStart
+
     /// The game has ended.
     case gameOver
 
