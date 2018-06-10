@@ -21,6 +21,7 @@ export class BuildersGame extends Component {
         this.playCard = this.playCard.bind(this);
         this.discardCard = this.discardCard.bind(this);
         this.discardCards = this.discardCards.bind(this);
+        this.draw = this.draw.bind(this);
     }
 
     discardCard(cardNum) {
@@ -39,13 +40,20 @@ export class BuildersGame extends Component {
     discardCards() {
         this.ws.send(JSON.stringify({
             'discard': this.state.cardsToDiscard
-        }))
+        }));
+    }
+
+    draw(type) {
+        this.ws.send(JSON.stringify({
+            'draw': type
+        }));
     }
 
     parseMessage(messageObject) {
         switch (messageObject['type']) {
         case 'playError':
         case 'turnStart':
+        case 'turnEnd':
             this.setState(BuildersGame.cleanState());
             break;
         case 'turn':
@@ -68,6 +76,15 @@ export class BuildersGame extends Component {
 
                 state.turn = 'discard';
                 state.hand = turnObject['hand'];
+
+                return state;
+            });
+            break;
+        case 'draw':
+            this.setState(() => {
+                const state = BuildersGame.cleanState();
+
+                state.turn = 'draw';
 
                 return state;
             });
@@ -125,6 +142,22 @@ export class BuildersGame extends Component {
                                 onPlay={this.discardCard}
                                 hide={this.state.cardsToDiscard}/>
                     <button onClick={this.discardCards}>Discard selected cards</button>
+                </div>
+            );
+        case 'draw':
+            return (
+                <div>
+                    What would you like to draw?
+                    <ul>
+                        {['worker', 'material', 'accident'].map(type => {
+                            return (
+                                <li key={type}>
+                                    <button onClick={() => this.draw(type)}>Draw</button>
+                                    {type.charAt(0).toUpperCase() + type.slice(1)}
+                                </li>
+                            );
+                        })}
+                    </ul>
                 </div>
             );
         default:
