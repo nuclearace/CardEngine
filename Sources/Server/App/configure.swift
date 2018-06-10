@@ -15,7 +15,7 @@ func configure(_ config: inout Config, _ env: inout Environment, _ services: ino
 
     // Register routes to the router
     let router = EngineRouter.default()
-    try routes(router)
+    try routes(router, env)
     services.register(router, as: Router.self)
 
     // Register middleware
