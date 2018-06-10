@@ -76,7 +76,7 @@ public enum BuildersPlayerResponse : Decodable {
         } else if let played = try? con.decode([Int].self, forKey: .play) {
             self = .play(played)
         } else {
-            throw BuildersPlayerResponseError.badInput
+            throw ResponseError.badInput
         }
     }
 
@@ -84,7 +84,7 @@ public enum BuildersPlayerResponse : Decodable {
         case discard, draw, play
     }
 
-    enum BuildersPlayerResponseError : Error {
+    enum ResponseError : Error {
         case badInput
     }
 }

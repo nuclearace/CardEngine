@@ -100,7 +100,7 @@ public final class BuildersBoard : GameContext {
                 return deadGame
             case let builderError as BuildersError where builderError == .badPlay:
                 fallthrough
-            case is BuildersPlayerResponse.BuildersPlayerResponseError:
+            case is BuildersPlayerResponse.ResponseError:
                 rollbackTurn()
 
                 return this.nextTurn()
