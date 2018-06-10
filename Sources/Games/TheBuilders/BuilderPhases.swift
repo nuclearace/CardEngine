@@ -166,9 +166,7 @@ struct DealPhase : BuilderPhase {
     private func getCardsToDiscard(fromPlayer player: BuilderPlayer) -> EventLoopFuture<Set<Int>> {
         let input = player.getInput(
                 UserInteraction(type: .turn,
-                                interaction: BuildersInteraction(phase: .discard,
-                                                                 dialog: ["Would you like discard something?"],
-                                                                 hand: player.hand)))
+                                interaction: BuildersInteraction(phase: .discard, hand: player.hand)))
 
         return input.map({[handCount = player.hand.count] response in
             guard case let .discard(discarded) = response else {
@@ -260,12 +258,8 @@ struct DrawPhase : BuilderPhase {
 
         return active.getInput(
                 UserInteraction(type: .turn,
-                                interaction: BuildersInteraction(phase: .draw, dialog: [
-                                    "Draw:",
-                                    "1: Worker",
-                                    "2: Material",
-                                    "3: Accident"
-                                ]))).then {response -> EventLoopFuture<()> in
+                                interaction: BuildersInteraction(phase: .draw)))
+                .then {response -> EventLoopFuture<()> in
             guard case let .draw(drawType) = response else {
                 return self.getCards(needed: needed, drawn: drawn, context: context)
             }

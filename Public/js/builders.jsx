@@ -129,6 +129,7 @@ export class BuildersGame extends Component {
         case 'play':
             return (
                 <div>
+                    Would you like to play something?
                     <PlayerHand hand={this.state.hand}
                                 onPlay={this.playCard}
                                 hide={this.state.cardsToPlay}/>
@@ -138,6 +139,7 @@ export class BuildersGame extends Component {
         case 'discard':
             return (
                 <div>
+                    Would you like to discard something?
                     <PlayerHand hand={this.state.hand}
                                 onPlay={this.discardCard}
                                 hide={this.state.cardsToDiscard}/>
