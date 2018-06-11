@@ -25,10 +25,10 @@ extension BuilderPhase {
         let hands = context.cardsInPlay.reduce(into: [String: EncodableHand](), {cur, keyValue in
             cur[keyValue.key.id.uuidString] = EncodableHand(hand: keyValue.value)
         })
+        let interaction = BuildersInteraction(gameState: BuildersState(cardsInPlay: hands))
 
         for player in context.players {
-            player.send(UserInteraction(type: .gameState,
-                                        interaction: BuildersInteraction(gameState: BuildersState(cardsInPlay: hands))))
+            player.send(UserInteraction(type: .gameState, interaction: interaction))
         }
     }
 }
