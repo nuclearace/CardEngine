@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import '../css/App.css';
-import { BuildersGame } from './builders';
+import { BuildersGame } from './builders/components';
 
 class App extends Component {
     render() {

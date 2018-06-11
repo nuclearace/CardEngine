@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import { BuildersCallbacks, BuildersState } from './helpers';
 
 export class BuildersGame extends Component {
     constructor(props) {
@@ -108,7 +109,7 @@ export class BuildersGame extends Component {
     }
 
     render() {
-        return <BuildersGameView game={this.state.gameState} callbacks={new BuilderCallbacks(this)}/>
+        return <BuildersGameView game={this.state.gameState} callbacks={new BuildersCallbacks(this)}/>
     }
 }
 
@@ -204,32 +205,5 @@ class PlayerCard extends Component {
                 return `Accident => Effects: ${card['type']['strike']}`;
             }
         }
-    }
-}
-
-class BuildersState {
-    constructor(prev) {
-        if (prev !== undefined) {
-            // TODO Maybe use a lib like immutable?
-            this.turn = prev.turn;
-            this.hand = prev.hand.slice();
-            this.cardsToPlay = prev.cardsToPlay.slice();
-            this.cardsToDiscard = prev.cardsToDiscard.slice();
-        } else {
-            this.turn = null;
-            this.hand = [];
-            this.cardsToPlay = [];
-            this.cardsToDiscard = [];
-        }
-    }
-}
-
-class BuilderCallbacks {
-    constructor(game) {
-        this.playCard = game.playCard.bind(game);
-        this.playCards = game.playCards.bind(game);
-        this.discardCard = game.discardCard.bind(game);
-        this.discardCards = game.discardCards.bind(game);
-        this.draw = game.draw.bind(game);
     }
 }
