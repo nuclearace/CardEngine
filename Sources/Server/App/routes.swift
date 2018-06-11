@@ -11,7 +11,7 @@ import Vapor
 func routes(_ router: Router, _ env: Environment) throws {
     // Basic "Hello, world!" example
     router.get("/") {req in
-        return "Hello, world!"
+        return req.redirect(to: "/index.html")
     }
 
     guard !env.isRelease else { return }
