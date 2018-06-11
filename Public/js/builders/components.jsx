@@ -120,44 +120,44 @@ class BuildersGameView extends Component {
         const callbacks = this.props.callbacks;
 
         switch (turn) {
-            case 'play':
-                return (
-                    <div>
-                        Would you like to play something?
-                        <PlayerHand hand={hand}
-                                    onPlay={callbacks.playCard}
-                                    hide={this.props.game.cardsToPlay}/>
-                        <button onClick={callbacks.playCards}>Play selected cards</button>
-                    </div>
-                );
-            case 'discard':
-                return (
-                    <div>
-                        Would you like to discard something?
-                        <PlayerHand hand={hand}
-                                    onPlay={callbacks.discardCard}
-                                    hide={this.props.game.cardsToDiscard}/>
-                        <button onClick={callbacks.discardCards}>Discard selected cards</button>
-                    </div>
-                );
-            case 'draw':
-                return (
-                    <div>
-                        What would you like to draw?
-                        <ul>
-                            {['worker', 'material', 'accident'].map(type => {
-                                return (
-                                    <li key={type}>
-                                        <button onClick={() => callbacks.draw(type)}>Draw</button>
-                                        {type.charAt(0).toUpperCase() + type.slice(1)}
-                                    </li>
-                                );
-                            })}
-                        </ul>
-                    </div>
-                );
-            default:
-                return <h2>Waiting!</h2>;
+        case 'play':
+            return (
+                <div>
+                    Would you like to play something?
+                    <PlayerHand hand={hand}
+                                onPlay={callbacks.playCard}
+                                hide={this.props.game.cardsToPlay}/>
+                    <button onClick={callbacks.playCards}>Play selected cards</button>
+                </div>
+            );
+        case 'discard':
+            return (
+                <div>
+                    Would you like to discard something?
+                    <PlayerHand hand={hand}
+                                onPlay={callbacks.discardCard}
+                                hide={this.props.game.cardsToDiscard}/>
+                    <button onClick={callbacks.discardCards}>Discard selected cards</button>
+                </div>
+            );
+        case 'draw':
+            return (
+                <div>
+                    What would you like to draw?
+                    <ul>
+                        {['worker', 'material', 'accident'].map(type => {
+                            return (
+                                <li key={type}>
+                                    <button onClick={() => callbacks.draw(type)}>Draw</button>
+                                    {type.charAt(0).toUpperCase() + type.slice(1)}
+                                </li>
+                            );
+                        })}
+                    </ul>
+                </div>
+            );
+        default:
+            return <h2>Waiting!</h2>;
         }
     }
 }
