@@ -34,6 +34,9 @@ public enum UserInteractionType : String, Encodable {
     /// Sent when the game starts.
     case gameStart
 
+    /// Sent to display state of the game. Such as cards in play.
+    case gameState
+
     /// The game has ended.
     case gameOver
 

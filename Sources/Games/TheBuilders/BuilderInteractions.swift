@@ -13,6 +13,9 @@ public struct BuildersInteraction : Encodable {
     /// Any text that should be displayed to the player.
     public var dialog: [String]?
 
+    /// The state of a game.
+    public var gameState: BuildersState?
+
     /// The winners of this game.
     public var winners: [String]?
 
@@ -20,12 +23,16 @@ public struct BuildersInteraction : Encodable {
     public var hand: [BuildersPlayable]?
 
     // TODO docstring
-    public init(phase: BuildersPlayerPhaseName? = nil,
-                dialog: [String]? = nil,
-                winners: [String]? = nil,
-                hand: [BuildersPlayable]? = nil) {
+    public init(
+            phase: BuildersPlayerPhaseName? = nil,
+            dialog: [String]? = nil,
+            gameState: BuildersState? = nil,
+            winners: [String]? = nil,
+            hand: [BuildersPlayable]? = nil
+    ) {
         self.phase = phase
         self.dialog = dialog
+        self.gameState = gameState
         self.winners = winners
         self.hand = hand
     }
@@ -41,6 +48,10 @@ public struct BuildersInteraction : Encodable {
             try container.encode(dialog, forKey: .dialog)
         }
 
+        if let state = self.gameState {
+            try container.encode(state, forKey: .gameState)
+        }
+
         if let winners = self.winners {
             try container.encode(winners, forKey: .winners)
         }
@@ -51,7 +62,7 @@ public struct BuildersInteraction : Encodable {
     }
 
     private enum CodingKeys : CodingKey {
-        case phase, dialog, winners, hand
+        case phase, dialog, gameState, winners, hand
     }
 }
 
@@ -87,4 +98,11 @@ public enum BuildersPlayerResponse : Decodable {
     enum ResponseError : Error {
         case badInput
     }
+}
+
+/// Represents the state of a builders game
+public struct BuildersState : Encodable {
+    // TODO player names
+    /// The cards that are currently in play.
+    var cardsInPlay: [String: EncodableHand]
 }

@@ -11,8 +11,26 @@ protocol BuilderPhase {
     /// The context that everything is working in.
     var context: BuildersBoard? { get }
 
+    /// Whether or not this phase should send syncing to players.
+    var shouldSync: Bool { get }
+
     /// Executes this phase with context.
     func doPhase() -> EventLoopFuture<()>
+}
+
+extension BuilderPhase {
+    func syncState() {
+        guard shouldSync, let context = context else { return }
+
+        let hands = context.cardsInPlay.reduce(into: [String: EncodableHand](), {cur, keyValue in
+            cur[keyValue.key.id.uuidString] = EncodableHand(hand: keyValue.value)
+        })
+
+        for player in context.players {
+            player.send(UserInteraction(type: .gameState,
+                                        interaction: BuildersInteraction(gameState: BuildersState(cardsInPlay: hands))))
+        }
+    }
 }
 
 /// The names of player facing phases of a turn. These do not have to match the number of internal `BuilderPhase`s.
@@ -39,6 +57,8 @@ private func newFuturePhase(to phase: BuilderPhase) -> EventLoopFuture<BuilderPh
 }
 
 func ~~> (lhs: BuilderPhase, rhs: BuilderPhase) -> EventLoopFuture<BuilderPhase> {
+    lhs.syncState()
+
     return lhs.doPhase().then({_ in
         return newFuturePhase(to: rhs)
     })
@@ -46,6 +66,8 @@ func ~~> (lhs: BuilderPhase, rhs: BuilderPhase) -> EventLoopFuture<BuilderPhase>
 
 func ~~> (lhs: EventLoopFuture<BuilderPhase>, rhs: BuilderPhase) -> EventLoopFuture<BuilderPhase> {
     return lhs.then({phase in
+        phase.syncState()
+
         return phase.doPhase().then({_ in
             return newFuturePhase(to: rhs)
         })
@@ -54,6 +76,8 @@ func ~~> (lhs: EventLoopFuture<BuilderPhase>, rhs: BuilderPhase) -> EventLoopFut
 
 /// The start of a turn.
 struct StartPhase : BuilderPhase {
+    let shouldSync = false
+
     private(set) weak var context: BuildersBoard?
 
     func doPhase() -> EventLoopFuture<()> {
@@ -69,6 +93,8 @@ struct StartPhase : BuilderPhase {
 ///
 /// The count phase is followed by the deal phase.
 struct CountPhase : BuilderPhase {
+    let shouldSync = false
+
     private(set) weak var context: BuildersBoard?
 
     func doPhase() -> EventLoopFuture<()> {
@@ -90,6 +116,8 @@ struct CountPhase : BuilderPhase {
 /// The deal phase is followed by the build phase.
 struct DealPhase : BuilderPhase {
     private typealias HandReducer = (kept: BuildersHand, play: BuildersHand)
+
+    let shouldSync = true
 
     private(set) weak var context: BuildersBoard?
 
@@ -210,6 +238,8 @@ struct DealPhase : BuilderPhase {
 ///
 /// The build phase is followed by the draw phase.
 struct BuildPhase : BuilderPhase {
+    let shouldSync = false
+
     private(set) weak var context: BuildersBoard?
 
     func doPhase() -> EventLoopFuture<()> {
@@ -237,6 +267,8 @@ struct BuildPhase : BuilderPhase {
 ///
 /// The draw phase concludes a turn.
 struct DrawPhase : BuilderPhase {
+    let shouldSync = true
+
     private(set) weak var context: BuildersBoard?
 
     func doPhase() -> EventLoopFuture<()> {
@@ -282,6 +314,8 @@ struct DrawPhase : BuilderPhase {
 
 /// The last phase in a turn. This does any cleanup to put the context in a good state for the next player.
 struct EndPhase : BuilderPhase {
+    let shouldSync = false
+
     private(set) weak var context: BuildersBoard?
 
     func doPhase() -> EventLoopFuture<()> {
@@ -301,6 +335,8 @@ struct EndPhase : BuilderPhase {
 
     static func ~~> (lhs: EventLoopFuture<BuilderPhase>, rhs: EndPhase) -> EventLoopFuture<()> {
         return lhs.then {phase in
+            phase.syncState()
+
             return phase.doPhase().then({_ in rhs.doPhase() })
         }
     }
