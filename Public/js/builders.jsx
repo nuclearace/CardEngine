@@ -14,32 +14,22 @@ export class BuildersGame extends Component {
             this.parseMessage(JSON.parse(event.data));
         });
 
-        this.state = BuildersGame.cleanState();
-
-        // Bind this
-        this.playCards = this.playCards.bind(this);
-        this.playCard = this.playCard.bind(this);
-        this.discardCard = this.discardCard.bind(this);
-        this.discardCards = this.discardCards.bind(this);
-        this.draw = this.draw.bind(this);
+        this.state = {gameState: new BuildersState()};
     }
 
     discardCard(cardNum) {
         this.setState(prevState => {
-            const newPlay = prevState.cardsToDiscard.slice();
+            const newState = new BuildersState(prevState.gameState);
 
-            newPlay.push(cardNum);
+            newState.cardsToDiscard.push(cardNum);
 
-            return {
-                hand: prevState.hand,
-                cardsToDiscard: newPlay
-            }
+            return {gameState: newState};
         });
     }
 
     discardCards() {
         this.ws.send(JSON.stringify({
-            'discard': this.state.cardsToDiscard
+            'discard': this.state.gameState.cardsToDiscard
         }));
     }
 
@@ -54,7 +44,7 @@ export class BuildersGame extends Component {
         case 'playError':
         case 'turnStart':
         case 'turnEnd':
-            this.setState(BuildersGame.cleanState());
+            this.setState({gameState: new BuildersState()});
             break;
         case 'turn':
             this.parseTurn(messageObject['interaction']);
@@ -68,25 +58,32 @@ export class BuildersGame extends Component {
     parseTurn(turnObject) {
         switch (turnObject['phase']) {
         case 'play':
-            this.setState({turn: 'play', hand: turnObject['hand']});
+            this.setState(() => {
+                const state = new BuildersState();
+
+                state.turn = 'play';
+                state.hand = turnObject['hand'];
+
+                return {gameState: state};
+            });
             break;
         case 'discard':
             this.setState(() => {
-                const state = BuildersGame.cleanState();
+                const state = new BuildersState();
 
                 state.turn = 'discard';
                 state.hand = turnObject['hand'];
 
-                return state;
+                return {gameState: state};
             });
             break;
         case 'draw':
             this.setState(() => {
-                const state = BuildersGame.cleanState();
+                const state = new BuildersState();
 
                 state.turn = 'draw';
 
-                return state;
+                return {gameState: state};
             });
             break;
         default:
@@ -96,96 +93,86 @@ export class BuildersGame extends Component {
 
     playCard(cardNum) {
         this.setState(prevState => {
-            const newPlay = prevState.cardsToPlay.slice();
+            const newState = new BuildersState(prevState.gameState);
 
-            newPlay.push(cardNum);
+            newState.cardsToPlay.push(cardNum);
 
-            return {
-                hand: prevState.hand,
-                cardsToPlay: newPlay
-            }
+            return {gameState: newState};
         });
     }
 
     playCards() {
         this.ws.send(JSON.stringify({
-            'play': this.state.cardsToPlay
+            'play': this.state.gameState.cardsToPlay
         }));
     }
 
-    static cleanState() {
-        const state = {};
-
-        state.turn = null;
-        state.hand = [];
-        state.cardsToPlay = [];
-        state.cardsToDiscard = [];
-
-        return state;
-    }
-
     render() {
-        switch (this.state.turn) {
-        case 'play':
-            return (
-                <div>
-                    Would you like to play something?
-                    <PlayerHand hand={this.state.hand}
-                                onPlay={this.playCard}
-                                hide={this.state.cardsToPlay}/>
-                    <button onClick={this.playCards}>Play selected cards</button>
-                </div>
-            );
-        case 'discard':
-            return (
-                <div>
-                    Would you like to discard something?
-                    <PlayerHand hand={this.state.hand}
-                                onPlay={this.discardCard}
-                                hide={this.state.cardsToDiscard}/>
-                    <button onClick={this.discardCards}>Discard selected cards</button>
-                </div>
-            );
-        case 'draw':
-            return (
-                <div>
-                    What would you like to draw?
-                    <ul>
-                        {['worker', 'material', 'accident'].map(type => {
-                            return (
-                                <li key={type}>
-                                    <button onClick={() => this.draw(type)}>Draw</button>
-                                    {type.charAt(0).toUpperCase() + type.slice(1)}
-                                </li>
-                            );
-                        })}
-                    </ul>
-                </div>
-            );
-        default:
-            return <h2>Waiting!</h2>;
+        return <BuildersGameView game={this.state.gameState} callbacks={new BuilderCallbacks(this)}/>
+    }
+}
+
+class BuildersGameView extends Component {
+    render() {
+        const turn = this.props.game.turn;
+        const hand = this.props.game.hand;
+        const callbacks = this.props.callbacks;
+
+        switch (turn) {
+            case 'play':
+                return (
+                    <div>
+                        Would you like to play something?
+                        <PlayerHand hand={hand}
+                                    onPlay={callbacks.playCard}
+                                    hide={this.props.game.cardsToPlay}/>
+                        <button onClick={callbacks.playCards}>Play selected cards</button>
+                    </div>
+                );
+            case 'discard':
+                return (
+                    <div>
+                        Would you like to discard something?
+                        <PlayerHand hand={hand}
+                                    onPlay={callbacks.discardCard}
+                                    hide={this.props.game.cardsToDiscard}/>
+                        <button onClick={callbacks.discardCards}>Discard selected cards</button>
+                    </div>
+                );
+            case 'draw':
+                return (
+                    <div>
+                        What would you like to draw?
+                        <ul>
+                            {['worker', 'material', 'accident'].map(type => {
+                                return (
+                                    <li key={type}>
+                                        <button onClick={() => callbacks.draw(type)}>Draw</button>
+                                        {type.charAt(0).toUpperCase() + type.slice(1)}
+                                    </li>
+                                );
+                            })}
+                        </ul>
+                    </div>
+                );
+            default:
+                return <h2>Waiting!</h2>;
         }
     }
 }
 
 class PlayerHand extends Component {
     render() {
-        this.onPlay = this.props.onPlay;
-
         return (
             <ul>
                 {this.props.hand.map((card, i) => {
                     return <PlayerCard key={i}
                                        card={card}
-                                       onPlay={() => this.playCard(i)}
+                                       onPlay={() => this.props.onPlay(i)}
                                        hide={this.props.hide.indexOf(i) !== -1} />;
                 })}
             </ul>
         )
-    }
-
-    playCard(cardNum) {
-        this.onPlay(cardNum);
     }
 }
 
@@ -217,5 +204,32 @@ class PlayerCard extends Component {
                 return `Accident => Effects: ${card['type']['strike']}`;
             }
         }
+    }
+}
+
+class BuildersState {
+    constructor(prev) {
+        if (prev !== undefined) {
+            // TODO Maybe use a lib like immutable?
+            this.turn = prev.turn;
+            this.hand = prev.hand.slice();
+            this.cardsToPlay = prev.cardsToPlay.slice();
+            this.cardsToDiscard = prev.cardsToDiscard.slice();
+        } else {
+            this.turn = null;
+            this.hand = [];
+            this.cardsToPlay = [];
+            this.cardsToDiscard = [];
+        }
+    }
+}
+
+class BuilderCallbacks {
+    constructor(game) {
+        this.playCard = game.playCard.bind(game);
+        this.playCards = game.playCards.bind(game);
+        this.discardCard = game.discardCard.bind(game);
+        this.discardCards = game.discardCards.bind(game);
+        this.draw = game.draw.bind(game);
     }
 }
