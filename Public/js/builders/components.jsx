@@ -185,8 +185,9 @@ class PlayerCard extends Component {
         return (
             <li>
                 <span>
-                    <button onClick={this.props.onPlay} disabled={this.props.hide}>Select</button>
-                    Type {PlayerCard.getInner(type, card)}
+                    <button onClick={this.props.onPlay} disabled={this.props.hide}>
+                        Select
+                    </button> {PlayerCard.getInner(type, card)}
                 </span>
             </li>
         )
