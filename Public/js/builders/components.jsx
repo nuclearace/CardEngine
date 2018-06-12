@@ -65,10 +65,10 @@ export class BuildersGame extends Component {
             this.setState((prevState) => {
                 const state = new BuildersState(prevState.gameState);
 
-                state.winner = messageObject['interaction']['winners'][0]
+                state.winner = messageObject['interaction']['winners'][0];
 
                 return {gameState: state};
-            })
+            });
             break;
         case 'turn':
             this.parseTurn(messageObject['interaction']);

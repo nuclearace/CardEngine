@@ -84,7 +84,7 @@ extension Array where Element == BuildersPlayable {
                 return true
             case .material where second.playType != .worker:
                 return true
-            default:
+            case _:
                 return false
             }
         })
