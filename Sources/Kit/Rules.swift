@@ -24,10 +24,8 @@ public protocol GameRules {
 
     // MARK: Methods
 
-    /// Executes player's turn.
-    ///
-    /// - parameter forPlayer: The player whose turn it is.
-    mutating func executeTurn(forPlayer player: PlayerType) -> TurnReturnType
+    /// Executes a turn. Depending on the game, this might involve just one player, or many.
+    mutating func executeTurn() -> TurnReturnType
 
     /// Calculates whether or not this game is over, returning the winning players.
     ///

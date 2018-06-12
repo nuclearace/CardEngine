@@ -19,12 +19,10 @@ public struct BuildersRules : GameRules {
         self.context = context
     }
 
-    /// Executes player's turn.
-    ///
-    /// - parameter forPLayer: The player whose turn it is.
-    public mutating func executeTurn(forPlayer player: BuilderPlayer) -> EventLoopFuture<()> {
+    /// Executes a turn.
+    public mutating func executeTurn() -> EventLoopFuture<()> {
         #if DEBUG
-        print("\(player.id)'s turn")
+        print("\(context.activePlayer.id)'s turn")
         #endif
 
         moveCount += 1

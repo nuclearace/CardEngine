@@ -75,7 +75,7 @@ public final class BuildersBoard : GameContext {
         // TODO better rollback
         let oldHand = activePlayer.hand
 
-        return rules.executeTurn(forPlayer: activePlayer).then {[weak self] _ -> EventLoopFuture<()> in
+        return rules.executeTurn().then {[weak self] _ -> EventLoopFuture<()> in
             guard let this = self else { return deadGame }
 
             this.players = Array(this.players[1...]) + [this.activePlayer]
