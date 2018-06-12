@@ -148,7 +148,7 @@ struct DealPhase : BuilderPhase {
             playedSomething = played.count > 0
 
             return context.runLoop.newSucceededFuture(result: ())
-        }.then {_ -> EventLoopFuture<Set<Int>> in
+        }.then {_ -> EventLoopFuture<[BuildersPlayable]> in
             // Get cards to discard
             return self.getCardsToDiscard(fromPlayer: active)
         }.then {[weak context] cards -> EventLoopFuture<()> in
@@ -157,7 +157,9 @@ struct DealPhase : BuilderPhase {
             // Discard those cards
             discardedSomething = cards.count > 0
 
-            active.hand = active.hand.enumerated().filter({ !cards.contains($0.offset) }).map({ $0.element })
+            active.hand = active.hand.lazy.filter({cardInHand in
+                return !cards.contains(where: { $0 == cardInHand })
+            })
 
             // TODO Should they have to play something?
             guard playedSomething || discardedSomething else {
@@ -173,7 +175,7 @@ struct DealPhase : BuilderPhase {
         }
     }
 
-    private func getCardsToPlay(fromPlayer player: BuilderPlayer) -> EventLoopFuture<Set<Int>> {
+    private func getCardsToPlay(fromPlayer player: BuilderPlayer) -> EventLoopFuture<[BuildersPlayable]> {
         assert(context != nil)
 
         let input = player.getInput(
@@ -182,42 +184,45 @@ struct DealPhase : BuilderPhase {
                 )
         )
 
-        return input.map({[handCount = player.hand.count] response in
+        return input.map({[hand = player.hand] response in
             guard case let .play(played) = response else {
                 return []
             }
 
-            return DealPhase.filterInvalidCards(indexes: played, handCount: handCount)
+            return DealPhase.filterInvalidCards(hand: hand, toPlay: Set(played))
         })
     }
 
-    private func getCardsToDiscard(fromPlayer player: BuilderPlayer) -> EventLoopFuture<Set<Int>> {
+    private func getCardsToDiscard(fromPlayer player: BuilderPlayer) -> EventLoopFuture<[BuildersPlayable]> {
         let input = player.getInput(
                 UserInteraction(type: .turn,
                                 interaction: BuildersInteraction(phase: .discard, hand: player.hand)))
 
-        return input.map({[handCount = player.hand.count] response in
+        return input.map({[hand = player.hand] response in
             guard case let .discard(discarded) = response else {
                 return []
             }
 
-            return DealPhase.filterInvalidCards(indexes: discarded, handCount: handCount)
+            return DealPhase.filterInvalidCards(hand: hand, toPlay: Set(discarded))
         })
     }
 
-    private static func filterInvalidCards(indexes: [Int], handCount: Int) -> Set<Int> {
-        return Set(indexes.filter({ $0 >= 0 && $0 <= handCount }))
+    private static func filterInvalidCards(hand: [BuildersPlayable], toPlay: Set<String>) -> [BuildersPlayable] {
+        return hand.filter({ toPlay.contains($0.id.uuidString) })
     }
 
-    private func playCards(_ cards: Set<Int>, forPlayer player: BuilderPlayer, context: BuildersBoard) -> BuildersHand? {
+    private func playCards(
+        _ cards: [BuildersPlayable],
+        forPlayer player: BuilderPlayer,
+        context: BuildersBoard
+    ) -> BuildersHand? {
         // Split into kept and played
-        let enumeratedHand = player.hand.enumerated()
-        let (kept, played) = enumeratedHand.reduce(into: ([], []), {(reducer: inout HandReducer, playable) in
-            switch cards.contains(playable.offset) {
+        let (kept, played) = player.hand.reduce(into: ([], []), {(reducer: inout HandReducer, playable) in
+            switch cards.contains(where: { $0 == playable }) {
             case true:
-                reducer.play.append(playable.element)
+                reducer.play.append(playable)
             case false:
-                reducer.kept.append(playable.element)
+                reducer.kept.append(playable)
             }
         })
 

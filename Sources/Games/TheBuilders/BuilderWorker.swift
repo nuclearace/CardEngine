@@ -44,6 +44,9 @@ public struct Worker : Laborer {
     /// The type of this playable.
     public let playType = BuildersPlayType.worker
 
+    /// The id of this worker.
+    public let id = UUID()
+
     /// The skill of this laborer.
     public let skill: SkillType
 

@@ -10,12 +10,20 @@ public protocol BuildersPlayable : Playable, Encodable {
     /// The type of this playable.
     var playType: BuildersPlayType { get }
 
+    /// The id of this playable.
+    var id: UUID { get }
+
     // TODO this should probably be defined on `Playable` but that needs associated types setup
     /// Returns whether or not this playable can be played by player.
     ///
     /// - parameter inContext: The context this playable is being used in.
     /// - parameter byPlayer: The player playing.
     func canPlay(inContext context: BuildersBoard, byPlayer player: BuilderPlayer) -> Bool
+}
+
+// TODO whenever Swift allows generalizied existentials, we can directly conform BuildersPlayable to hashable
+func == (lhs: BuildersPlayable, rhs: BuildersPlayable) -> Bool {
+    return lhs.id == rhs.id
 }
 
 /// Represents the types of playables.
@@ -40,7 +48,7 @@ struct EncodableHand : Encodable {
     func encode(to encoder: Encoder) throws {
         var container = encoder.unkeyedContainer()
 
-        for playable in hand {
+        for playable in hand.displaySorted() {
             try playable.encode(to: container.superEncoder())
         }
     }
@@ -61,6 +69,25 @@ extension Array where Element == BuildersPlayable {
 
     func prettyPrinted() -> String {
         return enumerated().map({ "\($0.offset + 1): \($0.element)\n" }).joined()
+    }
+
+    /// Sorts the player's hand in an order that makes the most sense to be displayed:
+    /// 1. Workers
+    /// 2. Material
+    /// 3. Accidents
+    ///
+    /// - returns: The hand sorted in the display order.
+    func displaySorted() -> [BuildersPlayable] {
+        return self.sorted(by: {first, second in
+            switch first.playType {
+            case .worker:
+                return true
+            case .material where second.playType != .worker:
+                return true
+            default:
+                return false
+            }
+        })
     }
 }
 

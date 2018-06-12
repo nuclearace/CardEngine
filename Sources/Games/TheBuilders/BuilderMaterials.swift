@@ -50,6 +50,9 @@ public struct Material : BuildingBlock, Encodable {
     /// The type of this playable.
     public let playType = BuildersPlayType.material
 
+    /// The id of this material.
+    public let id = UUID()
+
     /// The type of this building block.
     public let blockType: BuildingBlockType
 

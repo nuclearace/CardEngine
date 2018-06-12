@@ -44,6 +44,9 @@ public struct Accident : BuildersPlayable, Encodable {
     /// The type of this playable.
     public let playType = BuildersPlayType.accident
 
+    /// The id of this accident.
+    public let id = UUID()
+
     /// The type of this accident.
     public let type: AccidentType
 

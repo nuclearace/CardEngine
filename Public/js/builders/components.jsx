@@ -184,11 +184,13 @@ class PlayerHand extends Component {
     render() {
         return (
             <ul>
-                {this.props.hand.map((card, i) => {
-                    return <PlayerCard key={i}
+                {this.props.hand.map(card => {
+                    const id = card['id'];
+
+                    return <PlayerCard key={id}
                                        card={card}
-                                       onPlay={() => this.props.onPlay(i)}
-                                       hide={this.props.hide.indexOf(i) !== -1} />;
+                                       onPlay={() => this.props.onPlay(id)}
+                                       hide={this.props.hide.indexOf(id) !== -1} />;
                 })}
             </ul>
         )
