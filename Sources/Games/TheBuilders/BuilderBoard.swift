@@ -125,7 +125,8 @@ public final class BuildersBoard : GameContext {
             self.rules.setupGame()
 
             for player in self.players {
-                player.send(UserInteraction(type: .gameStart, interaction: BuildersInteraction()))
+                let interaction = BuildersInteraction(gameState: BuildersState(id: player.id.uuidString))
+                player.send(UserInteraction(type: .gameStart, interaction: interaction))
             }
 
             #if DEBUG

@@ -41,12 +41,20 @@ final class WebSocketInterfacer<T: GameContext> : UserInterfacer {
 
     func send(_ str: String) {
         wsEventLoop.execute {
+            #if DEBUG
+                print("Sending", str)
+            #endif
+
             self.ws.send(str)
         }
     }
 
     func getInput(withDialog dialog: String, withPromise promise: EventLoopPromise<String>) {
         wsEventLoop.execute {
+            #if DEBUG
+                print("Sending", dialog)
+            #endif
+
             self.responsePromise = promise
             self.ws.send(dialog)
         }

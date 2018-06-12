@@ -15,7 +15,7 @@ export class BuildersGame extends Component {
             this.parseMessage(JSON.parse(event.data));
         });
 
-        this.state = {gameState: new BuildersState()};
+        this.state = {gameState: new BuildersState(), id: ''};
     }
 
     discardCard(cardNum) {
@@ -47,6 +47,20 @@ export class BuildersGame extends Component {
         case 'turnEnd':
             this.setState({gameState: new BuildersState()});
             break;
+        case 'gameState':
+            this.setState((prevState) => {
+               const newState = new BuildersState(prevState.gameState);
+
+               newState.cardsInPlay = messageObject['interaction']['gameState']['cardsInPlay'];
+
+               return {gameState: newState};
+            });
+            break;
+        case 'gameStart':
+            this.setState((prevState) => {
+                return {gameState: prevState.gameState, id: messageObject['interaction']['gameState']['id']}
+            })
+            break;
         case 'turn':
             this.parseTurn(messageObject['interaction']);
             break;
@@ -59,8 +73,8 @@ export class BuildersGame extends Component {
     parseTurn(turnObject) {
         switch (turnObject['phase']) {
         case 'play':
-            this.setState(() => {
-                const state = new BuildersState();
+            this.setState((prevState) => {
+                const state = new BuildersState(prevState.gameState);
 
                 state.turn = 'play';
                 state.hand = turnObject['hand'];
@@ -69,8 +83,8 @@ export class BuildersGame extends Component {
             });
             break;
         case 'discard':
-            this.setState(() => {
-                const state = new BuildersState();
+            this.setState((prevState) => {
+                const state = new BuildersState(prevState.gameState);
 
                 state.turn = 'discard';
                 state.hand = turnObject['hand'];
@@ -79,8 +93,8 @@ export class BuildersGame extends Component {
             });
             break;
         case 'draw':
-            this.setState(() => {
-                const state = new BuildersState();
+            this.setState((prevState) => {
+                const state = new BuildersState(prevState.gameState);
 
                 state.turn = 'draw';
 
@@ -109,7 +123,9 @@ export class BuildersGame extends Component {
     }
 
     render() {
-        return <BuildersGameView game={this.state.gameState} callbacks={new BuildersCallbacks(this)}/>
+        return <BuildersGameView game={this.state.gameState}
+                                 callbacks={new BuildersCallbacks(this)}
+                                 id={this.state.id} />
     }
 }
 
@@ -123,10 +139,12 @@ class BuildersGameView extends Component {
         case 'play':
             return (
                 <div>
+                    <InPlay cardsInPlay={this.props.game.cardsInPlay[this.props.id]} />
+
                     Would you like to play something?
                     <PlayerHand hand={hand}
                                 onPlay={callbacks.playCard}
-                                hide={this.props.game.cardsToPlay}/>
+                                hide={this.props.game.cardsToPlay} />
                     <button onClick={callbacks.playCards}>Play selected cards</button>
                 </div>
             );
@@ -177,20 +195,51 @@ class PlayerHand extends Component {
     }
 }
 
+// TODO Merge this and PlayerHand?
+class InPlay extends Component {
+    render() {
+        if (this.props.cardsInPlay === undefined || this.props.cardsInPlay.length === 0) {
+            return '';
+        }
+
+        return (
+            <div>
+                Your cards in play:
+                <ul>
+                    {this.props.cardsInPlay.map((card, i) => {
+                        return <PlayerCard key={i} card={card} />;
+                    })}
+                </ul>
+            </div>
+        );
+    }
+}
+
 class PlayerCard extends Component {
     render() {
         const card = this.props.card;
         const type = this.props.card.playType;
 
-        return (
-            <li>
-                <span>
-                    <button onClick={this.props.onPlay} disabled={this.props.hide}>
-                        Select
-                    </button> {PlayerCard.getInner(type, card)}
-                </span>
-            </li>
-        )
+        if (this.props.onPlay === undefined) {
+            return (
+                <li>
+                    <span>
+                        {PlayerCard.getInner(type, card)}
+                    </span>
+                </li>
+            )
+        } else {
+            return (
+                <li>
+                    <span>
+                        <button onClick={this.props.onPlay} disabled={this.props.hide}>
+                            Select
+                        </button>
+                        {PlayerCard.getInner(type, card)}
+                    </span>
+                </li>
+            );
+        }
     }
 
     static getInner(type, card) {

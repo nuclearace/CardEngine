@@ -5,6 +5,7 @@
 import Foundation
 import Kit
 
+// TODO don't make this public
 /// An interaction with a Builders player.
 public struct BuildersInteraction : Encodable {
     /// The name of this phase of a turn.
@@ -22,7 +23,14 @@ public struct BuildersInteraction : Encodable {
     /// This player's hand.
     public var hand: [BuildersPlayable]?
 
-    // TODO docstring
+    /// Creates a new `BuildersInteraction` with the given values. All parameters are optional.
+    ///
+    /// - parameter phase: What phase of a turn this interaction is for.
+    /// - parameter dialog: Any text that should be shown to the user. This should be reserved for things the client
+    ///                     couldn't know. Such as errors or events.
+    /// - parameter gameState: The state of the game. See `BuildersState` for more details.
+    /// - parameter winners: The winners of this game.
+    /// - parameter hand: The player's hand.
     public init(
             phase: BuildersPlayerPhaseName? = nil,
             dialog: [String]? = nil,
@@ -105,4 +113,12 @@ public struct BuildersState : Encodable {
     // TODO player names
     /// The cards that are currently in play.
     var cardsInPlay: [String: EncodableHand]
+
+    /// The id of this player. This is only set during game start to allow the client to identify the player.
+    var id: String? = nil
+
+    init(cardsInPlay: [String: EncodableHand] = [:], id: String? = nil) {
+        self.cardsInPlay = cardsInPlay
+        self.id = id
+    }
 }

@@ -6,11 +6,13 @@ export class BuildersState {
             this.hand = prev.hand.slice();
             this.cardsToPlay = prev.cardsToPlay.slice();
             this.cardsToDiscard = prev.cardsToDiscard.slice();
+            this.cardsInPlay = prev.cardsInPlay; // cardsInPlay is a immutable property, only the server can change it
         } else {
             this.turn = null;
             this.hand = [];
             this.cardsToPlay = [];
             this.cardsToDiscard = [];
+            this.cardsInPlay = {};
         }
     }
 }
