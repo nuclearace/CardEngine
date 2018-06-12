@@ -58,7 +58,16 @@ export class BuildersGame extends Component {
             break;
         case 'gameStart':
             this.setState((prevState) => {
-                return {gameState: prevState.gameState, id: messageObject['interaction']['gameState']['id']}
+                return {gameState: prevState.gameState, id: messageObject['interaction']['gameState']['id']};
+            })
+            break;
+        case 'gameOver':
+            this.setState((prevState) => {
+                const state = new BuildersState(prevState.gameState);
+
+                state.winner = messageObject['interaction']['winners'][0]
+
+                return {gameState: state};
             })
             break;
         case 'turn':
@@ -131,6 +140,10 @@ export class BuildersGame extends Component {
 
 class BuildersGameView extends Component {
     render() {
+        if (this.props.game.winner) {
+            return <h2>{this.props.game.winner} has won!</h2>;
+        }
+
         const turn = this.props.game.turn;
         const hand = this.props.game.hand;
         const callbacks = this.props.callbacks;
