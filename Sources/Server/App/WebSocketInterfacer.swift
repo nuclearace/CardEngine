@@ -15,10 +15,16 @@ final class WebSocketInterfacer<T: GameContext> : UserInterfacer {
     let ws: WebSocket
     let wsEventLoop: EventLoop
 
+    private let id = UUID()
+
     init(ws: WebSocket, game: T, onLoop: EventLoop) {
         self.ws = ws
         self.game = game
         self.wsEventLoop = onLoop
+
+        #if DEBUG
+            print("Creating WebSocketInterfacer{\(id)}")
+        #endif
 
         // Now that they're in a game, all input should be considered as fulfilling a promise.
         self.ws.onText {[weak self] websocket, text in
@@ -27,6 +33,7 @@ final class WebSocketInterfacer<T: GameContext> : UserInterfacer {
             this.responsePromise?.succeed(result: text)
         }
 
+        // TODO(game-continuation)
         self.ws.onClose.do {_ in
             game.stopGame()
             gameStopped(game)
@@ -35,14 +42,14 @@ final class WebSocketInterfacer<T: GameContext> : UserInterfacer {
 
     #if DEBUG
     deinit {
-        print("Some WebSocketInterfacer is dying")
+        print("WebSocketInterfacer{\(id)} is dying")
     }
     #endif
 
     func send(_ str: String) {
         wsEventLoop.execute {
             #if DEBUG
-                print("Sending", str)
+                print("Send{\(self.id)}: \(str)")
             #endif
 
             self.ws.send(str)
@@ -52,7 +59,7 @@ final class WebSocketInterfacer<T: GameContext> : UserInterfacer {
     func getInput(withDialog dialog: String, withPromise promise: EventLoopPromise<String>) {
         wsEventLoop.execute {
             #if DEBUG
-                print("Sending", dialog)
+                print("Send{\(self.id)}: \(dialog)")
             #endif
 
             self.responsePromise = promise
