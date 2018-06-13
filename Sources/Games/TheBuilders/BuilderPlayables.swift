@@ -67,10 +67,6 @@ extension Array where Element == BuildersPlayable {
         return compactMap({ $0 as? Material })
     }
 
-    func prettyPrinted() -> String {
-        return enumerated().map({ "\($0.offset + 1): \($0.element)\n" }).joined()
-    }
-
     /// Sorts the player's hand in an order that makes the most sense to be displayed:
     /// 1. Workers
     /// 2. Material
