@@ -141,7 +141,11 @@ export class BuildersGame extends Component {
 class BuildersGameView extends Component {
     render() {
         if (this.props.game.winner) {
-            return <h2>{this.props.game.winner} has won!</h2>;
+            return (
+                <h2>
+                    {this.props.game.winner === this.props.id ? 'You have' : `${this.props.game.winner} has`} won!
+                </h2>
+            );
         }
 
         const turn = this.props.game.turn;
