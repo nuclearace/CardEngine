@@ -48,7 +48,7 @@ public final class BuildersBoard : GameContext {
 
     #if DEBUG
     deinit {
-        print("Game is dying")
+        print("Game{\(id)} is dying")
     }
     #endif
 
