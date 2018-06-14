@@ -106,6 +106,13 @@ public extension DefaultPlayingCard {
         /// An Ace.
         case ace
 
+        // MARK: Properties
+
+        /// The face values.
+        public static var faces: [Value] {
+            return [.jack, .queen, .king, .ace]
+        }
+
         // MARK: Initializers
 
         /// Initialize from a `Decoder`.
@@ -185,9 +192,32 @@ public extension DefaultPlayingCard {
         }
 
         private enum DefaultPlayingCardValueCases : RandomCasable {
-            static var allCases: [DefaultPlayingCardValueCases] = [.pip, .jack, .queen, .king, .ace]
+            static let allCases: [DefaultPlayingCardValueCases] = [.pip, .jack, .queen, .king, .ace]
 
             case pip, jack, queen, king, ace
         }
     }
+}
+
+// TODO can this be made generic to work with any `Playable`?
+/// A type that represents a deck. This type controls things like drawing playables and the probability of
+/// drawing each type.
+public struct Deck {
+    /// The cards of this deck.
+    public var cards = Deck.buildDeck()
+
+    /// Constructs a new `Deck`. This initializer creates a standard deck of 52 cards, un-shuffled.
+    public init() { }
+
+    private static func buildDeck() -> [DefaultPlayingCard] {
+        return DefaultPlayingCard.Suit.allCases.flatMap({suit -> [DefaultPlayingCard] in
+            let pips = (2...10).map({ DefaultPlayingCard(suit: suit, value: .pip($0)) })
+            let faces = Value.faces.map({ DefaultPlayingCard(suit: suit, value: $0 )})
+
+            // Trying to use flatMap here produces a warning?
+            return (pips + faces).compactMap({ $0 })
+        })
+    }
+
+    private typealias Value = DefaultPlayingCard.Value
 }

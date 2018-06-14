@@ -4,13 +4,6 @@ import Kit
 import NIO
 import TheBuilders
 
-let group = MultiThreadedEventLoopGroup(numberOfThreads: 1)
-let loop = group.next()
-let theBuilders = BuildersBoard(runLoop: loop)
+let deck = Deck()
 
-theBuilders.setupPlayers([BuilderPlayer(context: theBuilders, interfacer: ConsoleInterfacer()),
-                          BuilderPlayer(context: theBuilders, interfacer: ConsoleInterfacer())])
-theBuilders.startGame()
-
-// FIXME is there a way in NIO to start the runloop?
-CFRunLoopRun()
+print(deck.cards.count)
