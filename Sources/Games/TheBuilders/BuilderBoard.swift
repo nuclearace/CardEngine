@@ -75,6 +75,7 @@ public final class BuildersBoard : GameContext {
         // TODO better rollback
         let oldHand = activePlayer.hand
         let inPlay = cardsInPlay[activePlayer, default: []]
+        let oldAccidents = accidents
 
         return rules.executeTurn().then {[weak self] _ -> EventLoopFuture<()> in
             guard let this = self else { return deadGame }
@@ -86,12 +87,10 @@ public final class BuildersBoard : GameContext {
             guard let this = self else { return deadGame }
 
             func rollbackTurn() {
+                // This wasn't a valid turn reset to a previous state
                 let active = this.activePlayer
 
-                // This wasn't a valid turn, decrement the accident turns
-                this.accidents[active] = this.accidents[active, default: []].map({accident in
-                    return Accident(type: accident.type, turns: accident.turns - 1)
-                })
+                this.accidents = oldAccidents
                 this.cardsInPlay[active] = inPlay
 
                 active.hand = oldHand
