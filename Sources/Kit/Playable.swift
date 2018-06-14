@@ -214,8 +214,7 @@ public struct Deck {
             let pips = (2...10).map({ DefaultPlayingCard(suit: suit, value: .pip($0)) })
             let faces = Value.faces.map({ DefaultPlayingCard(suit: suit, value: $0 )})
 
-            // Trying to use flatMap here produces a warning?
-            return (pips + faces).compactMap({ $0 })
+            return pips + faces
         })
     }
 
