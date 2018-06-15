@@ -32,11 +32,11 @@ public struct BuildersInteraction : Encodable {
     /// - parameter winners: The winners of this game.
     /// - parameter hand: The player's hand.
     public init(
-            phase: BuildersPlayerPhaseName? = nil,
-            dialog: [String]? = nil,
-            gameState: BuildersState? = nil,
-            winners: [String]? = nil,
-            hand: [BuildersPlayable]? = nil
+        phase: BuildersPlayerPhaseName? = nil,
+        dialog: [String]? = nil,
+        gameState: BuildersState? = nil,
+        winners: [String]? = nil,
+        hand: [BuildersPlayable]? = nil
     ) {
         self.phase = phase
         self.dialog = dialog
