@@ -54,7 +54,7 @@ struct EncodableHand : Encodable {
     }
 }
 
-extension Array where Element == BuildersPlayable {
+extension Collection where Element == BuildersPlayable {
     var accidents: [Accident] {
         return compactMap({ $0 as? Accident })
     }
