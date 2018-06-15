@@ -48,32 +48,6 @@ public enum BuildersPlayerPhaseName : String, Encodable {
     case gameOver
 }
 
-private func newFuturePhase(to phase: BuilderPhase) -> EventLoopFuture<BuilderPhase> {
-    guard let context = phase.context else {
-        return currentEventLoop.newFailedFuture(error: BuildersError.gameDeath)
-    }
-
-    return context.runLoop.newSucceededFuture(result: phase)
-}
-
-func ~~> (lhs: BuilderPhase, rhs: BuilderPhase) -> EventLoopFuture<BuilderPhase> {
-    lhs.syncState()
-
-    return lhs.doPhase().then({_ in
-        return newFuturePhase(to: rhs)
-    })
-}
-
-func ~~> (lhs: EventLoopFuture<BuilderPhase>, rhs: BuilderPhase) -> EventLoopFuture<BuilderPhase> {
-    return lhs.then({phase in
-        phase.syncState()
-
-        return phase.doPhase().then({_ in
-            return newFuturePhase(to: rhs)
-        })
-    })
-}
-
 /// The start of a turn.
 struct StartPhase : BuilderPhase {
     let shouldSync = false
@@ -345,4 +319,30 @@ struct EndPhase : BuilderPhase {
             return phase.doPhase().then({_ in rhs.doPhase() })
         }
     }
+}
+
+private func newFuturePhase(to phase: BuilderPhase) -> EventLoopFuture<BuilderPhase> {
+    guard let context = phase.context else {
+        return currentEventLoop.newFailedFuture(error: BuildersError.gameDeath)
+    }
+
+    return context.runLoop.newSucceededFuture(result: phase)
+}
+
+func ~~> (lhs: BuilderPhase, rhs: BuilderPhase) -> EventLoopFuture<BuilderPhase> {
+    lhs.syncState()
+
+    return lhs.doPhase().then({_ in
+        return newFuturePhase(to: rhs)
+    })
+}
+
+func ~~> (lhs: EventLoopFuture<BuilderPhase>, rhs: BuilderPhase) -> EventLoopFuture<BuilderPhase> {
+    return lhs.then({phase in
+        phase.syncState()
+
+        return phase.doPhase().then({_ in
+            return newFuturePhase(to: rhs)
+        })
+    })
 }
