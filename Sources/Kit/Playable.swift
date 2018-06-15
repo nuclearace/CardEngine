@@ -64,7 +64,7 @@ public struct DefaultPlayingCard : Playable, Codable {
     ///
     /// **NOTE**: This does respect the odds of pulling a face card vs regular card.
     public static func getInstance() -> DefaultPlayingCard {
-        return DefaultPlayingCard(suit: .randomCase, value: .randomValue())
+        fatalError("Getting random instance of a deck of 52 card doesn't make sense in the face of probabilities")
     }
 }
 
@@ -158,43 +158,8 @@ public extension DefaultPlayingCard {
             }
         }
 
-        /// Gets a random value. You can pass `pipsWithinRange` if you wish to have a larger or smaller set of pip values.
-        /// The default is for a deck of 52 cards.
-        ///
-        /// - parameter pipRange: The range of valid pip values.
-        /// - returns: A random `DefaultPlayingCardValue`.
-        public static func randomValue(pipsWithinRange range: CountableClosedRange<Int> = 2...10) -> Value {
-            switch DefaultPlayingCardValueCases.randomCase {
-            case .pip:
-                // FIXME Redo this in Swift 4.2 with the new random stuff
-                let rand: Int
-
-                #if os(macOS)
-                    rand = range.lowerBound + Int(arc4random_uniform(UInt32(range.upperBound - range.lowerBound + 1)))
-                #else
-                    rand = (Int(random()) % range.upperBound - range.lowerBound + 1) + range.lowerBound
-                #endif
-
-                return .pip(rand)
-            case .jack:
-                return .jack
-            case .queen:
-                return .queen
-            case .king:
-                return .king
-            case .ace:
-                return .ace
-            }
-        }
-
         private enum DefaultPlayingCardValueError : Error {
             case badValue
-        }
-
-        private enum DefaultPlayingCardValueCases : RandomCasable {
-            static let allCases: [DefaultPlayingCardValueCases] = [.pip, .jack, .queen, .king, .ace]
-
-            case pip, jack, queen, king, ace
         }
     }
 }
