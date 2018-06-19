@@ -150,8 +150,6 @@ struct DealPhase : BuilderPhase {
     }
 
     private func getCardsToPlay(fromPlayer player: BuilderPlayer) -> EventLoopFuture<[BuildersPlayable]> {
-        assert(context != nil)
-
         let input = player.getInput(
                 UserInteraction(type: .turn,
                                 interaction: BuildersInteraction(phase: .play, hand: player.hand)
