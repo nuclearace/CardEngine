@@ -124,14 +124,14 @@ public extension DefaultPlayingCard {
                 return
             }
 
-            switch try? con.decode(String.self) {
-            case "jack"?:
+            switch try con.decode(String.self) {
+            case "jack":
                 self = .jack
-            case "queen"?:
+            case "queen":
                 self = .queen
-            case "king"?:
+            case "king":
                 self = .king
-            case "ace"?:
+            case "ace":
                 self = .ace
             case _:
                 throw DefaultPlayingCardValueError.badValue
