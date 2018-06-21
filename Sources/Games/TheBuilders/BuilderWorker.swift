@@ -74,7 +74,7 @@ extension Worker : CustomStringConvertible {
     }
 }
 
-extension Array where Element == Worker {
+extension Collection where Element == Worker {
     var allSkills: [SkillType] {
         return map({ $0.skill })
     }
