@@ -175,7 +175,7 @@ public struct Deck {
     public init() { }
 
     private static func buildDeck() -> [DefaultPlayingCard] {
-        return DefaultPlayingCard.Suit.allCases.flatMap({suit -> [DefaultPlayingCard] in
+        return Suit.allCases.flatMap({suit -> [DefaultPlayingCard] in
             let pips = (2...10).map({ DefaultPlayingCard(suit: suit, value: .pip($0)) })
             let faces = Value.faces.map({ DefaultPlayingCard(suit: suit, value: $0 )})
 
@@ -184,4 +184,5 @@ public struct Deck {
     }
 
     private typealias Value = DefaultPlayingCard.Value
+    private typealias Suit = DefaultPlayingCard.Suit
 }
