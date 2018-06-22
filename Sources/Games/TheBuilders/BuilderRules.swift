@@ -9,6 +9,7 @@ import Kit
 /// The game of The Builders.
 public struct BuildersRules : GameRules {
     static let cardsNeededInHand = 7
+    static let floorsNeededToWin = 1
 
     /// The context these rules are applying to
     public unowned let context: BuildersBoard
@@ -39,7 +40,7 @@ public struct BuildersRules : GameRules {
     ///
     /// - returns: An array of `BuilderPlayer` who've won, or an empty array if no one has one.
     public func getWinners() -> [BuilderPlayer] {
-        return context.hotels.filter({ $0.value.floorsBuilt > 0 }).map({ $0.key })
+        return context.hotels.filter({ $0.value.floorsBuilt >= BuildersRules.floorsNeededToWin }).map({ $0.key })
     }
 
     /// Starts a game. This is called to deal cards, give money, etc, before the first player goes.
