@@ -91,7 +91,7 @@ final class DefaultLobby<Game: GameContext> : GameLobby where Game.RulesType.Pla
     private func startNewGame() {
         precondition(waitingPlayers.count >= 2, "Should have two players waiting to start a game")
 
-        let board = GameType(runLoop: MultiThreadedEventLoopGroup.currentEventLoop!)
+        let board = GameType(runLoop: runLoop)
         let players = [
             GameType.RulesType.PlayerType(context: board,
                                           interfacer: WebSocketInterfacer(ws: waitingPlayers[0].ws,
