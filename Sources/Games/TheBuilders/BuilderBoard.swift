@@ -40,7 +40,7 @@ public final class BuildersBoard : GameContext {
     /// The run loop for this game.
     let runLoop: EventLoop
 
-    /// Creates a new game with the given players.
+    /// Creates a new game that operates on the given run loop.
     public init(runLoop: EventLoop) {
         self.runLoop = runLoop
         self.rules = BuildersRules(context: self)
