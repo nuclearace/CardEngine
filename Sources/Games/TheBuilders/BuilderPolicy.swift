@@ -3,6 +3,7 @@
 //
 
 import Foundation
+import Kit
 import NIO
 
 // Internal helpers for Builders
@@ -33,3 +34,5 @@ enum BuildersError : Error {
     /// The game has gone and died.
     case gameDeath
 }
+
+public typealias BuildersHand = Hand<BuildersPlayable>

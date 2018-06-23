@@ -26,7 +26,7 @@ public final class BuildersBoard : GameContext {
 
     // TODO This is a bit crappy. Eventually we'll probably have another object that encapsulates this state
     /// The cards that are currently in play.
-    public internal(set) var cardsInPlay = [RulesType.PlayerType: [BuildersPlayable]]()
+    public internal(set) var cardsInPlay = [RulesType.PlayerType: BuildersHand]()
 
     /// Each player's hotel.
     public internal(set) var hotels = [RulesType.PlayerType: Hotel]()

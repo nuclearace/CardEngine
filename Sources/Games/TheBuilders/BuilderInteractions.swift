@@ -21,7 +21,7 @@ public struct BuildersInteraction : Encodable {
     public var winners: [String]?
 
     /// This player's hand.
-    public var hand: [BuildersPlayable]?
+    public var hand: BuildersHand?
 
     /// Creates a new `BuildersInteraction` with the given values. All parameters are optional.
     ///
@@ -36,7 +36,7 @@ public struct BuildersInteraction : Encodable {
         dialog: [String]? = nil,
         gameState: BuildersState? = nil,
         winners: [String]? = nil,
-        hand: [BuildersPlayable]? = nil
+        hand: BuildersHand? = nil
     ) {
         self.phase = phase
         self.dialog = dialog

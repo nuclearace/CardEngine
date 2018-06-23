@@ -131,9 +131,9 @@ struct DealPhase : BuilderPhase {
             // Discard those cards
             discardedSomething = cards.count > 0
 
-            active.hand = active.hand.lazy.filter({cardInHand in
+            active.hand = BuildersHand(playables: active.hand.lazy.filter({cardInHand in
                 return !cards.contains(where: { $0 == cardInHand })
-            })
+            }), maxPlayables: BuildersRules.cardsNeededInHand)
 
             // TODO Should they have to play something?
             guard playedSomething || discardedSomething else {
@@ -179,7 +179,7 @@ struct DealPhase : BuilderPhase {
         })
     }
 
-    private static func filterInvalidCards(hand: [BuildersPlayable], toPlay: Set<String>) -> [BuildersPlayable] {
+    private static func filterInvalidCards(hand: BuildersHand, toPlay: Set<String>) -> [BuildersPlayable] {
         return hand.filter({ toPlay.contains($0.id.uuidString) })
     }
 

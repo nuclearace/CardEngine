@@ -38,12 +38,9 @@ public enum BuildersPlayType : String, Codable {
     case accident
 }
 
-/// A hand of BuildersPlayables
-internal typealias BuildersHand = [BuildersPlayable]
-
 /// A type that allows an array of arbitrary `BuildersPlayable`'s to to encoded.
 struct EncodableHand : Encodable {
-    var hand: [BuildersPlayable]
+    var hand: BuildersHand
 
     func encode(to encoder: Encoder) throws {
         var container = encoder.unkeyedContainer()
