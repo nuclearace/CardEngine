@@ -2,6 +2,7 @@
 // Created by Erik Little on 6/9/18.
 //
 
+import Foundation
 import HTTP
 import Service
 import Vapor
@@ -54,6 +55,7 @@ private func handleUpgrade(_ websocket: WebSocket, _ request: Request) {
         case BuildersBoard.name:
             Lobbies.buildersLobby.addPlayerToWait(websocket)
         case _:
+            websocket.send("bad payload")
             websocket.close()
             return
         }
