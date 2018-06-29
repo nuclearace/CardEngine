@@ -40,6 +40,7 @@ private func handleUpgrade(_ websocket: WebSocket, _ request: Request) {
     websocket.onText {websocket, string in
         guard let maybeJson = try? JSONSerialization.jsonObject(with: string.data(using: .utf8)!),
               let json = maybeJson as? [String: Any] else {
+            websocket.send("bad payload")
             websocket.close()
 
             return
