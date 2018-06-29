@@ -15,7 +15,7 @@ public final class BuildersBoard : GameContext {
 
     /// The player who is currently making moves
     public var activePlayer: RulesType.PlayerType {
-        return players[0]
+        return players[activePlayerIndex]
     }
 
     /// The id for this game.
@@ -39,6 +39,8 @@ public final class BuildersBoard : GameContext {
 
     /// The run loop for this game.
     let runLoop: EventLoop
+
+    private var activePlayerIndex = 0
 
     /// Creates a new game that operates on the given run loop.
     public init(runLoop: EventLoop) {
@@ -79,7 +81,7 @@ public final class BuildersBoard : GameContext {
         return rules.executeTurn().then {[weak self] _ -> EventLoopFuture<()> in
             guard let this = self else { return deadGame }
 
-            this.players = Array(this.players[1...]) + [this.activePlayer]
+            this.setupNextPlayer()
 
             return this.nextTurn()
         }.thenIfError {[weak self] error in
@@ -108,6 +110,10 @@ public final class BuildersBoard : GameContext {
                 fatalError("Unknown error \(error)")
             }
         }
+    }
+
+    private func setupNextPlayer() {
+        activePlayerIndex = (activePlayerIndex + 1) % players.count
     }
 
     /// Sets up this game with players.
