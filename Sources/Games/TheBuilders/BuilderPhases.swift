@@ -54,7 +54,7 @@ struct StartPhase : BuilderPhase {
     private(set) weak var context: BuildersBoard?
 
     func doPhase() -> EventLoopFuture<()> {
-        guard let context = context else { return deadGame }
+        guard let context = context else { return deadGame(failWith: Void.self) }
 
         context.activePlayer.send(UserInteraction(type: .turnStart, interaction: BuildersInteraction()))
 
@@ -71,7 +71,7 @@ struct CountPhase : BuilderPhase {
     private(set) weak var context: BuildersBoard?
 
     func doPhase() -> EventLoopFuture<()> {
-        guard let context = context else { return deadGame }
+        guard let context = context else { return deadGame(failWith: Void.self) }
 
         let active = context.activePlayer
 
@@ -89,73 +89,28 @@ struct CountPhase : BuilderPhase {
 /// The deal phase is followed by the build phase.
 struct DealPhase : BuilderPhase {
     private typealias HandReducer = (kept: BuildersHand, play: BuildersHand)
+    private typealias DealPhaseResult = HandReducer
 
     let shouldSync = true
 
     private(set) weak var context: BuildersBoard?
 
     func doPhase() -> EventLoopFuture<()> {
-        guard let context = context else { return deadGame }
-
-        let active: BuilderPlayer = context.activePlayer
-
-        var playedSomething = false
-        var discardedSomething = false
-
-        // These are strong captures, but if something happens, like a user disconnects, the promise will communicate
-        // communicate a gameDeath error
-        return getCardsToPlay(fromPlayer: active).then {[weak context] cards -> EventLoopFuture<()> in
-            guard let context = context else { return deadGame }
-
-            // Get the cards to play
-            guard let played = self.playCards(cards, forPlayer: active, context: context) else {
-                active.send(
-                        UserInteraction(type: .playError,
-                                        interaction: BuildersInteraction(dialog: ["You played a card that you " +
-                                                "currently are unable to play"]))
-                )
-
-                return context.runLoop.newFailedFuture(error: BuildersError.badPlay)
-            }
-
-            playedSomething = played.count > 0
-
-            return context.runLoop.newSucceededFuture(result: ())
-        }.then {_ -> EventLoopFuture<[BuildersPlayable]> in
-            // Get cards to discard
-            return self.getCardsToDiscard(fromPlayer: active)
-        }.then {[weak context] cards -> EventLoopFuture<()> in
-            guard let context = context else { return deadGame }
-
-            // Discard those cards
-            discardedSomething = cards.count > 0
-
-            active.hand = BuildersHand(playables: active.hand.lazy.filter({cardInHand in
-                return !cards.contains(where: { $0 == cardInHand })
-            }), maxPlayables: BuildersRules.cardsNeededInHand)
-
-            // TODO Should they have to play something?
-            guard playedSomething || discardedSomething else {
-                active.send(
-                        UserInteraction(type: .playError,
-                                        interaction: BuildersInteraction(dialog: ["You must do something!"]))
-                )
-
-                return context.runLoop.newFailedFuture(error: BuildersError.badPlay)
-            }
-
-            return context.runLoop.newSucceededFuture(result: ())
-        }
+        return getCardsToPlay().then(handlePlayed).then(getCardsToDiscard).then(finishUp)
     }
 
-    private func getCardsToPlay(fromPlayer player: BuilderPlayer) -> EventLoopFuture<[BuildersPlayable]> {
-        let input = player.getInput(
+    private func getCardsToPlay() -> EventLoopFuture<BuildersHand> {
+        guard let active = context?.activePlayer else {
+            return deadGame(failWith: BuildersHand.self)
+        }
+
+        let input = active.getInput(
                 UserInteraction(type: .turn,
-                                interaction: BuildersInteraction(phase: .play, hand: player.hand)
+                                interaction: BuildersInteraction(phase: .play, hand: active.hand)
                 )
         )
 
-        return input.map({[hand = player.hand] response in
+        return input.map({[hand = active.hand] response in
             guard case let .play(played) = response else {
                 return []
             }
@@ -164,26 +119,27 @@ struct DealPhase : BuilderPhase {
         })
     }
 
-    private func getCardsToDiscard(fromPlayer player: BuilderPlayer) -> EventLoopFuture<[BuildersPlayable]> {
-        let input = player.getInput(
-                UserInteraction(type: .turn,
-                                interaction: BuildersInteraction(phase: .discard, hand: player.hand)))
+    private func handlePlayed(_ cards: BuildersHand) -> EventLoopFuture<BuildersHand> {
+        guard let context = context else { return deadGame(failWith: BuildersHand.self) }
 
-        return input.map({[hand = player.hand] response in
-            guard case let .discard(discarded) = response else {
-                return []
-            }
+        let active = context.activePlayer
 
-            return DealPhase.filterInvalidCards(hand: hand, toPlay: Set(discarded))
-        })
-    }
+        // Get the cards to play
+        guard let played = playCards(cards, forPlayer: active, context: context) else {
+            active.send(
+                    UserInteraction(type: .playError,
+                            interaction: BuildersInteraction(dialog: ["You played a card that you " +
+                                    "currently are unable to play"]))
+            )
 
-    private static func filterInvalidCards(hand: BuildersHand, toPlay: Set<String>) -> [BuildersPlayable] {
-        return hand.filter({ toPlay.contains($0.id.uuidString) })
+            return context.runLoop.newFailedFuture(error: BuildersError.badPlay)
+        }
+
+        return context.runLoop.newSucceededFuture(result: played)
     }
 
     private func playCards(
-        _ cards: [BuildersPlayable],
+        _ cards: BuildersHand,
         forPlayer player: BuilderPlayer,
         context: BuildersBoard
     ) -> BuildersHand? {
@@ -208,6 +164,54 @@ struct DealPhase : BuilderPhase {
 
         return played
     }
+
+    private func getCardsToDiscard(cardsPlayed: BuildersHand) -> EventLoopFuture<DealPhaseResult> {
+        guard let active = context?.activePlayer else {
+            return deadGame(failWith: DealPhaseResult.self)
+        }
+
+        let input = active.getInput(
+                UserInteraction(type: .turn,
+                                interaction: BuildersInteraction(phase: .discard, hand: active.hand))
+        )
+
+        return input.map({[hand = active.hand] response in
+            guard case let .discard(discarded) = response else {
+                return ([], [])
+            }
+
+            return (cardsPlayed, DealPhase.filterInvalidCards(hand: hand, toPlay: Set(discarded)))
+        })
+    }
+
+    private func finishUp(results: DealPhaseResult) -> EventLoopFuture<()> {
+        guard let context = context else { return deadGame(failWith: Void.self) }
+
+        let active = context.activePlayer
+
+        let (cardsPlayed, cardsDiscarded) = results
+
+        // TODO Should they have to play something?
+        guard !cardsPlayed.isEmpty || !cardsDiscarded.isEmpty else {
+            active.send(
+                    UserInteraction(type: .playError,
+                            interaction: BuildersInteraction(dialog: ["You must do something!"]))
+            )
+
+            return context.runLoop.newFailedFuture(error: BuildersError.badPlay)
+        }
+
+        // Discard those cards
+        active.hand = BuildersHand(playables: active.hand.lazy.filter({cardInHand in
+            return !cardsDiscarded.contains(where: { $0 == cardInHand })
+        }), maxPlayables: BuildersRules.cardsNeededInHand)
+
+        return context.runLoop.newSucceededFuture(result: ())
+    }
+
+    private static func filterInvalidCards(hand: BuildersHand, toPlay: Set<String>) -> BuildersHand {
+        return BuildersHand(playables: hand.filter({ toPlay.contains($0.id.uuidString) }))
+    }
 }
 
 /// During the build the phase, we calculate whether or not player built a new floor or not.
@@ -219,7 +223,7 @@ struct BuildPhase : BuilderPhase {
     private(set) weak var context: BuildersBoard?
 
     func doPhase() -> EventLoopFuture<()> {
-        guard let context = context else { return deadGame }
+        guard let context = context else { return deadGame(failWith: Void.self) }
 
         let active: BuilderPlayer = context.activePlayer
         var hotel = context.hotels[active]!
@@ -248,7 +252,7 @@ struct DrawPhase : BuilderPhase {
     private(set) weak var context: BuildersBoard?
 
     func doPhase() -> EventLoopFuture<()> {
-        guard let context = context else { return deadGame }
+        guard let context = context else { return deadGame(failWith: Void.self) }
 
         let active: BuilderPlayer = context.activePlayer
 
@@ -295,7 +299,7 @@ struct EndPhase : BuilderPhase {
     private(set) weak var context: BuildersBoard?
 
     func doPhase() -> EventLoopFuture<()> {
-        guard let context = context else { return deadGame }
+        guard let context = context else { return deadGame(failWith: Void.self) }
 
         let active = context.activePlayer
 

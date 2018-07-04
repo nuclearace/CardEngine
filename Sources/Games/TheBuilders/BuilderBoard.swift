@@ -83,13 +83,13 @@ public final class BuildersBoard : GameContext {
         let oldAccidents = accidents
 
         return rules.executeTurn().then {[weak self] _ -> EventLoopFuture<()> in
-            guard let this = self else { return deadGame }
+            guard let this = self else { return deadGame(failWith: Void.self) }
 
             this.setupNextPlayer()
 
             return this.nextTurn()
         }.thenIfError {[weak self] error in
-            guard let this = self else { return deadGame }
+            guard let this = self else { return deadGame(failWith: Void.self) }
 
             func rollbackTurn() {
                 // This wasn't a valid turn reset to a previous state
@@ -103,7 +103,7 @@ public final class BuildersBoard : GameContext {
 
             switch error {
             case let builderError as BuildersError where builderError == .gameDeath:
-                return deadGame
+                return deadGame(failWith: Void.self)
             case let builderError as BuildersError where builderError == .badPlay:
                 fallthrough
             case is BuildersPlayerResponse.ResponseError:

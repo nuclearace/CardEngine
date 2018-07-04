@@ -20,7 +20,7 @@ var currentEventLoop: EventLoop {
 }
 
 /// Returns a new failed future for the current event loop. Return when a game has died.
-var deadGame: EventLoopFuture<()> {
+func deadGame<T>(failWith with: T.Type) -> EventLoopFuture<T> {
     return currentEventLoop.newFailedFuture(error: BuildersError.gameDeath)
 }
 
