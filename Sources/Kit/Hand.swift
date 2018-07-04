@@ -64,7 +64,7 @@ extension Hand : RangeReplaceableCollection {
     public mutating func replaceSubrange<C>(
         _ subrange: Range<Index>,
         with newElements: C
-    ) where C : Collection, Element == C.Element {
+    ) where C: Collection, Element == C.Element {
         playables.replaceSubrange(subrange, with: newElements)
     }
 }

@@ -9,8 +9,12 @@ import Vapor
 
 /// Register your application's routes here.
 func routes(_ router: Router, _ env: Environment) throws {
-    // Basic "Hello, world!" example
     router.get("/") {req in
+        return req.redirect(to: "/index.html")
+    }
+
+    // TODO figure out how to redirect them to a Builders lobby
+    router.get("/builders") {req in
         return req.redirect(to: "/index.html")
     }
 
