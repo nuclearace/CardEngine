@@ -22,9 +22,7 @@ extension BuilderPhase {
     func syncState() {
         guard shouldSync, let context = context else { return }
 
-        let hands = context.cardsInPlay.reduce(into: [String: EncodableHand](), {cur, keyValue in
-            cur[keyValue.key.id.uuidString] = EncodableHand(hand: keyValue.value)
-        })
+        let hands = context.cardsInPlay.byPlayerId(mappingValues: {  EncodableHand(hand: $0) })
         let floors = context.hotels.byPlayerId(mappingValues: { $0.floorsBuilt })
         let interaction = BuildersInteraction(gameState: BuildersState(cardsInPlay: hands, floorsBuilt: floors))
 
