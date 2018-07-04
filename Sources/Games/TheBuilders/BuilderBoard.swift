@@ -56,11 +56,8 @@ public final class BuildersBoard : GameContext {
 
     private func announceWinners(_ winners: [BuilderPlayer]) {
         // TODO Use some kind of name for the players
-        let floors = hotels.reduce(into: [String: Int](), {cur, keyValue in
-            cur[keyValue.key.id.uuidString] = keyValue.value.floorsBuilt
-        })
         let buildersInteraction = BuildersInteraction(
-            gameState: BuildersState(floorsBuilt: floors),
+            gameState: BuildersState(floorsBuilt: hotels.byPlayerId(mappingValues: { $0.floorsBuilt })),
             winners: winners.map({ $0.id.uuidString })
         )
 

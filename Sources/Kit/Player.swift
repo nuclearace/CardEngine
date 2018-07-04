@@ -27,6 +27,19 @@ extension Player {
     }
 }
 
+extension Dictionary where Key: Player {
+    /// Transforms this dictionary of `Player` into a dictionary of [String: NewValue], where they key is the id of the
+    /// player.
+    ///
+    /// - parameter mappingValues: A function that maps values stored into a new representation.
+    /// - returns: A `Dictionary` of `[String: NewValue]` where the key is `Player.id.uuidString`.
+    public func byPlayerId<NewValue>(mappingValues map: (Value) -> NewValue) -> [String: NewValue] {
+        return reduce(into: [String: NewValue]()) {cur, keyValue in
+            cur[keyValue.0.id.uuidString] = map(keyValue.1)
+        }
+    }
+}
+
 /// Says that a type will be able to interface with a user.
 public protocol UserInterfacer {
     // MARK: Properties

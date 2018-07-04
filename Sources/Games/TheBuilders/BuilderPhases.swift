@@ -25,9 +25,7 @@ extension BuilderPhase {
         let hands = context.cardsInPlay.reduce(into: [String: EncodableHand](), {cur, keyValue in
             cur[keyValue.key.id.uuidString] = EncodableHand(hand: keyValue.value)
         })
-        let floors = context.hotels.reduce(into: [String: Int](), {cur, keyValue in
-            cur[keyValue.key.id.uuidString] = keyValue.value.floorsBuilt
-        })
+        let floors = context.hotels.byPlayerId(mappingValues: { $0.floorsBuilt })
         let interaction = BuildersInteraction(gameState: BuildersState(cardsInPlay: hands, floorsBuilt: floors))
 
         for player in context.players {
