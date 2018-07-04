@@ -25,7 +25,10 @@ extension BuilderPhase {
         let hands = context.cardsInPlay.reduce(into: [String: EncodableHand](), {cur, keyValue in
             cur[keyValue.key.id.uuidString] = EncodableHand(hand: keyValue.value)
         })
-        let interaction = BuildersInteraction(gameState: BuildersState(cardsInPlay: hands))
+        let floors = context.hotels.reduce(into: [String: Int](), {cur, keyValue in
+            cur[keyValue.key.id.uuidString] = keyValue.value.floorsBuilt
+        })
+        let interaction = BuildersInteraction(gameState: BuildersState(cardsInPlay: hands, floorsBuilt: floors))
 
         for player in context.players {
             player.send(UserInteraction(type: .gameState, interaction: interaction))
@@ -223,7 +226,7 @@ struct BuildPhase : BuilderPhase {
         guard let context = context else { return deadGame }
 
         let active: BuilderPlayer = context.activePlayer
-        var hotel = context.hotels[active, default: Hotel()]
+        var hotel = context.hotels[active]!
 
         guard var hand = context.cardsInPlay[active] else {
             return context.runLoop.newSucceededFuture(result: ())

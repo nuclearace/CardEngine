@@ -52,6 +52,7 @@ export class BuildersGame extends Component {
                const newState = new BuildersState(prevState.gameState);
 
                newState.cardsInPlay = messageObject['interaction']['gameState']['cardsInPlay'];
+               newState.floorsBuilt = messageObject['interaction']['gameState']['floorsBuilt'];
 
                return {gameState: newState};
             });
@@ -66,6 +67,7 @@ export class BuildersGame extends Component {
                 const state = new BuildersState(prevState.gameState);
 
                 state.winner = messageObject['interaction']['winners'][0];
+                state.floorsBuilt = messageObject['interaction']['gameState']['floorsBuilt'];
 
                 return {gameState: state};
             });
@@ -142,9 +144,13 @@ class BuildersGameView extends Component {
     render() {
         if (this.props.game.winner) {
             return (
-                <h2>
-                    {this.props.game.winner === this.props.id ? 'You have' : `${this.props.game.winner} has`} won!
-                </h2>
+                <div>
+                    <FloorsBuilt floorsBuilt={this.props.game.floorsBuilt} />
+
+                    <h2>
+                        {this.props.game.winner === this.props.id ? 'You have' : `${this.props.game.winner} has`} won!
+                    </h2>
+                </div>
             );
         }
 
@@ -156,6 +162,8 @@ class BuildersGameView extends Component {
         case 'play':
             return (
                 <div>
+                    <FloorsBuilt floorsBuilt={this.props.game.floorsBuilt} />
+
                     <InPlay cardsInPlay={this.props.game.cardsInPlay[this.props.id]} />
 
                     Would you like to play something?
@@ -168,6 +176,8 @@ class BuildersGameView extends Component {
         case 'discard':
             return (
                 <div>
+                    <FloorsBuilt floorsBuilt={this.props.game.floorsBuilt} />
+
                     Would you like to discard something?
                     <PlayerHand hand={hand}
                                 onPlay={callbacks.discardCard}
@@ -178,6 +188,8 @@ class BuildersGameView extends Component {
         case 'draw':
             return (
                 <div>
+                    <FloorsBuilt floorsBuilt={this.props.game.floorsBuilt} />
+
                     What would you like to draw?
                     <ul>
                         {['worker', 'material', 'accident'].map(type => {
@@ -275,4 +287,18 @@ class PlayerCard extends Component {
             }
         }
     }
+}
+
+function FloorsBuilt(props) {
+    return (
+        <div>
+            Floors built:
+
+            <ul>
+                {Object.entries(props.floorsBuilt).map(keyObj => {
+                    return <li key={keyObj[0]}>{keyObj[0]}: {keyObj[1]}</li>;
+                })}
+            </ul>
+        </div>
+    );
 }

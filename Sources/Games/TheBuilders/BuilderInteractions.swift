@@ -114,11 +114,15 @@ public struct BuildersState : Encodable {
     /// The cards that are currently in play.
     var cardsInPlay: [String: EncodableHand]
 
+    /// The number of floors built by each player.
+    var floorsBuilt: [String: Int]
+
     /// The id of this player. This is only set during game start to allow the client to identify the player.
     var id: String? = nil
 
-    init(cardsInPlay: [String: EncodableHand] = [:], id: String? = nil) {
+    init(cardsInPlay: [String: EncodableHand] = [:], floorsBuilt: [String: Int] = [:], id: String? = nil) {
         self.cardsInPlay = cardsInPlay
+        self.floorsBuilt = floorsBuilt
         self.id = id
     }
 }

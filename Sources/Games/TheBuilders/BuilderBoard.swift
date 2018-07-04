@@ -56,8 +56,15 @@ public final class BuildersBoard : GameContext {
 
     private func announceWinners(_ winners: [BuilderPlayer]) {
         // TODO Use some kind of name for the players
-        let interaction = UserInteraction(type: .gameOver,
-                                          interaction: BuildersInteraction(winners: winners.map({ $0.id.uuidString })))
+        let floors = hotels.reduce(into: [String: Int](), {cur, keyValue in
+            cur[keyValue.key.id.uuidString] = keyValue.value.floorsBuilt
+        })
+        let buildersInteraction = BuildersInteraction(
+            gameState: BuildersState(floorsBuilt: floors),
+            winners: winners.map({ $0.id.uuidString })
+        )
+
+        let interaction = UserInteraction(type: .gameOver, interaction: buildersInteraction)
         for player in players {
             player.send(interaction)
         }
@@ -123,6 +130,9 @@ public final class BuildersBoard : GameContext {
         assert(players.count >= 2, "You need more players for this game!")
 
         self.players = players
+        self.hotels = players.reduce(into: [RulesType.PlayerType: Hotel](), {hotels, player in
+            hotels[player] = Hotel()
+        })
     }
 
     /// Starts this game.

@@ -7,6 +7,7 @@ export class BuildersState {
             this.cardsToPlay = prev.cardsToPlay.slice();
             this.cardsToDiscard = prev.cardsToDiscard.slice();
             this.cardsInPlay = prev.cardsInPlay; // cardsInPlay is a immutable property, only the server can change it
+            this.floorsBuilt = prev.floorsBuilt; // floorsBuilt is a immutable property, only the server can change it
             this.winner = prev.winner;
         } else {
             this.turn = null;
@@ -14,6 +15,7 @@ export class BuildersState {
             this.cardsToPlay = [];
             this.cardsToDiscard = [];
             this.cardsInPlay = {};
+            this.floorsBuilt = {};
             this.winner = null;
         }
     }
