@@ -54,7 +54,7 @@ struct StartPhase : BuilderPhase {
     private(set) weak var context: BuildersBoard?
 
     func doPhase() -> EventLoopFuture<()> {
-        guard let context = context else { return deadGame(failWith: Void.self) }
+        guard let context = context else { return deadGame() }
 
         context.activePlayer.send(UserInteraction(type: .turnStart, interaction: BuildersInteraction()))
 
@@ -71,7 +71,7 @@ struct CountPhase : BuilderPhase {
     private(set) weak var context: BuildersBoard?
 
     func doPhase() -> EventLoopFuture<()> {
-        guard let context = context else { return deadGame(failWith: Void.self) }
+        guard let context = context else { return deadGame() }
 
         let active = context.activePlayer
 
@@ -101,7 +101,7 @@ struct DealPhase : BuilderPhase {
 
     private func getCardsToPlay() -> EventLoopFuture<BuildersHand> {
         guard let active = context?.activePlayer else {
-            return deadGame(failWith: BuildersHand.self)
+            return deadGame()
         }
 
         let input = active.getInput(
@@ -120,7 +120,7 @@ struct DealPhase : BuilderPhase {
     }
 
     private func handlePlayed(_ cards: BuildersHand) -> EventLoopFuture<BuildersHand> {
-        guard let context = context else { return deadGame(failWith: BuildersHand.self) }
+        guard let context = context else { return deadGame() }
 
         let active = context.activePlayer
 
@@ -168,7 +168,7 @@ struct DealPhase : BuilderPhase {
 
     private func getCardsToDiscard(cardsPlayed: BuildersHand) -> EventLoopFuture<DealPhaseResult> {
         guard let active = context?.activePlayer else {
-            return deadGame(failWith: DealPhaseResult.self)
+            return deadGame()
         }
 
         let input = active.getInput(
@@ -187,7 +187,7 @@ struct DealPhase : BuilderPhase {
     }
 
     private func finishUp(results: DealPhaseResult) -> EventLoopFuture<()> {
-        guard let context = context else { return deadGame(failWith: Void.self) }
+        guard let context = context else { return deadGame() }
 
         let active = context.activePlayer
         let (cardsPlayed, cardsDiscarded) = results
@@ -225,7 +225,7 @@ struct BuildPhase : BuilderPhase {
     private(set) weak var context: BuildersBoard?
 
     func doPhase() -> EventLoopFuture<()> {
-        guard let context = context else { return deadGame(failWith: Void.self) }
+        guard let context = context else { return deadGame() }
 
         let active: BuilderPlayer = context.activePlayer
         var hotel = context.hotels[active]!
@@ -254,7 +254,7 @@ struct DrawPhase : BuilderPhase {
     private(set) weak var context: BuildersBoard?
 
     func doPhase() -> EventLoopFuture<()> {
-        guard let context = context else { return deadGame(failWith: Void.self) }
+        guard let context = context else { return deadGame() }
 
         let active: BuilderPlayer = context.activePlayer
 
@@ -301,7 +301,7 @@ struct EndPhase : BuilderPhase {
     private(set) weak var context: BuildersBoard?
 
     func doPhase() -> EventLoopFuture<()> {
-        guard let context = context else { return deadGame(failWith: Void.self) }
+        guard let context = context else { return deadGame() }
 
         let active = context.activePlayer
 
