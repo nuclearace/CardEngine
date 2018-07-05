@@ -188,7 +188,6 @@ struct DealPhase : BuilderPhase {
         guard let context = context else { return deadGame(failWith: Void.self) }
 
         let active = context.activePlayer
-
         let (cardsPlayed, cardsDiscarded) = results
 
         // TODO Should they have to play something?
