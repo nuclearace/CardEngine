@@ -58,9 +58,9 @@ public struct Material : BuildingBlock, Encodable {
 
     /// Returns whether or not this playable can be played by player.
     ///
-    /// - parameter inContext: The context this playable is being used in.
+    /// - parameter givenState: The state this playable is being used in.
     /// - parameter byPlayer: The player playing.
-    public func canPlay(inContext context: BuildersBoard, byPlayer player: BuilderPlayer) -> Bool {
+    public func canPlay(givenState context: BuildersBoardState, byPlayer player: BuilderPlayer) -> Bool {
         let accidents = context.accidents[player, default: []]
         let activeWorkers = context.cardsInPlay[player, default: []].workers.active(accountingFor: accidents)
 

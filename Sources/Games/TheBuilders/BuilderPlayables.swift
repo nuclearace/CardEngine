@@ -16,9 +16,9 @@ public protocol BuildersPlayable : Playable, Encodable {
     // TODO this should probably be defined on `Playable` but that needs associated types setup
     /// Returns whether or not this playable can be played by player.
     ///
-    /// - parameter inContext: The context this playable is being used in.
+    /// - parameter givenState: The state this playable is being used in.
     /// - parameter byPlayer: The player playing.
-    func canPlay(inContext context: BuildersBoard, byPlayer player: BuilderPlayer) -> Bool
+    func canPlay(givenState context: BuildersBoardState, byPlayer player: BuilderPlayer) -> Bool
 }
 
 // TODO whenever Swift allows generalizied existentials, we can directly conform BuildersPlayable to hashable

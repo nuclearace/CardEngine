@@ -20,9 +20,6 @@ public final class BuilderPlayer : InteractablePlayer {
     private let encoder = JSONEncoder()
     private let decoder = JSONDecoder()
 
-    /// The playable items that this player has. This are items that are not in play.
-    public internal(set) var hand = BuildersHand(maxPlayables: BuildersRules.cardsNeededInHand)
-
     public init(context: BuildersBoard, interfacer: UserInterfacer) {
         self.context = context
         self.interfacer = interfacer

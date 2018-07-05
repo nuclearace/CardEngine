@@ -55,9 +55,9 @@ public struct Worker : Laborer {
 
     /// Returns whether or not this playable can be played by player.
     ///
-    /// - parameter inContext: The context this playable is being used in.
+    /// - parameter givenState: The state this playable is being used in.
     /// - parameter byPlayer: The player playing.
-    public func canPlay(inContext context: BuildersBoard, byPlayer player: BuilderPlayer) -> Bool {
+    public func canPlay(givenState context: BuildersBoardState, byPlayer player: BuilderPlayer) -> Bool {
         // Workers are always playable
         return true
     }

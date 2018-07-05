@@ -21,15 +21,8 @@ public final class BuildersBoard : GameContext {
     /// The id for this game.
     public let id = UUID()
 
-    /// The accidents that are afflicting a user.
-    public internal(set) var accidents = [RulesType.PlayerType: [Accident]]()
-
-    // TODO This is a bit crappy. Eventually we'll probably have another object that encapsulates this state
-    /// The cards that are currently in play.
-    public internal(set) var cardsInPlay = [RulesType.PlayerType: BuildersHand]()
-
-    /// Each player's hotel.
-    public internal(set) var hotels = [RulesType.PlayerType: Hotel]()
+    /// The state of the board.
+    public internal(set) var state: BuildersBoardState!
 
     /// The players in this game.
     public private(set) var players = [RulesType.PlayerType]()
@@ -45,6 +38,7 @@ public final class BuildersBoard : GameContext {
     /// Creates a new game that operates on the given run loop.
     public init(runLoop: EventLoop) {
         self.runLoop = runLoop
+        self.state = BuildersBoardState(context: self)
         self.rules = BuildersRules(context: self)
     }
 
@@ -57,11 +51,11 @@ public final class BuildersBoard : GameContext {
     private func announceWinners(_ winners: [BuilderPlayer]) {
         // TODO Use some kind of name for the players
         let buildersInteraction = BuildersInteraction(
-            gameState: BuildersState(floorsBuilt: hotels.byPlayerId(mappingValues: { $0.floorsBuilt })),
+            gameState: BuildersState(floorsBuilt: state.hotels.byPlayerId(mappingValues: { $0.floorsBuilt })),
             winners: winners.map({ $0.id.uuidString })
         )
-
         let interaction = UserInteraction(type: .gameOver, interaction: buildersInteraction)
+
         for player in players {
             player.send(interaction)
         }
@@ -77,29 +71,15 @@ public final class BuildersBoard : GameContext {
             return runLoop.newSucceededFuture(result: ())
         }
 
-        // TODO better rollback
-        let oldHand = activePlayer.hand
-        let inPlay = cardsInPlay[activePlayer, default: []]
-        let oldAccidents = accidents
-
-        return rules.executeTurn().then {[weak self] _ -> EventLoopFuture<()> in
+        return rules.executeTurn().then {[weak self] stateChange -> EventLoopFuture<()> in
             guard let this = self else { return deadGame() }
 
+            this.state = stateChange
             this.setupNextPlayer()
 
             return this.nextTurn()
         }.thenIfError {[weak self] error in
             guard let this = self else { return deadGame() }
-
-            func rollbackTurn() {
-                // This wasn't a valid turn reset to a previous state
-                let active = this.activePlayer
-
-                this.accidents = oldAccidents
-                this.cardsInPlay[active] = inPlay
-
-                active.hand = oldHand
-            }
 
             switch error {
             case let builderError as BuildersError where builderError == .gameDeath:
@@ -107,8 +87,6 @@ public final class BuildersBoard : GameContext {
             case let builderError as BuildersError where builderError == .badPlay:
                 fallthrough
             case is BuildersPlayerResponse.ResponseError:
-                rollbackTurn()
-
                 return this.nextTurn()
             case _:
                 fatalError("Unknown error \(error)")
@@ -127,7 +105,7 @@ public final class BuildersBoard : GameContext {
         assert(players.count >= 2, "You need more players for this game!")
 
         self.players = players
-        self.hotels = players.reduce(into: [RulesType.PlayerType: Hotel](), {hotels, player in
+        self.state.hotels = players.reduce(into: [RulesType.PlayerType: Hotel](), {hotels, player in
             hotels[player] = Hotel()
         })
     }

@@ -21,26 +21,27 @@ public struct BuildersRules : GameRules {
     }
 
     /// Executes a turn.
-    public mutating func executeTurn() -> EventLoopFuture<()> {
+    public mutating func executeTurn() -> EventLoopFuture<BuildersBoardState> {
         #if DEBUG
         print("\(context.activePlayer.id)'s turn")
         #endif
 
         moveCount += 1
 
-        return StartPhase(context: context)
-                ~~> CountPhase(context: context)
-                ~~> DealPhase(context: context)
-                ~~> DrawPhase(context: context)
-                ~~> BuildPhase(context: context)
-                ~~> EndPhase(context: context)
+        return context.state
+                ~~> StartPhase.self
+                ~~> CountPhase.self
+                ~~> DealPhase.self
+                ~~> DrawPhase.self
+                ~~> BuildPhase.self
+                ~~> EndPhase.self
     }
 
     /// Calculates whether or not this game is over, returning the winning players.
     ///
     /// - returns: An array of `BuilderPlayer` who've won, or an empty array if no one has one.
     public func getWinners() -> [BuilderPlayer] {
-        return context.hotels.filter({ $0.value.floorsBuilt >= BuildersRules.floorsNeededToWin }).map({ $0.key })
+        return context.state.hotels.filter({ $0.value.floorsBuilt >= BuildersRules.floorsNeededToWin }).map({ $0.key })
     }
 
     /// Starts a game. This is called to deal cards, give money, etc, before the first player goes.
@@ -55,9 +56,9 @@ public struct BuildersRules : GameRules {
         for i in 0..<BuildersRules.cardsNeededInHand {
             switch i {
             case 0...1:
-                player.hand.append(Worker.getInstance())
+                context.state.cardsInHand[player, default: []].append(Worker.getInstance())
             case _:
-                player.hand.append(Material.getInstance())
+                context.state.cardsInHand[player, default: []].append(Material.getInstance())
             }
         }
     }
