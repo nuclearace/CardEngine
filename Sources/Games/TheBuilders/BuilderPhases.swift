@@ -9,13 +9,13 @@ import NIO
 /// Represents a phase of a turn.
 protocol BuilderPhase {
     /// The context that everything is working in.
-    var stateChanger: BuildersBoardState { get }
+    var startingState: BuildersBoardState { get }
 
     /// Whether or not this phase should send syncing to players.
     var shouldSync: Bool { get }
 
     /// Creating a new phase.
-    init(stateChanger: BuildersBoardState)
+    init(startingState: BuildersBoardState)
 
     /// Executes this phase with context.
     func doPhase() -> EventLoopFuture<BuildersBoardState>
@@ -23,10 +23,10 @@ protocol BuilderPhase {
 
 extension BuilderPhase {
     func syncState() {
-        guard shouldSync, let context = stateChanger.context else { return }
+        guard shouldSync, let context = startingState.context else { return }
 
-        let hands = stateChanger.cardsInPlay.byPlayerId(mappingValues: EncodableHand.init(hand:))
-        let floors = stateChanger.hotels.byPlayerId(mappingValues: { $0.floorsBuilt })
+        let hands = startingState.cardsInPlay.byPlayerId(mappingValues: EncodableHand.init(hand:))
+        let floors = startingState.hotels.byPlayerId(mappingValues: { $0.floorsBuilt })
         let interaction = BuildersInteraction(gameState: BuildersState(cardsInPlay: hands, floorsBuilt: floors))
 
         for player in context.players {
@@ -54,14 +54,14 @@ public enum BuildersPlayerPhaseName : String, Encodable {
 struct StartPhase : BuilderPhase {
     let shouldSync = false
 
-    private(set) var stateChanger: BuildersBoardState
+    private(set) var startingState: BuildersBoardState
 
     func doPhase() -> EventLoopFuture<BuildersBoardState> {
-        guard let context = stateChanger.context else { return deadGame() }
+        guard let context = startingState.context else { return deadGame() }
 
         context.activePlayer.send(UserInteraction(type: .turnStart, interaction: BuildersInteraction()))
 
-        return context.runLoop.newSucceededFuture(result: stateChanger)
+        return context.runLoop.newSucceededFuture(result: startingState)
     }
 }
 
@@ -71,13 +71,13 @@ struct StartPhase : BuilderPhase {
 struct CountPhase : BuilderPhase {
     let shouldSync = false
 
-    private(set) var stateChanger: BuildersBoardState
+    private(set) var startingState: BuildersBoardState
 
     func doPhase() -> EventLoopFuture<BuildersBoardState> {
-        guard let context = stateChanger.context else { return deadGame() }
+        guard let context = startingState.context else { return deadGame() }
 
         let active = context.activePlayer
-        var state = stateChanger
+        var state = startingState
 
         // Filter out accidents that aren't valid anymore
         state.accidents[active] = state.accidents[active, default: []].filter({accident in
@@ -96,18 +96,18 @@ struct DealPhase : BuilderPhase {
 
     let shouldSync = true
 
-    private(set) var stateChanger: BuildersBoardState
+    private(set) var startingState: BuildersBoardState
 
     func doPhase() -> EventLoopFuture<BuildersBoardState> {
         return getCardsToPlay().then(handlePlayed).then(getCardsToDiscard).then(finishUp)
     }
 
     private func getCardsToPlay() -> EventLoopFuture<BuildersHand> {
-        guard let active = stateChanger.context?.activePlayer else {
+        guard let active = startingState.context?.activePlayer else {
             return deadGame()
         }
 
-        let hand = stateChanger.cardsInHand[active, default: []]
+        let hand = startingState.cardsInHand[active, default: []]
         let input = active.getInput(
                 UserInteraction(type: .turn,
                                 interaction: BuildersInteraction(phase: .play, hand: hand)
@@ -124,12 +124,12 @@ struct DealPhase : BuilderPhase {
     }
 
     private func handlePlayed(_ cards: BuildersHand) -> EventLoopFuture<DealPhaseResult> {
-        guard let context = stateChanger.context else { return deadGame() }
+        guard let context = startingState.context else { return deadGame() }
 
         let active = context.activePlayer
 
         // Get the cards to play
-        guard let result = playCards(cards, forPlayer: active, state: stateChanger) else {
+        guard let result = playCards(cards, forPlayer: active) else {
             active.send(
                     UserInteraction(type: .playError,
                             interaction: BuildersInteraction(dialog: ["You played a card that you " +
@@ -143,14 +143,11 @@ struct DealPhase : BuilderPhase {
         return context.runLoop.newSucceededFuture(result: result)
     }
 
-    private func playCards(
-        _ cards: BuildersHand,
-        forPlayer player: BuilderPlayer,
-        state: BuildersBoardState
-    ) -> DealPhaseResult? {
-        guard let context = state.context else { return nil }
+    private func playCards(_ cards: BuildersHand, forPlayer player: BuilderPlayer) -> DealPhaseResult? {
+        // State hasn't changed yet, safe to read from startingState.
+        guard let context = startingState.context else { return nil }
 
-        var state = state
+        var state = startingState
 
         let hand = state.cardsInHand[player, default: []]
         let (kept, played) = hand.reduce(into: ([], []), {(reducer: inout HandReducer, playable) in
@@ -175,7 +172,7 @@ struct DealPhase : BuilderPhase {
     }
 
     private func getCardsToDiscard(previousState: DealPhaseResult) -> EventLoopFuture<DealPhaseResult> {
-        guard let active = stateChanger.context?.activePlayer else {
+        guard let active = startingState.context?.activePlayer else {
             return deadGame()
         }
 
@@ -198,7 +195,7 @@ struct DealPhase : BuilderPhase {
     }
 
     private func finishUp(results: DealPhaseResult) -> EventLoopFuture<BuildersBoardState> {
-        guard let context = stateChanger.context else { return deadGame() }
+        guard let context = startingState.context else { return deadGame() }
 
         let active = context.activePlayer
 
@@ -242,13 +239,13 @@ struct DealPhase : BuilderPhase {
 struct BuildPhase : BuilderPhase {
     let shouldSync = false
 
-    private(set) var stateChanger: BuildersBoardState
+    private(set) var startingState: BuildersBoardState
 
     func doPhase() -> EventLoopFuture<BuildersBoardState> {
-        guard let context = stateChanger.context else { return deadGame() }
+        guard let context = startingState.context else { return deadGame() }
 
         let active: BuilderPlayer = context.activePlayer
-        var state = stateChanger
+        var state = startingState
 
         guard var hand = state.cardsInPlay[active] else {
             return context.runLoop.newSucceededFuture(result: state)
@@ -267,19 +264,19 @@ struct BuildPhase : BuilderPhase {
 struct DrawPhase : BuilderPhase {
     let shouldSync = true
 
-    private(set) var stateChanger: BuildersBoardState
+    private(set) var startingState: BuildersBoardState
 
     func doPhase() -> EventLoopFuture<BuildersBoardState> {
-        guard let context = stateChanger.context else { return deadGame() }
+        guard let context = startingState.context else { return deadGame() }
 
         let active: BuilderPlayer = context.activePlayer
-        let hand = stateChanger.cardsInHand[active, default: []]
+        let hand = startingState.cardsInHand[active, default: []]
 
         #if DEBUG
         print("\(context.activePlayer.id) should draw some cards")
         #endif
 
-        return getCards(needed: BuildersRules.cardsNeededInHand-hand.count, drawn: 0, state: stateChanger)
+        return getCards(needed: BuildersRules.cardsNeededInHand-hand.count, drawn: 0, state: startingState)
     }
 
     private func getCards(needed: Int, drawn: Int, state: BuildersBoardState) -> EventLoopFuture<BuildersBoardState> {
@@ -320,13 +317,13 @@ struct DrawPhase : BuilderPhase {
 struct EndPhase : BuilderPhase {
     let shouldSync = false
 
-    private(set) var stateChanger: BuildersBoardState
+    private(set) var startingState: BuildersBoardState
 
     func doPhase() -> EventLoopFuture<BuildersBoardState> {
-        guard let context = stateChanger.context else { return deadGame() }
+        guard let context = startingState.context else { return deadGame() }
 
         let active = context.activePlayer
-        var state = stateChanger
+        var state = startingState
 
         active.send(UserInteraction(type: .turnEnd, interaction: BuildersInteraction()))
 
@@ -342,7 +339,7 @@ struct EndPhase : BuilderPhase {
         return lhs.then {phase in
             phase.syncState()
 
-            return phase.doPhase().then({state in rhs.init(stateChanger: state).doPhase() })
+            return phase.doPhase().then({state in rhs.init(startingState: state).doPhase() })
         }
     }
 }
@@ -355,11 +352,11 @@ private func newFuturePhase(
         return currentEventLoop.newFailedFuture(error: BuildersError.gameDeath)
     }
 
-    return context.runLoop.newSucceededFuture(result: phase.init(stateChanger: changer))
+    return context.runLoop.newSucceededFuture(result: phase.init(startingState: changer))
 }
 
 func ~~> (lhs: BuildersBoardState, rhs: BuilderPhase.Type) -> BuilderPhase {
-    return rhs.init(stateChanger: lhs)
+    return rhs.init(startingState: lhs)
 }
 
 func ~~> (lhs: BuilderPhase, rhs: BuilderPhase.Type) -> EventLoopFuture<BuilderPhase> {
