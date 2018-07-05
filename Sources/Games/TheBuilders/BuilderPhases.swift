@@ -129,7 +129,8 @@ struct DealPhase : BuilderPhase {
             active.send(
                     UserInteraction(type: .playError,
                             interaction: BuildersInteraction(dialog: ["You played a card that you " +
-                                    "currently are unable to play"]))
+                                    "currently are unable to play"])
+                    )
             )
 
             return context.runLoop.newFailedFuture(error: BuildersError.badPlay)
@@ -172,7 +173,8 @@ struct DealPhase : BuilderPhase {
 
         let input = active.getInput(
                 UserInteraction(type: .turn,
-                                interaction: BuildersInteraction(phase: .discard, hand: active.hand))
+                                interaction: BuildersInteraction(phase: .discard, hand: active.hand)
+                )
         )
 
         return input.map({[hand = active.hand] response in
@@ -194,7 +196,8 @@ struct DealPhase : BuilderPhase {
         guard !cardsPlayed.isEmpty || !cardsDiscarded.isEmpty else {
             active.send(
                     UserInteraction(type: .playError,
-                            interaction: BuildersInteraction(dialog: ["You must do something!"]))
+                            interaction: BuildersInteraction(dialog: ["You must do something!"])
+                    )
             )
 
             return context.runLoop.newFailedFuture(error: BuildersError.badPlay)
