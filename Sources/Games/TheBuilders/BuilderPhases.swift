@@ -53,8 +53,7 @@ public enum BuildersPlayerPhaseName : String, Encodable {
 /// The start of a turn.
 struct StartPhase : BuilderPhase {
     let shouldSync = false
-
-    private(set) var startingState: BuildersBoardState
+    let startingState: BuildersBoardState
 
     func doPhase() -> EventLoopFuture<BuildersBoardState> {
         guard let context = startingState.context else { return deadGame() }
@@ -70,8 +69,7 @@ struct StartPhase : BuilderPhase {
 /// The count phase is followed by the deal phase.
 struct CountPhase : BuilderPhase {
     let shouldSync = false
-
-    private(set) var startingState: BuildersBoardState
+    let startingState: BuildersBoardState
 
     func doPhase() -> EventLoopFuture<BuildersBoardState> {
         guard let context = startingState.context else { return deadGame() }
@@ -92,11 +90,8 @@ struct CountPhase : BuilderPhase {
 ///
 /// The deal phase is followed by the build phase.
 struct DealPhase : BuilderPhase {
-    private typealias HandReducer = (kept: BuildersHand, play: BuildersHand)
-
     let shouldSync = true
-
-    private(set) var startingState: BuildersBoardState
+    let startingState: BuildersBoardState
 
     func doPhase() -> EventLoopFuture<BuildersBoardState> {
         return getCardsToPlay().then(handlePlayed).then(getCardsToDiscard).then(finishUp)
@@ -226,6 +221,8 @@ struct DealPhase : BuilderPhase {
         return BuildersHand(playables: hand.filter({ toPlay.contains($0.id.uuidString) }))
     }
 
+    private typealias HandReducer = (kept: BuildersHand, play: BuildersHand)
+
     private struct DealPhaseResult {
         var played = BuildersHand()
         var discarded = BuildersHand()
@@ -238,8 +235,7 @@ struct DealPhase : BuilderPhase {
 /// The build phase is followed by the draw phase.
 struct BuildPhase : BuilderPhase {
     let shouldSync = false
-
-    private(set) var startingState: BuildersBoardState
+    let startingState: BuildersBoardState
 
     func doPhase() -> EventLoopFuture<BuildersBoardState> {
         guard let context = startingState.context else { return deadGame() }
@@ -263,8 +259,7 @@ struct BuildPhase : BuilderPhase {
 /// The draw phase concludes a turn.
 struct DrawPhase : BuilderPhase {
     let shouldSync = true
-
-    private(set) var startingState: BuildersBoardState
+    let startingState: BuildersBoardState
 
     func doPhase() -> EventLoopFuture<BuildersBoardState> {
         guard let context = startingState.context else { return deadGame() }
@@ -316,8 +311,7 @@ struct DrawPhase : BuilderPhase {
 /// The last phase in a turn. This does any cleanup to put the context in a good state for the next player.
 struct EndPhase : BuilderPhase {
     let shouldSync = false
-
-    private(set) var startingState: BuildersBoardState
+    let startingState: BuildersBoardState
 
     func doPhase() -> EventLoopFuture<BuildersBoardState> {
         guard let context = startingState.context else { return deadGame() }
