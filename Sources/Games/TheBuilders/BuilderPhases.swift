@@ -282,10 +282,10 @@ struct DrawPhase : BuilderPhase {
         let interaction = UserInteraction(type: .turn, interaction: BuildersInteraction(phase: .draw))
 
         func handleDraw(response: BuildersPlayerResponse) -> EventLoopFuture<BuildersBoardState> {
+            guard let context = state.context else { return deadGame() }
             guard case let .draw(drawType) = response else {
                 return self.getCards(needed: needed, drawn: drawn, state: state)
             }
-            guard let context = state.context else { return deadGame() }
 
             let active: BuilderPlayer = context.activePlayer
             var state = state
