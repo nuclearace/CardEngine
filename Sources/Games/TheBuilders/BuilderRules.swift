@@ -8,6 +8,8 @@ import Kit
 
 /// The game of The Builders.
 public struct BuildersRules : GameRules {
+    // MARK: Properties
+
     static let cardsNeededInHand = 7
     static let floorsNeededToWin = 1
 
@@ -16,9 +18,14 @@ public struct BuildersRules : GameRules {
 
     private var moveCount = 0
 
+    // MARK: Initializers
+
+    /// Creates a new `BuildersRules` with the given `BuildersBoard`
     public init(context: BuildersBoard) {
         self.context = context
     }
+
+    // MARK: Methods
 
     /// Executes a turn.
     public mutating func executeTurn() -> EventLoopFuture<BuildersBoardState> {
