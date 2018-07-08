@@ -36,11 +36,10 @@ public protocol GameContext : AnyObject {
 
     // MARK: Methods
 
-    /// Sets up this game with some players.
-    func setupPlayers(_ players: [RulesType.PlayerType])
-
-    /// Starts this game.
-    func startGame()
+    /// Starts this game with the given players.
+    ///
+    /// - parameter withPlayers: The `Player`s for this game.
+    func startGame(withPlayers players: [RulesType.PlayerType])
 
     /// Halts this game.
     func stopGame()

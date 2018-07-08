@@ -103,8 +103,7 @@ final class DefaultLobby<Game: GameContext> : GameLobby where Game.RulesType.Pla
                                                                           onLoop: waitingPlayers[1].loop))
         ]
 
-        board.setupPlayers(players)
-        board.startGame()
+        board.startGame(withPlayers: players)
 
         games[board.id] = board
         waitingPlayers = Array(waitingPlayers.dropFirst(2))

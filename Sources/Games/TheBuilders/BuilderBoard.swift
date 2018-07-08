@@ -101,7 +101,7 @@ public final class BuildersBoard : GameContext {
     /// Sets up this game with players.
     ///
     /// - parameter players: The players.
-    public func setupPlayers(_ players: [RulesType.PlayerType]) {
+    private func setupPlayers(_ players: [RulesType.PlayerType]) {
         assert(players.count >= 2, "You need more players for this game!")
 
         self.players = players
@@ -114,8 +114,9 @@ public final class BuildersBoard : GameContext {
     }
 
     /// Starts this game.
-    public func startGame() {
+    public func startGame(withPlayers players: [RulesType.PlayerType]) {
         runLoop.execute {
+            self.setupPlayers(players)
             self.rules.setupGame()
 
             for player in self.players {
