@@ -105,9 +105,12 @@ public final class BuildersBoard : GameContext {
         assert(players.count >= 2, "You need more players for this game!")
 
         self.players = players
-        self.state.hotels = players.reduce(into: [RulesType.PlayerType: Hotel](), {hotels, player in
-            hotels[player] = Hotel()
-        })
+
+        for player in players {
+            state.hotels[player] = Hotel()
+            state.cardsInPlay[player] = []
+            state.cardsInHand[player] = []
+        }
     }
 
     /// Starts this game.

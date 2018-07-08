@@ -63,9 +63,9 @@ public struct BuildersRules : GameRules {
         for i in 0..<BuildersRules.cardsNeededInHand {
             switch i {
             case 0...1:
-                context.state.cardsInHand[player, default: []].append(Worker.getInstance())
+                context.state.cardsInHand[player]!.append(Worker.getInstance())
             case _:
-                context.state.cardsInHand[player, default: []].append(Material.getInstance())
+                context.state.cardsInHand[player]!.append(Material.getInstance())
             }
         }
     }
