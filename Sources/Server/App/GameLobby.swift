@@ -10,6 +10,7 @@ import WebSocket
 
 // Import the games
 import TheBuilders
+import TicTacToe
 
 /// A namespace to wrap various lobbies.
 struct Lobbies {
