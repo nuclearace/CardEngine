@@ -44,3 +44,19 @@ public protocol GameContext : AnyObject {
     /// Halts this game.
     func stopGame()
 }
+
+/// Gets the current event loop. Only valid when called from inside an event loop.
+public var currentEventLoop: EventLoop {
+    return MultiThreadedEventLoopGroup.currentEventLoop!
+}
+
+/// Returns a new failed future for the current event loop. Return when a game has died.
+public func deadGame<T>() -> EventLoopFuture<T> {
+    return currentEventLoop.newFailedFuture(error: GameError.gameDeath)
+}
+
+/// Generic game errors.
+public enum GameError : Error {
+    /// The game can be considered dead, and its memory ready for releasing.
+    case gameDeath
+}

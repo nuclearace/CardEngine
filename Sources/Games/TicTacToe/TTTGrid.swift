@@ -22,11 +22,31 @@ public final class TTTGrid : GameContext {
 
     private let runLoop: EventLoop
 
-    private var activePlayerIndex = 0
+    private var activeMark = TTTMark.X
+
+    private var activePlayerIndex: Int {
+        return activeMark == .X ? 0 : 1
+    }
 
     public required init(runLoop: EventLoop) {
         self.runLoop = runLoop
         self.rules = TTTRules(grid: self)
+    }
+
+    @discardableResult
+    private func nextTurn() -> EventLoopFuture<()> {
+        let winners = rules.getWinners()
+
+        guard winners.isEmpty else {
+            // TODO(winners)
+            return runLoop.newSucceededFuture(result: ())
+        }
+
+        return rules.executeTurn().then {[weak self] grid  -> EventLoopFuture<()> in
+            guard let this = self else { return deadGame() }
+
+            return this.runLoop.newSucceededFuture(result: ())
+        }
     }
 
     public func startGame(withPlayers players: [TTTPlayer]) {

@@ -4,6 +4,7 @@
 
 import Foundation
 import Kit
+import NIO
 
 public struct TTTRules : GameRules {
     public unowned let context: TTTGrid
@@ -12,7 +13,7 @@ public struct TTTRules : GameRules {
         self.context = grid
     }
 
-    public func executeTurn() -> String {
+    public func executeTurn() -> EventLoopFuture<[[TTTMark]]> {
         fatalError("executeTurn() has not been implemented")
     }
 
