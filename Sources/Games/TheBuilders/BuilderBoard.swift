@@ -82,9 +82,9 @@ public final class BuildersBoard : GameContext {
             guard let this = self else { return deadGame() }
 
             switch error {
-            case let builderError as BuildersError where builderError == .gameDeath:
+            case let builderError as GameError where builderError == .gameDeath:
                 return deadGame()
-            case let builderError as BuildersError where builderError == .badPlay:
+            case let builderError as GameError where builderError == .badPlay:
                 fallthrough
             case is BuildersPlayerResponse.ResponseError:
                 return this.nextTurn()
@@ -134,7 +134,7 @@ public final class BuildersBoard : GameContext {
     public func stopGame() {
         runLoop.execute {
             for player in self.players {
-                player.interfacer.responsePromise?.fail(error: BuildersError.gameDeath)
+                player.interfacer.responsePromise?.fail(error: GameError.gameDeath)
             }
         }
     }

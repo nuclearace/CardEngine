@@ -12,21 +12,16 @@ public final class TTTGrid : GameContext {
     public let id = UUID()
 
     public var activePlayer: TTTPlayer {
-        return players[activePlayerIndex]
+        return players[activeMark.index]
     }
 
     public private(set) var players = [TTTPlayer]()
     public private(set) var rules: TTTRules!
 
-    private(set) var grid = [[TTTMark]](repeating: [TTTMark](repeating: .empty, count: 3), count: 3)
+    private(set) var activeMark = TTTMark.X
+    private(set) var grid = [[TTTMark?]](repeating: [TTTMark?](repeating: nil, count: 3), count: 3)
 
     private let runLoop: EventLoop
-
-    private var activeMark = TTTMark.X
-
-    private var activePlayerIndex: Int {
-        return activeMark == .X ? 0 : 1
-    }
 
     public required init(runLoop: EventLoop) {
         self.runLoop = runLoop
@@ -42,8 +37,11 @@ public final class TTTGrid : GameContext {
             return runLoop.newSucceededFuture(result: ())
         }
 
-        return rules.executeTurn().then {[weak self] grid  -> EventLoopFuture<()> in
+        return rules.executeTurn().then {[weak self] grid -> EventLoopFuture<()> in
             guard let this = self else { return deadGame() }
+
+            this.grid = grid
+            this.activeMark = !this.activeMark
 
             return this.runLoop.newSucceededFuture(result: ())
         }

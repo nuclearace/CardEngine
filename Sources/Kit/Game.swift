@@ -59,4 +59,10 @@ public func deadGame<T>() -> EventLoopFuture<T> {
 public enum GameError : Error {
     /// The game can be considered dead, and its memory ready for releasing.
     case gameDeath
+
+    /// The game received bad input from a player.
+    case badInput
+
+    /// A player made an illegal move.
+    case badPlay
 }

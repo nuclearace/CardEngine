@@ -132,7 +132,7 @@ struct DealPhase : BuilderPhase {
                     )
             )
 
-            return context.runLoop.newFailedFuture(error: BuildersError.badPlay)
+            return context.runLoop.newFailedFuture(error: GameError.badPlay)
         }
 
         return context.runLoop.newSucceededFuture(result: result)
@@ -202,7 +202,7 @@ struct DealPhase : BuilderPhase {
                     )
             )
 
-            return context.runLoop.newFailedFuture(error: BuildersError.badPlay)
+            return context.runLoop.newFailedFuture(error: GameError.badPlay)
         }
 
         var state = results.state
@@ -343,7 +343,7 @@ private func newFuturePhase(
     withStateChanger changer: BuildersBoardState
 ) -> EventLoopFuture<BuilderPhase> {
     guard let context = changer.context else {
-        return currentEventLoop.newFailedFuture(error: BuildersError.gameDeath)
+        return currentEventLoop.newFailedFuture(error: GameError.gameDeath)
     }
 
     return context.runLoop.newSucceededFuture(result: phase.init(startingState: changer))
