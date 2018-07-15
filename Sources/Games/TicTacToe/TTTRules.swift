@@ -26,9 +26,18 @@ public struct TTTRules : GameRules {
 
             grid[x][y] = mark
 
-            // TODO(winner)
+            var (row, col, diag, antiDiag) = (0, 0, 0, 0)
 
-            return TTTResult(grid: grid, winner: nil)
+            for i in 0..<3 {
+                if grid[x][i] == mark { row += 1 }
+                if grid[i][y] == mark { col += 1 }
+                if grid[i][i] == mark { diag += 1 }
+                if grid[i][3-i+1] == mark { antiDiag += 1 }
+            }
+
+            let winner = row == 3 || col == 3 || diag == 3 || antiDiag == 3
+
+            return TTTResult(grid: grid, winner: winner ? mark : nil)
         }
     }
 
@@ -43,5 +52,5 @@ public struct TTTRules : GameRules {
 
 public struct TTTResult {
     public var grid: [[TTTMark?]]
-    public var winner: TTTPlayer?
+    public var winner: TTTMark?
 }
