@@ -113,7 +113,9 @@ extension InteractablePlayer {
         interfacer.getInput(withDialog: String(data: encoded, encoding: .utf8)!, withPromise: p)
 
         return p.futureResult.thenThrowing({[decoder = self.decoder] str in
-            return try decoder.decode(T.self, from: str.data(using: .utf8)!)
+            guard let data = str.data(using: .utf8) else { throw GameError.badInput }
+
+            return try decoder.decode(T.self, from: data)
         })
     }
 
