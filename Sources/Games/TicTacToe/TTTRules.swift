@@ -9,13 +9,11 @@ import NIO
 public struct TTTRules : GameRules {
     public unowned let context: TTTGrid
 
-    var winner: TTTMark? = nil
-
     init(grid: TTTGrid) {
         self.context = grid
     }
 
-    public func executeTurn() -> EventLoopFuture<[[TTTMark?]]> {
+    public func executeTurn() -> EventLoopFuture<TTTResult> {
         return context.activePlayer.getInput(
             UserInteraction(type: .turnStart, interaction: TTTInteraction())
         ).thenThrowing {[grid = context.grid, mark = context.activeMark] res in
@@ -30,17 +28,20 @@ public struct TTTRules : GameRules {
 
             // TODO(winner)
 
-            return grid
+            return TTTResult(grid: grid, winner: nil)
         }
     }
 
     public func getWinners() -> [TTTPlayer] {
-        guard let winner = self.winner else { return [] }
-
-        return [context.players[winner.index]]
+        fatalError("Winners returned through executeTurn")
     }
 
     public func setupGame() {
 
     }
+}
+
+public struct TTTResult {
+    public var grid: [[TTTMark?]]
+    public var winner: TTTPlayer?
 }

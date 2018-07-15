@@ -30,20 +30,18 @@ public final class TTTGrid : GameContext {
 
     @discardableResult
     private func nextTurn() -> EventLoopFuture<()> {
-        let winners = rules.getWinners()
-
-        guard winners.isEmpty else {
-            // TODO(winners)
-            return runLoop.newSucceededFuture(result: ())
-        }
-
-        return rules.executeTurn().then {[weak self] grid -> EventLoopFuture<()> in
+        return rules.executeTurn().then {[weak self] result -> EventLoopFuture<()> in
             guard let this = self else { return deadGame() }
 
-            this.grid = grid
+            this.grid = result.grid
             this.activeMark = !this.activeMark
 
-            return this.runLoop.newSucceededFuture(result: ())
+            if let winner = result.winner {
+                // TODO(winner)
+                return this.runLoop.newSucceededFuture(result: ())
+            } else {
+                return this.nextTurn()
+            }
         }
     }
 
