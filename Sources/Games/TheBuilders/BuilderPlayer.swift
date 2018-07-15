@@ -8,17 +8,23 @@ import Kit
 
 public final class BuilderPlayer : InteractablePlayer {
     public typealias RulesType = BuildersRules
+    public typealias InteractionType = BuildersInteraction
+    public typealias InteractionReturnType = EventLoopFuture<BuildersPlayerResponse>
+
+    /// The player's context.
+    public unowned let context: BuildersBoard
 
     /// The unique identifier for this player.
     public let id = UUID()
 
+    /// The player's encoder.
+    public let encoder = JSONEncoder()
+
+    /// The player's decoder.
+    public let decoder = JSONDecoder()
+
     /// How the game interfaces with this player.
     public let interfacer: UserInterfacer
-
-    private unowned let context: BuildersBoard
-
-    private let encoder = JSONEncoder()
-    private let decoder = JSONDecoder()
 
     public init(context: BuildersBoard, interfacer: UserInterfacer) {
         self.context = context
@@ -30,31 +36,4 @@ public final class BuilderPlayer : InteractablePlayer {
         print("Player \(id) is dying")
     }
     #endif
-
-    /// Prints some dialog to the player.
-    public func send(_ dialog: UserInteraction<BuildersInteraction>) {
-        guard let encoded = try? encoder.encode(dialog) else {
-            fatalError("Error creating JSON for builders")
-        }
-
-        interfacer.send(String(data: encoded, encoding: .utf8)!)
-    }
-
-    /// Gets some input from the user.
-    ///
-    /// - parameter object: The object to send to the user.
-    /// - returns: The input from the user.
-    public func getInput(_ dialog: UserInteraction<BuildersInteraction>) -> EventLoopFuture<BuildersPlayerResponse> {
-        guard let encoded = try? encoder.encode(dialog) else {
-            fatalError("Error creating JSON for builders")
-        }
-
-        let p: EventLoopPromise<String> = context.runLoop.newPromise()
-
-        interfacer.getInput(withDialog: String(data: encoded, encoding: .utf8)!, withPromise: p)
-
-        return p.futureResult.thenThrowing({[decoder = self.decoder] str in
-            return try decoder.decode(BuildersPlayerResponse.self, from: str.data(using: .utf8)!)
-        })
-    }
 }

@@ -11,6 +11,8 @@ public final class TTTGrid : GameContext {
 
     public let id = UUID()
 
+    public let runLoop: EventLoop
+
     public var activePlayer: TTTPlayer {
         return players[activeMark.index]
     }
@@ -20,8 +22,6 @@ public final class TTTGrid : GameContext {
 
     private(set) var activeMark = TTTMark.X
     private(set) var grid = [[TTTMark?]](repeating: [TTTMark?](repeating: nil, count: 3), count: 3)
-
-    private let runLoop: EventLoop
 
     public required init(runLoop: EventLoop) {
         self.runLoop = runLoop

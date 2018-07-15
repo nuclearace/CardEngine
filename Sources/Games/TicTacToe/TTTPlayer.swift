@@ -8,20 +8,18 @@ import NIO
 
 public final class TTTPlayer : InteractablePlayer {
     public typealias RulesType = TTTRules
+    public typealias InteractionType = TTTInteraction
+    public typealias InteractionReturnType = EventLoopFuture<TTTInteractionResponse>
 
+    public unowned let context: TTTGrid
     public let id = UUID()
     public let interfacer: UserInterfacer
+    public let encoder = JSONEncoder()
+    public let decoder = JSONDecoder()
 
     public init(context: TTTGrid, interfacer: UserInterfacer) {
+        self.context = context
         self.interfacer = interfacer
-    }
-
-    public func send(_ dialog: UserInteraction<TTTInteraction>) {
-
-    }
-
-    public func getInput(_ object: UserInteraction<TTTInteraction>) -> EventLoopFuture<TTTInteractionResponse> {
-        fatalError("getInput(object:) has not been implemented")
     }
 }
 

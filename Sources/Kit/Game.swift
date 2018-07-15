@@ -29,6 +29,9 @@ public protocol GameContext : AnyObject {
     /// The rules for the game executing in this context.
     var rules: RulesType! { get }
 
+    /// This context's event loop. Used to submit work that needs to be run on that loop.
+    var runLoop: EventLoop { get }
+
     // MARK: Initializers
 
     /// Creates a new game controlled on `runLoop`.

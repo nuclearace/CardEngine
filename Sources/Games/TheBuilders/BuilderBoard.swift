@@ -13,6 +13,9 @@ public final class BuildersBoard : GameContext {
     /// The name of this game.
     public static let name = "TheBuilders"
 
+    /// This context's event loop. Used to submit work that needs to be run on that loop.
+    public let runLoop: EventLoop
+
     /// The player who is currently making moves
     public var activePlayer: RulesType.PlayerType {
         return players[activePlayerIndex]
@@ -29,9 +32,6 @@ public final class BuildersBoard : GameContext {
 
     /// What a turn looks like in this context.
     public private(set) var rules: RulesType!
-
-    /// The run loop for this game.
-    let runLoop: EventLoop
 
     private var activePlayerIndex = 0
 

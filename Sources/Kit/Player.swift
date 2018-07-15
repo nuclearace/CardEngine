@@ -67,6 +67,15 @@ public protocol InteractablePlayer : Player {
 
     // MARK: Properties
 
+    /// The player's context.
+    var context: RulesType.ContextType { get }
+
+    /// The encoder messages should be put through.
+    var encoder: JSONEncoder { get }
+
+    /// The decoder messages should be put through.
+    var decoder: JSONDecoder { get }
+
     /// How the game interfaces with this player.
     var interfacer: UserInterfacer { get }
 
@@ -85,4 +94,35 @@ public protocol InteractablePlayer : Player {
     /// - parameter object: The object to send to the player.
     /// - returns: The input from the user.
     func getInput(_ object: UserInteraction<InteractionType>) -> InteractionReturnType
+}
+
+extension InteractablePlayer {
+    // TODO(inlinable 4.2)
+    /// Default implementation for `EventLoopFuture`s.
+    ///
+    /// This will return a future that will be executed on `context.runLoop`.
+    public func getInput<T: Decodable>(
+        _ dialog: UserInteraction<InteractionType>
+    ) -> InteractionReturnType where InteractionReturnType == EventLoopFuture<T> {
+        guard let encoded = try? encoder.encode(dialog) else {
+            fatalError("Error creating JSON")
+        }
+
+        let p: EventLoopPromise<String> = context.runLoop.newPromise()
+
+        interfacer.getInput(withDialog: String(data: encoded, encoding: .utf8)!, withPromise: p)
+
+        return p.futureResult.thenThrowing({[decoder = self.decoder] str in
+            return try decoder.decode(T.self, from: str.data(using: .utf8)!)
+        })
+    }
+
+    /// Default implementation.
+    public func send(_ dialog: UserInteraction<InteractionType>) {
+        guard let encoded = try? encoder.encode(dialog) else {
+            fatalError("Error creating JSON")
+        }
+
+        interfacer.send(String(data: encoded, encoding: .utf8)!)
+    }
 }
