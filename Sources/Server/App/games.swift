@@ -6,8 +6,15 @@ import Foundation
 import Kit
 import WebSocket
 
+// Import the games
 import TheBuilders
 import TicTacToe
+
+/// A namespace to wrap various lobbies.
+struct Lobbies {
+    static let buildersLobby = DefaultLobby<BuildersBoard>()
+    static let ticTacToeLobby = DefaultLobby<TTTGrid>()
+}
 
 func addWebSocketToGameLobby(gameName name: String, websocket ws: WebSocket) {
     switch name {

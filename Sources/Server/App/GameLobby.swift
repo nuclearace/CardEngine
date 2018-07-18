@@ -8,16 +8,6 @@ import Kit
 import NIO
 import WebSocket
 
-// Import the games
-import TheBuilders
-import TicTacToe
-
-/// A namespace to wrap various lobbies.
-struct Lobbies {
-    static let buildersLobby = DefaultLobby<BuildersBoard>()
-    static let ticTacToeLobby = DefaultLobby<TTTGrid>()
-}
-
 typealias WsPlayer = (ws: WebSocket, loop: EventLoop)
 
 /// Marks a type will hold a set of games.
