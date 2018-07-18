@@ -9,6 +9,7 @@ import Vapor
 import WebSocket
 
 import TheBuilders
+import TicTacToe
 
 /// Called before your application initializes.
 func configure(_ config: inout Config, _ env: inout Environment, _ services: inout Services) throws {
@@ -52,13 +53,6 @@ private func handleUpgrade(_ websocket: WebSocket, _ request: Request) {
             return
         }
 
-        switch game {
-        case BuildersBoard.name:
-            Lobbies.buildersLobby.addPlayerToWait(websocket)
-        case _:
-            websocket.send("bad payload")
-            websocket.close()
-            return
-        }
+        addWebSocketToGameLobby(gameName: game, websocket: websocket)
     }
 }

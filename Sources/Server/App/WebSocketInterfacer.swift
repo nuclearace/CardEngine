@@ -36,7 +36,7 @@ final class WebSocketInterfacer<T: GameContext> : UserInterfacer {
         // TODO(game-continuation)
         self.ws.onClose.do {_ in
             game.stopGame()
-            gameStopped(game)
+            removeGameFromLobby(game)
         }.catch {_ in }
     }
 

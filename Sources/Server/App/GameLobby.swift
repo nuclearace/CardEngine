@@ -15,6 +15,7 @@ import TicTacToe
 /// A namespace to wrap various lobbies.
 struct Lobbies {
     static let buildersLobby = DefaultLobby<BuildersBoard>()
+    static let ticTacToeLobby = DefaultLobby<TTTGrid>()
 }
 
 typealias WsPlayer = (ws: WebSocket, loop: EventLoop)
@@ -108,14 +109,5 @@ final class DefaultLobby<Game: GameContext> : GameLobby where Game.RulesType.Pla
 
         games[board.id] = board
         waitingPlayers = Array(waitingPlayers.dropFirst(2))
-    }
-}
-
-func gameStopped<T: GameContext>(_ game: T) {
-    switch game {
-    case let game as BuildersBoard:
-        Lobbies.buildersLobby.removeGame(game)
-    case _:
-        return
     }
 }
