@@ -22,7 +22,7 @@ func addWebSocketToGameLobby(gameName name: String, websocket ws: WebSocket) {
     }
 }
 
-func removeGameFromLobby<T: GameContext>(game game: T) {
+func removeGameFromLobby<T: GameContext>(game: T) {
     switch game {
     case let game as BuildersBoard:
         Lobbies.buildersLobby.removeGame(game)
