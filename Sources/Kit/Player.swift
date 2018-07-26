@@ -63,6 +63,7 @@ public protocol InteractablePlayer : Player {
     /// The input type.
     associatedtype InteractionType: Encodable
 
+    /// The output type.
     associatedtype InteractionReturnType = String
 
     // MARK: Properties
