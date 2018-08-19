@@ -71,12 +71,6 @@ public protocol InteractablePlayer : Player {
     /// The player's context.
     var context: RulesType.ContextType { get }
 
-    /// The encoder messages should be put through.
-    var encoder: JSONEncoder { get }
-
-    /// The decoder messages should be put through.
-    var decoder: JSONDecoder { get }
-
     /// How the game interfaces with this player.
     var interfacer: UserInterfacer { get }
 
@@ -97,6 +91,10 @@ public protocol InteractablePlayer : Player {
     func getInput(_ object: UserInteraction<InteractionType>) -> InteractionReturnType
 }
 
+// Encoding should be thread-safe
+private let encoder = JSONEncoder()
+private let decoder = JSONDecoder()
+
 extension InteractablePlayer {
     // TODO(inlinable 4.2)
     /// Default implementation for `EventLoopFuture`s.
@@ -113,7 +111,7 @@ extension InteractablePlayer {
 
         interfacer.getInput(withDialog: String(data: encoded, encoding: .utf8)!, withPromise: p)
 
-        return p.futureResult.thenThrowing({[decoder = self.decoder] str in
+        return p.futureResult.thenThrowing({str in
             guard let data = str.data(using: .utf8) else { throw GameError.badInput }
 
             return try decoder.decode(T.self, from: data)

@@ -14,8 +14,6 @@ public final class TTTPlayer : InteractablePlayer {
     public unowned let context: TTTGrid
     public let id = UUID()
     public let interfacer: UserInterfacer
-    public let encoder = JSONEncoder()
-    public let decoder = JSONDecoder()
 
     public init(context: TTTGrid, interfacer: UserInterfacer) {
         self.context = context

@@ -17,12 +17,6 @@ public final class BuilderPlayer : InteractablePlayer {
     /// The unique identifier for this player.
     public let id = UUID()
 
-    /// The player's encoder.
-    public let encoder = JSONEncoder()
-
-    /// The player's decoder.
-    public let decoder = JSONDecoder()
-
     /// How the game interfaces with this player.
     public let interfacer: UserInterfacer
 
