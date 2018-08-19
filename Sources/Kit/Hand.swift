@@ -79,3 +79,16 @@ extension Hand : Encodable where PlayableType: Encodable {
         }
     }
 }
+
+extension Hand : Decodable where PlayableType: Decodable {
+    public init(from decoder: Decoder) throws {
+        var con = try decoder.unkeyedContainer()
+        var playables = [PlayableType]()
+
+        while !con.isAtEnd {
+            playables.append(try con.decode(PlayableType.self))
+        }
+
+        self.init(playables: playables)
+    }
+}
