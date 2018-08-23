@@ -166,26 +166,26 @@ struct DealPhase : BuilderPhase {
         return DealPhaseResult(played: played, discarded: [], state: state)
     }
 
-    private func getCardsToDiscard(previousState: DealPhaseResult) -> EventLoopFuture<DealPhaseResult> {
+    private func getCardsToDiscard(workingState: DealPhaseResult) -> EventLoopFuture<DealPhaseResult> {
         guard let active = startingState.context?.activePlayer else {
             return deadGame()
         }
 
-        let hand = previousState.state.cardsInHand[active, default: []]
+        let hand = workingState.state.cardsInHand[active, default: []]
         let input = active.getInput(
                 UserInteraction(type: .turn,
                                 interaction: BuildersInteraction(phase: .discard, hand: hand)
                 )
         )
 
-        return input.map({[state = previousState.state] response in
+        return input.map({[state = workingState.state] response in
             guard case let .discard(discarded) = response else {
                 return DealPhaseResult(played: [], discarded: [], state: state)
             }
 
-            return DealPhaseResult(played: previousState.played,
+            return DealPhaseResult(played: workingState.played,
                                    discarded: DealPhase.filterInvalidCards(hand: hand, toPlay: Set(discarded)),
-                                   state: previousState.state)
+                                   state: workingState.state)
         })
     }
 
