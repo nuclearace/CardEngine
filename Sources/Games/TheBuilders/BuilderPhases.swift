@@ -330,11 +330,15 @@ struct EndPhase : BuilderPhase {
     }
 
     static func ~~> (lhs: EventLoopFuture<BuilderPhase>, rhs: EndPhase.Type) -> EventLoopFuture<BuildersBoardState> {
-        return lhs.then {phase in
+        return lhs.then({phase in
             phase.syncState()
 
-            return phase.doPhase().then({state in rhs.init(startingState: state).doPhase() })
-        }
+            return phase.doPhase().then({state in
+                let end = rhs.init(startingState: state)
+                end.syncState()
+                return end.doPhase()
+            })
+        })
     }
 }
 
