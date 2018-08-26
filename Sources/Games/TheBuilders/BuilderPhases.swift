@@ -271,10 +271,14 @@ struct DrawPhase : BuilderPhase {
         print("\(context.activePlayer.id) should draw some cards")
         #endif
 
-        return getCards(needed: BuildersRules.cardsNeededInHand-hand.count, drawn: 0, state: startingState)
+        return DrawPhase.getCards(needed: BuildersRules.cardsNeededInHand-hand.count, drawn: 0, state: startingState)
     }
 
-    private func getCards(needed: Int, drawn: Int, state: BuildersBoardState) -> EventLoopFuture<BuildersBoardState> {
+    private static func getCards(
+        needed: Int,
+        drawn: Int,
+        state: BuildersBoardState
+    ) -> EventLoopFuture<BuildersBoardState> {
         guard let context = state.context else { return deadGame() }
         guard drawn < needed else { return context.runLoop.newSucceededFuture(result: state) }
 
@@ -303,7 +307,7 @@ struct DrawPhase : BuilderPhase {
         }
 
         return active.getInput(interaction).then(handleDraw).thenIfError {_ in
-            return self.getCards(needed: needed, drawn: drawn, state: state)
+            return DrawPhase.getCards(needed: needed, drawn: drawn, state: state)
         }
     }
 }
